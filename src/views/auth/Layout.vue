@@ -1,0 +1,48 @@
+<script setup></script>
+
+<template>
+  <div class="auth">
+    <!-- 左侧背景 -->
+    <div class="auth-left"></div>
+
+    <!-- 右侧内容 -->
+    <div class="auth-right">
+      <div class="auth-card">
+        <router-view />
+      </div>
+    </div>
+  </div>
+</template>
+
+<style scoped lang="less">
+.auth {
+  display: flex;
+  height: 100vh;
+  background: @bg-page;
+}
+
+/* 左侧背景 */
+.auth-left {
+  width: 770px;
+  height: 100%;
+  background: url('@/assets/image/auth.png') no-repeat center;
+  background-size: cover;
+}
+
+/* 右侧 */
+.auth-right {
+  width: 1150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 卡片 */
+.auth-card {
+  width: 643px;
+  padding: @space-xl;
+  background: @bg-white;
+  border-radius: @radius-large;
+  box-shadow: @shadow-card;
+}
+</style>

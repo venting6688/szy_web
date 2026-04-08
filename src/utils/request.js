@@ -1,12 +1,13 @@
 import axios from 'axios';
 import router from '@/router';
-import { getToken, removeToken } from '@/utils/auth/token';
+import { getToken, removeToken } from '@/utils/index/auth';
 // 如果你用 TDesign
 import { MessagePlugin } from 'tdesign-vue-next';
 
 // 创建请求实例
 const instance = axios.create({
-  baseURL: import.meta.env.VITE_GLOB_DOMAIN_URL,
+  baseURL: import.meta.env.VITE_GLOB_DOMAIN_URL, // 不使用代理
+  // baseURL: '/http', // 使用代理
   timeout: 10000,
   withCredentials: false,
 });
@@ -43,7 +44,7 @@ instance.interceptors.response.use(
      */
 
     // ✔ 成功
-    if (res.code === 0) {
+    if (res.code === 200) {
       return res.data;
     }
 
@@ -74,38 +75,38 @@ instance.interceptors.response.use(
 
 // ================== 请求方法封装 ==================
 
-export const post = (url, data = {}, params = {}) => {
+export function post(url, data = {}, params = {}) {
   return instance({
     method: 'post',
     url,
     data,
     params,
   });
-};
+}
 
-export const get = (url, params = {}) => {
+export function get(url, params = {}) {
   return instance({
     method: 'get',
     url,
     params,
   });
-};
+}
 
-export const put = (url, data = {}, params = {}) => {
+export function put(url, data = {}, params = {}) {
   return instance({
     method: 'put',
     url,
     data,
     params,
   });
-};
+}
 
-export const _delete = (url, params = {}) => {
+export function _delete(url, params = {}) {
   return instance({
     method: 'delete',
     url,
     params,
   });
-};
+}
 
 export default instance;

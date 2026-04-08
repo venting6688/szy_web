@@ -30,6 +30,7 @@
     "@tailwindcss/vite": "^4.2.2",
     "@vueuse/core": "^13.3.0",
     "axios": "^1.9.0",
+    "china-area-data": "^5.0.1",
     "dayjs": "^1.11.20",
     "mitt": "^3.0.1",
     "nprogress": "^0.2.0",

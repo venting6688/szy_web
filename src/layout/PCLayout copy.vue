@@ -12,7 +12,7 @@ onMounted(() => {
       <nav>
         <RouterLink to="/">Home</RouterLink>
         <br />
-        <RouterLink to="/registration">Registration</RouterLink>
+        <RouterLink to="/appointment">Appointment</RouterLink>
       </nav>
     </header>
     <router-view />

@@ -54,10 +54,10 @@ export default ({ mode }) => {
     css: {
       preprocessorOptions: {
         less: {
-          // modifyVars: {
-          //   hack: `true; @import (reference) "${resolve('src/style/variables.less')}";`,
-          // },
-          // math: 'strict',
+          modifyVars: {
+            hack: `true; @import (reference) "${resolve('src/style/variables.less')}";`,
+          },
+          math: 'strict',
           javascriptEnabled: true,
         },
       },
@@ -74,10 +74,10 @@ export default ({ mode }) => {
       cors: true,
       // 自定义代理规则
       proxy: {
-        '/api': {
+        '/http': {
           target: 'https://szyyy.sdzydfy.com', // 后端地址
           changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/api/, ''),
+          rewrite: (path) => path.replace(/^\/http/, ''),
         },
       },
       // 预热文件以提前转换和缓存结果，降低启动期间的初始页面加载时长并防止转换瀑布

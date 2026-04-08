@@ -2,11 +2,24 @@
 import { get } from '@/utils/request';
 
 // 大科室
-export const getFirstDepts = (params) => {
-  return get('/api/dh/newFirstDepts', params);
+export const getFirstDepts = (params = {}) => {
+  const { hospitalId, startDate, endDate, ...rest } = params;
+
+  return get('/api/dh/newFirstDepts', {
+    hospitalId,
+    startDate,
+    endDate,
+    ...rest,
+  });
 };
 
-// 二级科室
-export const getSecondDepts = (params) => {
-  return get('/api/dh/newDepts', params);
+// 子科室
+export const getSecondDepts = (params = {}) => {
+  const { hospitalId, deptId, ...rest } = params;
+
+  return get('/api/dh/newSecondDepts', {
+    hospitalId,
+    deptId,
+    ...rest,
+  });
 };
