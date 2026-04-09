@@ -4,6 +4,9 @@ import dayjs from 'dayjs';
 import { useRouter } from 'vue-router';
 import DoctorCard from '@/components/DoctorCard/DoctorCard.vue';
 import { getFirstDeptsApi, getSecondDeptsApi } from '@/api/department';
+import { getSchedulesApi, getScheduleDetailApi } from '@/api/schedule';
+import downIcon from '@/assets/image/down.png';
+import rightIcon from '@/assets/image/right.png';
 
 const router = useRouter();
 const type = 'appointment';
@@ -21,17 +24,6 @@ const handleBook = (doctor) => {
 };
 
 const currentDept = ref(-1);
-// 点击科室
-async function onClickDept(item) {
-  currentDept.value = item.CliSerGroupID;
-  // 点击科室后，获取子科室
-  const arr = await getSecondDeptsApi({
-    departmentGroupCode: item.CliSerGroupID,
-    startDate: currentDate.value,
-    endDate: currentDate.value,
-  });
-  console.log('子科室', arr);
-}
 
 const dates = Array.from({ length: 7 }, (_, i) => dayjs().add(i, 'day').format('YYYY-MM-DD'));
 
@@ -39,47 +31,96 @@ const currentDate = ref(dates[0]);
 
 const onlyAvailable = ref(false);
 
-const doctors = ref([
-  {
-    id: 1,
-    name: '郭友强',
-    price: 28,
-    am: 0,
-    pm: 20,
-    avatar: '@/assets/image/order.png',
-  },
-  {
-    id: 2,
-    name: '王芳',
-    price: 28,
-    am: 0,
-    pm: 20,
-    avatar: '@/assets/image/order.png',
-  },
-  {
-    id: 3,
-    name: '王芳',
-    price: 28,
-    am: 0,
-    pm: 20,
-    avatar: '@/assets/image/order.png',
-  },
-]);
+const doctors = ref([]);
 const format = (d) => dayjs(d).format('MM月DD日');
 
 const displayDoctors = computed(() => {
   if (!onlyAvailable.value) return doctors.value;
-  return doctors.value.filter((d) => d.am > 0 || d.pm > 0);
+  return doctors.value.filter((d) => d.schedule.some((s) => s.left > 0));
 });
 //#region 科室
 const firstDeptList = ref([]);
+const secondDeptMap = ref({}); // 存子科室
+const openDept = ref(null); // 当前展开的一级科室
 async function getFirstDepts() {
   const arr = await getFirstDeptsApi({
-    startDate: currentDate.value,
-    endDate: currentDate.value,
+    startDate: '2026-04-09',
+    endDate: '2026-04-09',
   });
   console.log('大科室', arr);
   firstDeptList.value = arr;
+}
+// 点击一级科室
+async function onClickDept(item) {
+  const id = item.CliSerGroupID;
+
+  // 切换展开状态
+  if (openDept.value === id) {
+    openDept.value = null;
+    return;
+  }
+
+  openDept.value = id;
+  currentDept.value = id;
+
+  // 如果已经加载过，就不再请求
+  if (secondDeptMap.value[id]) return;
+
+  const data = await getSecondDeptsApi({
+    departmentGroupCode: id,
+    startDate: '2026-04-09',
+    endDate: '2026-04-09',
+  });
+  if (Array.isArray(data)) {
+    secondDeptMap.value[id] = data;
+  } else {
+    secondDeptMap.value[id] = [data];
+  }
+  console.log('子科室', secondDeptMap.value[id]);
+}
+
+function transformSchedule(list, deptCode) {
+  const map = new Map();
+
+  list.forEach((item) => {
+    const code = item.DocCode;
+    // 初始化医生
+    if (!map.has(code)) {
+      map.set(code, {
+        code,
+        deptCode,
+        name: item.DoctorName,
+        price: item.RegFee,
+        desc: item.DocIntruduction,
+        doctorType: item.DoctorSessType,
+        scheduleItemCode: item.ScheduleItemCode,
+        schedule: [],
+      });
+    }
+    const doctor = map.get(code);
+    doctor.schedule.push({
+      period: item.SessionName,
+      total: Number(item.AvailableTotalNum),
+      left: Number(item.AvailableLeftNum),
+    });
+  });
+  return Array.from(map.values());
+}
+
+const currentSecondDept = ref(null);
+// 点击子科室
+async function onClickSecondDept(child) {
+  console.log('子科室', child);
+  currentSecondDept.value = child.DeptCode;
+  // 加载医生排班
+  const schedules = await getSchedulesApi({
+    deptCode: child.CLGRPRowId,
+    doctorCode: null,
+    startDate: '2026-04-09',
+    endDate: '2026-04-09',
+  });
+  doctors.value = transformSchedule(schedules, child.CLGRPRowId);
+  console.log('医生排班', doctors.value);
 }
 //#endregion
 
@@ -116,16 +157,43 @@ watch(
     <div class="content">
       <!-- 左侧科室 -->
       <div class="left">
-        <div class="dept-title">科室分类</div>
+        <div class="dept-title">预约挂号</div>
 
         <div
           v-for="item in firstDeptList"
           :key="item.CliSerGroupID"
-          class="dept-item"
-          :class="{ active: currentDept === item.CliSerGroupID }"
-          @click="onClickDept(item)"
+          class="dept-group"
         >
-          {{ item.CliSerGroupName }}
+          <!-- 一级 -->
+          <div
+            class="dept-item level-1"
+            :class="{ active: currentDept === item.CliSerGroupID }"
+            @click="onClickDept(item)"
+          >
+            <!-- 图标 -->
+            <img
+              class="icon"
+              :src="openDept === item.CliSerGroupID ? downIcon : rightIcon"
+            />
+
+            {{ item.CliSerGroupName }}
+          </div>
+
+          <!-- 二级 -->
+          <div
+            v-if="openDept === item.CliSerGroupID"
+            class="dept-children"
+          >
+            <div
+              v-for="child in secondDeptMap[item.CliSerGroupID] || []"
+              :key="child.CLGRPRowId"
+              class="dept-item level-2"
+              :class="{ active: currentSecondDept === child.CLGRPRowId }"
+              @click="onClickSecondDept(child)"
+            >
+              {{ child.CLGRPDesc }}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -181,10 +249,28 @@ watch(
 
         <!-- 医生列表 -->
         <div class="doctor-list">
+          <!-- loading -->
           <div
+            v-if="loading"
+            class="loading"
+          >
+            加载中...
+          </div>
+
+          <!-- 空状态 -->
+          <div
+            v-else-if="!doctors.length"
+            class="empty"
+          >
+            暂无医生
+          </div>
+
+          <!-- 正常列表 -->
+          <div
+            v-else
             class="doctor-list-item"
             v-for="doc in displayDoctors"
-            :key="doc.id"
+            :key="doc.code"
           >
             <DoctorCard
               :doctor="doc"
@@ -198,7 +284,7 @@ watch(
 </template>
 <style scoped lang="less">
 .page {
-  background: @bg-white;
+  background: @bg-page;
   padding: @space-xl;
 }
 
@@ -216,37 +302,71 @@ watch(
 
 /* ================= 左侧科室 ================= */
 .left {
-  width: 240px;
+  width: 260px;
   border-right: 1px solid @border-color;
+  background: @bg-white;
 
   .dept-title {
-    font-size: @font-medium;
+    font-size: 24px;
     font-weight: 600;
     color: @text-primary;
     padding: @space-md;
   }
 
+  .dept-group {
+    border-bottom: 1px solid @border-light;
+  }
+
   .dept-item {
+    display: flex;
+    align-items: center;
+    gap: @space-sm;
     padding: @space-md;
     cursor: pointer;
     font-size: @font-base;
     color: @text-regular;
     transition: all 0.2s;
 
+    .icon {
+      width: 12px;
+      height: 12px;
+    }
+
     &:hover {
       background: fade(@primary-color, 8%);
     }
 
     &.active {
-      background: fade(@primary-color, 12%);
-      color: @primary-color;
+      background: @primary-color;
+      color: #fff;
       font-weight: 500;
     }
+  }
+
+  /* 一级 */
+  .level-1 {
+    font-weight: 500;
+  }
+
+  /* 二级 */
+  .level-2 {
+    padding-left: 36px;
+    font-size: @font-base;
+    color: @text-regular;
+
+    &:hover {
+      color: @primary-color;
+    }
+  }
+
+  .dept-children {
+    background: #fafafa;
   }
 }
 
 /* ================= 右侧 ================= */
 .right {
+  width: calc(100% - 260px);
   flex: 1;
   padding-left: @space-xl;
 }
@@ -301,11 +421,13 @@ watch(
 
 /* ================= 医生列表 ================= */
 .doctor-list {
+  width: 920px;
   display: flex;
   flex-wrap: wrap;
-  gap: @space-xl;
+  gap: 18px;
+  margin: 0 auto;
   .doctor-list-item {
-    width: 48%;
+    width: 448px;
   }
 }
 </style>

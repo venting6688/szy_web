@@ -5,6 +5,17 @@ const props = defineProps({
   doctor: Object,
 });
 
+const ellipsisState = ref({
+  row: 3,
+  // expandable: true,
+  // collapsible: true,
+  tooltipProps: {
+    content: props.doctor.desc,
+    placement: 'top',
+    theme: 'light',
+  },
+});
+
 // 处理动态图片路径的方法
 const getImageUrl = (path) => {
   // 检查路径是否以 '@/' 开头，如果是，则使用 new URL 进行解析
@@ -18,6 +29,16 @@ const getImageUrl = (path) => {
 };
 
 const emit = defineEmits(['book']);
+
+import { getScheduleDetailApi } from '@/api/schedule';
+async function getScheduleDetail() {
+  const res = await getScheduleDetailApi({
+    scheduleItemCode: props.doctor.scheduleItemCode,
+    deptCode: props.doctor.deptCode,
+  });
+  console.log('获取号源', res);
+}
+watch(() => props.doctor, getScheduleDetail, { immediate: true });
 </script>
 
 <template>
@@ -25,19 +46,15 @@ const emit = defineEmits(['book']);
     <!-- 上半部分 -->
     <div class="card-top">
       <img
-        :src="getImageUrl(doctor.avatar)"
+        :src="`https://szyyy.sdzydfy.com/img/${doctor.code}.jpg`"
         class="avatar"
       />
-
       <div class="info">
         <div class="name-row">
           <span class="name">{{ doctor.name }}</span>
-          <span class="title">{{ doctor.title }}</span>
+          <span class="title">{{ doctor.doctorType }}</span>
         </div>
-
-        <div class="desc">
-          {{ doctor.desc }}
-        </div>
+        <t-typography-paragraph :ellipsis="ellipsisState">{{ doctor.desc }}</t-typography-paragraph>
       </div>
 
       <div class="price">￥{{ doctor.price }}</div>
@@ -45,44 +62,37 @@ const emit = defineEmits(['book']);
 
     <!-- 下半部分 -->
     <div class="card-bottom">
-      <!-- 上午 -->
-      <div class="time-row">
+      <div
+        class="time-row"
+        v-for="item in doctor.schedule"
+        :key="item.period"
+      >
         <div class="left">
           <span class="date">{{ doctor.date }}</span>
-          <span class="period">上午</span>
-          <span class="remain gray">剩余 {{ doctor.am }}</span>
-        </div>
-
-        <t-button
-          size="small"
-          class="btn-wait"
-          v-if="doctor.am === 0"
-          @click="emit('book', doctor)"
-        >
-          +候补
-        </t-button>
-      </div>
-
-      <!-- 下午 -->
-      <div class="time-row">
-        <div class="left">
-          <span class="date">{{ doctor.date }}</span>
-          <span class="period">下午</span>
+          <span class="period">{{ item.period }}</span>
           <span
             class="remain"
-            :class="doctor.pm > 0 ? 'green' : 'gray'"
+            :class="item.left > 0 ? 'green' : 'gray'"
           >
-            剩余 {{ doctor.pm }}
+            剩余 {{ item.left }}
           </span>
         </div>
 
         <t-button
           size="small"
           class="btn-book"
-          :disabled="doctor.pm === 0"
-          @click="emit('book', doctor)"
+          :disabled="item.left === 0"
+          @click="emit('book', item)"
         >
           预约
+        </t-button>
+        <t-button
+          size="small"
+          class="btn-wait"
+          :disabled="item.left === 0"
+          @click="emit('book', item)"
+        >
+          候补
         </t-button>
       </div>
     </div>
@@ -101,14 +111,14 @@ const emit = defineEmits(['book']);
 .card-top {
   display: flex;
   position: relative;
-}
-
-/* 头像 */
-.avatar {
-  width: 80px;
-  height: 80px;
-  border-radius: @radius-small;
-  margin-right: @space-md;
+  /* 头像 */
+  .avatar {
+    flex: 0 0 auto;
+    width: 96px;
+    height: 120px;
+    border-radius: @radius-small;
+    margin-right: @space-md;
+  }
 }
 
 /* 信息 */
@@ -126,6 +136,10 @@ const emit = defineEmits(['book']);
 .desc {
   font-size: @font-base;
   color: @text-regular;
+  width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* 价格 */

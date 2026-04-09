@@ -30,6 +30,6 @@ export async function getSecondDeptsApi(params = {}) {
   if (res.code !== 200) {
     throw new Error(res.message || '获取子科室失败');
   } else {
-    return res.data?.ResultData?.CliSerGroups || [];
+    return res.data?.ResultData?.ClinicGroups || [];
   }
 }

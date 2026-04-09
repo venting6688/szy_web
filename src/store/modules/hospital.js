@@ -14,7 +14,7 @@ export const useHospitalStore = defineStore('hospital', {
       try {
         // 调用API获取院区列表
         const branches = await getHospitalBranchesApi({
-          code: '1237000049557358X0',
+          code: import.meta.env.VITE_HOSPITAL_CODE || '1237000049557358X0',
         });
 
         // 转换结构
