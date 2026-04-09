@@ -3,6 +3,7 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { registerApi } from '@/api/user';
 import { useUserStore } from '@/store/modules/user';
+import { sendYunMsgApi } from '@/api/user';
 
 const userStore = useUserStore();
 const router = useRouter();
@@ -31,23 +32,74 @@ const goLogin = () => {
   router.push('/login');
 };
 
-async function goRegister() {
-  form.value.nation = form.value.nation.label;
-  form.value.province = form.value.area[0].label;
-  form.value.city = form.value.area[1].label;
-  form.value.district = form.value.area[2].label;
+import { isEmptyObject } from '@/utils/index/common';
 
-  const res = await registerApi(form.value);
+const registerFormRef = ref(null);
+const registerFormRules = ref({
+  realName: [{ required: true, message: '请输入姓名' }],
+  idCard: [{ required: true, message: '请输入证件号' }],
+  phoneNumber: [
+    { required: true, message: '请输入手机号' },
+    {
+      validator: (val) => /^1[3-9]\d{9}$/.test(val),
+      message: '请输入正确的11位手机号码',
+    },
+  ],
+  verificationCode: [{ required: true, message: '请输入验证码' }],
+  password: [{ required: true, message: '请输入密码' }],
+  confirmPassword: [{ required: true, message: '请确认密码' }],
+  area: [{ required: true, message: '请选择所在地区' }],
+
+  detailAddress: [{ required: true, message: '请输入详细地址' }],
+  nation: [{ required: true, message: '请选择民族' }],
+  idType: [{ required: true, message: '请选择证件类型' }],
+  birthday: [{ required: true, message: '请选择出生日期' }],
+  gender: [{ required: true, message: '请选择性别' }],
+});
+async function goRegister() {
+  const isValid = await registerFormRef.value.validate();
+  console.log(isValid);
+  if (isValid !== true && !isEmptyObject(isValid)) {
+    throw new Error('注册表单验证失败:', isValid);
+  }
+  const formData = {
+    ...form.value,
+  };
+  formData.nation = formData.nation.label;
+  const areaText = getAreaText(formData.area, areaOptions);
+  formData.province = areaText[0];
+  formData.city = areaText[1];
+  formData.district = areaText[2];
+  const res = await registerApi(formData);
+  router.push('/login');
   console.log(res);
 }
+const countdown = ref(0); // 倒计时秒数
+let timer = null; // 定时器实例
+
 // 验证码
 async function onClickGetVerificationCode() {
+  console.log(form.value.phoneNumber);
+
+  if (countdown.value > 0) return; // 防止重复点击
+
   console.log('获取验证码');
   const res = await sendYunMsgApi({
     type: 'kopebe',
     phone: form.value.phoneNumber,
   });
   console.log(res);
+
+  // 开始倒计时
+  countdown.value = 60;
+  timer = setInterval(() => {
+    if (countdown.value > 0) {
+      countdown.value--;
+    } else {
+      clearInterval(timer);
+      timer = null;
+    }
+  }, 1000);
 }
 //#region 地址处理
 import areaData from 'china-area-data';
@@ -82,28 +134,50 @@ const buildAreaTree = () => {
 
 const areaOptions = buildAreaTree();
 console.log(areaOptions);
+
+function getAreaText(values, options) {
+  let result = [];
+  let current = options;
+
+  for (let i = 0; i < values.length; i++) {
+    const node = current.find((item) => item.value === values[i]);
+    if (!node) break;
+
+    result.push(node.label);
+    current = node.children || [];
+  }
+  return result;
+}
 //#endregion
 // 字典数据
 import { getDictDataApi } from '@/api/user';
 const dictData = ref({});
 const nationalityOptions = ref([]);
 const cardTypeOptions = ref([]);
+const genderOptions = ref([]);
+
+// 辅助函数：将字典数据转换为下拉选项格式
+const mapDictToOptions = (dictArray) => {
+  return (
+    dictArray?.map((item) => ({
+      label: item.dictLabel,
+      value: item.dictValue,
+    })) || []
+  );
+};
+
 onMounted(async () => {
   const data = await getDictDataApi();
   console.log(data);
   dictData.value = data || {};
-  // 民族数据格式转换为下拉选项
-  nationalityOptions.value =
-    data?.nationality?.map((item) => ({
-      label: item.dictLabel,
-      value: item.dictValue,
-    })) || [];
-  // 证件类型数据格式转换为下拉选项
-  cardTypeOptions.value =
-    data?.card_type?.map((item) => ({
-      label: item.dictLabel,
-      value: item.dictValue,
-    })) || [];
+
+  nationalityOptions.value = mapDictToOptions(data?.nationality);
+  cardTypeOptions.value = mapDictToOptions(data?.card_type);
+  genderOptions.value = mapDictToOptions(data?.sex).filter((item) => item.label === '男' || item.label === '女');
+});
+
+const btnDisabled = computed(() => {
+  return !form.value.phoneNumber || countdown.value > 0;
 });
 </script>
 
@@ -114,12 +188,13 @@ onMounted(async () => {
     <div class="form-container">
       <t-form
         :data="form"
+        ref="registerFormRef"
         layout="vertical"
+        :rules="registerFormRules"
       >
         <t-form-item
           label="姓名"
           name="realName"
-          requiredMark
         >
           <t-input
             v-model="form.realName"
@@ -130,7 +205,6 @@ onMounted(async () => {
         <t-form-item
           label="证件类型"
           name="idType"
-          requiredMark
         >
           <t-select
             v-model="form.idType"
@@ -147,7 +221,6 @@ onMounted(async () => {
         <t-form-item
           label="证件号码"
           name="idCard"
-          requiredMark
         >
           <t-input
             v-model="form.idCard"
@@ -157,10 +230,10 @@ onMounted(async () => {
         <t-form-item
           label="出生日期"
           name="birthday"
-          requiredMark
         >
           <t-date-picker
             v-model="form.birthday"
+            class="w-full"
             type="date"
             placeholder="请选择出生日期"
           />
@@ -168,7 +241,6 @@ onMounted(async () => {
         <t-form-item
           label="手机号码"
           name="phoneNumber"
-          requiredMark
         >
           <t-input
             v-model="form.phoneNumber"
@@ -178,7 +250,6 @@ onMounted(async () => {
         <t-form-item
           label="验证码"
           name="verificationCode"
-          requiredMark
         >
           <t-input
             v-model="form.verificationCode"
@@ -187,19 +258,20 @@ onMounted(async () => {
             <template #suffix>
               <t-button
                 class="get-verification-code-btn"
-                @click="onClickGetVerificationCode"
+                :class="{ disabled: btnDisabled }"
+                @click="!btnDisabled && onClickGetVerificationCode()"
                 shape="round"
-                type="primary"
+                theme="primary"
                 size="small"
-                >获取动态码</t-button
               >
+                {{ countdown > 0 ? `${countdown}s 后重发` : '获取动态码' }}
+              </t-button>
             </template>
           </t-input>
         </t-form-item>
         <t-form-item
           label="密码"
           name="password"
-          requiredMark
         >
           <t-input
             v-model="form.password"
@@ -210,26 +282,22 @@ onMounted(async () => {
         <t-form-item
           label="性别"
           name="gender"
-          requiredMark
         >
           <t-select
             v-model="form.gender"
             placeholder="请选择性别"
           >
             <t-option
-              value="male"
-              label="男"
-            />
-            <t-option
-              value="female"
-              label="女"
+              v-for="item in genderOptions"
+              :key="item.value"
+              :value="item.value"
+              :label="item.label"
             />
           </t-select>
         </t-form-item>
         <t-form-item
           label="民族"
           name="nation"
-          requiredMark
         >
           <t-select
             v-model="form.nation"
@@ -244,37 +312,32 @@ onMounted(async () => {
             />
           </t-select>
         </t-form-item>
-        <t-form
-          :data="form"
-          layout="vertical"
+        <t-form-item
+          label="所在地区"
+          name="area"
         >
-          <t-form-item
-            label="所在地区"
-            requiredMark
-          >
-            <t-cascader
-              v-model="form.area"
-              :options="areaOptions"
-              placeholder="请选择所在地区"
-              clearable
-            />
-          </t-form-item>
-        </t-form>
+          <t-cascader
+            v-model="form.area"
+            :options="areaOptions"
+            value-type="full"
+            placeholder="请选择所在地区"
+            @change="onChangeArea"
+            clearable
+          />
+        </t-form-item>
         <t-form-item
           label="详细地址"
           name="detailAddress"
-          requiredMark
         >
           <t-input
             v-model="form.detailAddress"
             placeholder="请输入详细地址"
           />
         </t-form-item>
-
         <!-- <t-form-item
           label="国籍"
           name="nationality"
-          requiredMark
+
         >
           <t-input
             v-model="form.nationality"
@@ -327,6 +390,12 @@ onMounted(async () => {
       background-color: #fff;
       color: @primary-color;
       border-color: @primary-color;
+      &.disabled {
+        background-color: #f5f5f5;
+        color: #999;
+        border-color: #999;
+        cursor: not-allowed;
+      }
     }
   }
 

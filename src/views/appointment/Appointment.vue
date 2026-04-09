@@ -5,23 +5,13 @@ import { useRouter } from 'vue-router';
 import DoctorCard from '@/components/DoctorCard/DoctorCard.vue';
 import { getFirstDeptsApi, getSecondDeptsApi } from '@/api/department';
 import { getSchedulesApi, getScheduleDetailApi } from '@/api/schedule';
+import { createAppointmentApi } from '@/api/appointment';
 import downIcon from '@/assets/image/down.png';
 import rightIcon from '@/assets/image/right.png';
+import Dialog from '@/views/appointment/Dialog.vue';
 
 const router = useRouter();
 const type = 'appointment';
-
-const handleBook = (doctor) => {
-  console.log('预约医生：', doctor);
-  // TODO：跳转挂号确认页
-  router.push({
-    path: '/appointment/confirm',
-    query: {
-      doctorId: doctor.id,
-      date: currentDate.value,
-    },
-  });
-};
 
 const currentDept = ref(-1);
 
@@ -44,8 +34,8 @@ const secondDeptMap = ref({}); // 存子科室
 const openDept = ref(null); // 当前展开的一级科室
 async function getFirstDepts() {
   const arr = await getFirstDeptsApi({
-    startDate: '2026-04-09',
-    endDate: '2026-04-09',
+    startDate: currentDate.value,
+    endDate: currentDate.value,
   });
   console.log('大科室', arr);
   firstDeptList.value = arr;
@@ -68,8 +58,8 @@ async function onClickDept(item) {
 
   const data = await getSecondDeptsApi({
     departmentGroupCode: id,
-    startDate: '2026-04-09',
-    endDate: '2026-04-09',
+    startDate: currentDate.value,
+    endDate: currentDate.value,
   });
   if (Array.isArray(data)) {
     secondDeptMap.value[id] = data;
@@ -89,9 +79,11 @@ function transformSchedule(list, deptCode) {
       map.set(code, {
         code,
         deptCode,
+        date: currentDate.value,
         name: item.DoctorName,
         price: item.RegFee,
         desc: item.DocIntruduction,
+        deptName: item.DepartmentName,
         doctorType: item.DoctorSessType,
         scheduleItemCode: item.ScheduleItemCode,
         schedule: [],
@@ -111,15 +103,19 @@ const currentSecondDept = ref(null);
 // 点击子科室
 async function onClickSecondDept(child) {
   console.log('子科室', child);
-  currentSecondDept.value = child.DeptCode;
-  // 加载医生排班
+  currentSecondDept.value = child.CLGRPRowId;
+
+  loadDoctors();
+}
+// 加载医生排班
+async function loadDoctors() {
   const schedules = await getSchedulesApi({
-    deptCode: child.CLGRPRowId,
+    deptCode: currentSecondDept.value,
     doctorCode: null,
-    startDate: '2026-04-09',
-    endDate: '2026-04-09',
+    startDate: currentDate.value,
+    endDate: currentDate.value,
   });
-  doctors.value = transformSchedule(schedules, child.CLGRPRowId);
+  doctors.value = transformSchedule(schedules, currentSecondDept.value);
   console.log('医生排班', doctors.value);
 }
 //#endregion
@@ -148,6 +144,18 @@ watch(
   { immediate: true },
 );
 // #endregion
+
+// 选择日期
+function onClickDate(date) {
+  currentDate.value = date;
+  loadDoctors();
+}
+
+// 弹窗
+const dialogRef = ref(null);
+function bookEmit(doctor) {
+  dialogRef.value.book(doctor);
+}
 </script>
 <template>
   <div class="page">
@@ -231,7 +239,7 @@ watch(
             :key="d"
             class="date-item"
             :class="{ active: currentDate === d }"
-            @click="currentDate = d"
+            @click="onClickDate(d)"
           >
             <div>{{ format(d) }}</div>
             <div class="sub">有号</div>
@@ -274,12 +282,14 @@ watch(
           >
             <DoctorCard
               :doctor="doc"
-              @book="handleBook"
+              @book="bookEmit(doc)"
             />
           </div>
         </div>
       </div>
     </div>
+    <!-- 预约弹窗 -->
+    <Dialog ref="dialogRef" />
   </div>
 </template>
 <style scoped lang="less">
@@ -333,19 +343,18 @@ watch(
     }
 
     &:hover {
-      background: fade(@primary-color, 8%);
-    }
-
-    &.active {
-      background: @primary-color;
-      color: #fff;
-      font-weight: 500;
+      background: @primary-color-fade;
     }
   }
 
   /* 一级 */
   .level-1 {
     font-weight: 500;
+    &.active {
+      background: @primary-color;
+      color: #fff;
+      font-weight: 500;
+    }
   }
 
   /* 二级 */
@@ -356,6 +365,11 @@ watch(
 
     &:hover {
       color: @primary-color;
+    }
+    &.active {
+      background: @primary-color-fade;
+      color: @primary-color;
+      font-weight: 500;
     }
   }
 

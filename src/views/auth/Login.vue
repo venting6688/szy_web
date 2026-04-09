@@ -1,23 +1,35 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { loginApi } from '@/api/user';
+
+import { MessagePlugin } from 'tdesign-vue-next';
+import { isEmptyObject } from '@/utils/index/common';
 import { useUserStore } from '@/store/modules/user';
+import { loginApi } from '@/api/user';
 
 const userStore = useUserStore();
 
 const router = useRouter();
+const loginFormRef = ref(null);
 
 const form = ref({
   username: '',
   password: '',
 });
+// 登录表单验证规则
+const loginFormRules = ref({
+  username: [{ required: true, message: '请输入身份证号' }],
+  password: [{ required: true, message: '请输入密码' }],
+});
 
 async function onClickLogin() {
+  const isValid = await loginFormRef.value.validate();
+  console.log(isValid);
+  if (isValid !== true && !isEmptyObject(isValid)) {
+    throw new Error('登录表单验证失败:', isValid);
+  }
   const data = await loginApi(form.value);
-  console.log(data);
   userStore.setLogin(data.accessToken, data);
-
   router.push('/appointment');
 }
 
@@ -32,13 +44,15 @@ function goRegister() {
 
     <div class="form-container">
       <t-form
+        ref="loginFormRef"
         :data="form"
+        :rules="loginFormRules"
         layout="vertical"
         label-align="top"
       >
         <t-form-item
           label="账号"
-          requiredMark
+          name="username"
         >
           <t-input
             v-model="form.username"
@@ -49,7 +63,7 @@ function goRegister() {
 
         <t-form-item
           label="密码"
-          requiredMark
+          name="password"
         >
           <t-input
             v-model="form.password"
@@ -76,6 +90,7 @@ function goRegister() {
       block
       shape="circle"
       @click="onClickLogin"
+      @keyup.enter="onClickLogin"
       >登录</t-button
     >
 

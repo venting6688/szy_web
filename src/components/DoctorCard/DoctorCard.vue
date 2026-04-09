@@ -30,15 +30,15 @@ const getImageUrl = (path) => {
 
 const emit = defineEmits(['book']);
 
-import { getScheduleDetailApi } from '@/api/schedule';
-async function getScheduleDetail() {
-  const res = await getScheduleDetailApi({
-    scheduleItemCode: props.doctor.scheduleItemCode,
-    deptCode: props.doctor.deptCode,
-  });
-  console.log('获取号源', res);
-}
-watch(() => props.doctor, getScheduleDetail, { immediate: true });
+// import { getScheduleDetailApi } from '@/api/schedule';
+// async function getScheduleDetail() {
+//   const res = await getScheduleDetailApi({
+//     scheduleItemCode: props.doctor.scheduleItemCode,
+//     deptCode: props.doctor.deptCode,
+//   });
+//   console.log('获取号源', res);
+// }
+// watch(() => props.doctor, getScheduleDetail, { immediate: true });
 </script>
 
 <template>
@@ -79,20 +79,20 @@ watch(() => props.doctor, getScheduleDetail, { immediate: true });
         </div>
 
         <t-button
+          v-if="item.left > 0"
           size="small"
           class="btn-book"
-          :disabled="item.left === 0"
-          @click="emit('book', item)"
+          @click="emit('book', doctor)"
         >
           预约
         </t-button>
         <t-button
+          v-else
           size="small"
           class="btn-wait"
-          :disabled="item.left === 0"
-          @click="emit('book', item)"
+          @click="emit('book', doctor)"
         >
-          候补
+          +候补
         </t-button>
       </div>
     </div>
@@ -105,6 +105,7 @@ watch(() => props.doctor, getScheduleDetail, { immediate: true });
   border-radius: @radius-base;
   padding: @space-lg;
   box-shadow: @shadow-card;
+  height: 100%;
 }
 
 /* 上半部分 */
@@ -177,14 +178,20 @@ watch(() => props.doctor, getScheduleDetail, { immediate: true });
 
 /* 按钮 */
 .btn-wait {
-  background: fade(@warning-color, 15%);
+  width: 72px;
+  height: 28px;
+  background: @warning-color-fade;
   color: @warning-color;
-  border-radius: @radius-small;
+  border-radius: 29px;
+  border: 0;
 }
 
 .btn-book {
-  background: @success-color;
-  color: #fff;
-  border-radius: @radius-small;
+  width: 72px;
+  height: 28px;
+  background: @primary-color-fade;
+  color: @primary-color;
+  border-radius: 29px;
+  border: 0;
 }
 </style>

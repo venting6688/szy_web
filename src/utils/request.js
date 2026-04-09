@@ -55,23 +55,6 @@ instance.interceptors.request.use(
 instance.interceptors.response.use(
   (response) => {
     return response.data;
-    /**
-     * ⚠️ 这里假设后端返回格式：
-     * {
-     *   code: 0,
-     *   data: {},
-     *   message: 'success'
-     * }
-     */
-
-    // ✔ 成功
-    // if (res.code === 200) {
-    //   return res.data;
-    // }
-
-    // // ❌ 业务错误
-    // MessagePlugin.error(res.message || '请求失败');
-    // return Promise.reject(res);
   },
   (error) => {
     const { response } = error;
