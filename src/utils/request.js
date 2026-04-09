@@ -4,6 +4,8 @@ import { getToken, removeToken } from '@/utils/index/auth';
 // 如果你用 TDesign
 import { MessagePlugin } from 'tdesign-vue-next';
 
+import { useHospitalStore } from '@/store/modules/hospital';
+
 // 创建请求实例
 const instance = axios.create({
   baseURL: import.meta.env.VITE_GLOB_DOMAIN_URL, // 不使用代理
@@ -11,6 +13,7 @@ const instance = axios.create({
   timeout: 10000,
   withCredentials: false,
 });
+const whiteList = ['/mobile/miniProgramLogin', '/mobile/api/sendYunMsg', '/mobile/webRegister'];
 
 // ================== 请求拦截 ==================
 instance.interceptors.request.use(
@@ -21,7 +24,26 @@ instance.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    // 如果是白名单中的API，不添加hospitalId
+    if (whiteList.includes(config.url)) {
+      return config;
+    }
 
+    const hospitalStore = useHospitalStore();
+
+    if (config.method === 'get') {
+      config.params = {
+        hospitalId: hospitalStore.current,
+        ...config.params,
+      };
+    }
+
+    if (config.method === 'post') {
+      config.data = {
+        hospitalId: hospitalStore.current,
+        ...config.data,
+      };
+    }
     return config;
   },
   (error) => {
@@ -32,8 +54,7 @@ instance.interceptors.request.use(
 // ================== 响应拦截 ==================
 instance.interceptors.response.use(
   (response) => {
-    const res = response.data;
-
+    return response.data;
     /**
      * ⚠️ 这里假设后端返回格式：
      * {
@@ -44,13 +65,13 @@ instance.interceptors.response.use(
      */
 
     // ✔ 成功
-    if (res.code === 200) {
-      return res.data;
-    }
+    // if (res.code === 200) {
+    //   return res.data;
+    // }
 
-    // ❌ 业务错误
-    MessagePlugin.error(res.message || '请求失败');
-    return Promise.reject(res);
+    // // ❌ 业务错误
+    // MessagePlugin.error(res.message || '请求失败');
+    // return Promise.reject(res);
   },
   (error) => {
     const { response } = error;

@@ -2,6 +2,9 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { loginApi } from '@/api/user';
+import { useUserStore } from '@/store/modules/user';
+
+const userStore = useUserStore();
 
 const router = useRouter();
 
@@ -13,6 +16,8 @@ const form = ref({
 async function onClickLogin() {
   const data = await loginApi(form.value);
   console.log(data);
+  userStore.setLogin(data.accessToken, data);
+
   router.push('/appointment');
 }
 

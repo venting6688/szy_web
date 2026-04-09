@@ -1,5 +1,12 @@
 <script setup>
-import { RouterLink, RouterView } from 'vue-router';
+import { onMounted } from 'vue';
+import { useHospitalStore } from '@/store/modules/hospital';
+
+const hospitalStore = useHospitalStore();
+
+onMounted(() => {
+  hospitalStore.fetchHospitalList();
+});
 </script>
 
 <template>

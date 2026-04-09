@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import { MessagePlugin } from 'tdesign-vue-next';
 import NProgress from 'nprogress';
 import { getToken } from '@/utils/index';
 import { isMobile } from '@/utils/index';
@@ -38,7 +39,6 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
-  return next();
   NProgress.start();
   const token = getToken();
   const isMobileDevice = isMobile();
@@ -58,13 +58,15 @@ router.beforeEach((to, from, next) => {
   // 3. 登录判断
   if (token) {
     if (whiteList.includes(to.path)) {
-      return next(isMobileDevice ? '/mobile/home' : '/');
+      return next(isMobileDevice ? '/mobile/appointment' : '/appointment');
     }
     return next();
   } else {
     if (whiteList.includes(to.path)) {
       return next();
     }
+    // 未登录跳转登录页
+    MessagePlugin.warning('请先登录');
     return next(isMobileDevice ? '/mobile/login' : '/login');
   }
 });

@@ -1,10 +1,15 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { sendYunMsgApi, registerApi } from '@/api/user';
+import { registerApi } from '@/api/user';
+import { useUserStore } from '@/store/modules/user';
 
+const userStore = useUserStore();
 const router = useRouter();
 
+onMounted(() => {
+  console.log('Component mounted!');
+});
 const form = ref({
   idType: '',
   idCard: '',

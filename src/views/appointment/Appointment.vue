@@ -1,18 +1,12 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, watch, computed } from 'vue';
 import dayjs from 'dayjs';
 import { useRouter } from 'vue-router';
 import DoctorCard from '@/components/DoctorCard/DoctorCard.vue';
+import { getFirstDeptsApi, getSecondDeptsApi } from '@/api/department';
 
 const router = useRouter();
-
 const type = 'appointment';
-
-const deptList = ref([
-  { id: 1, name: '内科门诊' },
-  { id: 2, name: '外科门诊' },
-  { id: 3, name: '肝胆外科' },
-]);
 
 const handleBook = (doctor) => {
   console.log('预约医生：', doctor);
@@ -26,9 +20,18 @@ const handleBook = (doctor) => {
   });
 };
 
-const currentDept = ref(1);
-
-const hospital = ref('1');
+const currentDept = ref(-1);
+// 点击科室
+async function onClickDept(item) {
+  currentDept.value = item.CliSerGroupID;
+  // 点击科室后，获取子科室
+  const arr = await getSecondDeptsApi({
+    departmentGroupCode: item.CliSerGroupID,
+    startDate: currentDate.value,
+    endDate: currentDate.value,
+  });
+  console.log('子科室', arr);
+}
 
 const dates = Array.from({ length: 7 }, (_, i) => dayjs().add(i, 'day').format('YYYY-MM-DD'));
 
@@ -68,6 +71,42 @@ const displayDoctors = computed(() => {
   if (!onlyAvailable.value) return doctors.value;
   return doctors.value.filter((d) => d.am > 0 || d.pm > 0);
 });
+//#region 科室
+const firstDeptList = ref([]);
+async function getFirstDepts() {
+  const arr = await getFirstDeptsApi({
+    startDate: currentDate.value,
+    endDate: currentDate.value,
+  });
+  console.log('大科室', arr);
+  firstDeptList.value = arr;
+}
+//#endregion
+
+// #region 院区
+// 院区
+import { useHospitalStore } from '@/store/modules/hospital';
+const hospitalStore = useHospitalStore();
+// 院区列表
+const hospitalOptions = computed(() => hospitalStore.list);
+// 当前院区
+const hospitalId = ref(null);
+// 切换院区
+function onChangeHospital() {
+  hospitalStore.setHospital(hospitalId.value);
+  getFirstDepts();
+}
+// 如果监听到院区列表不为空了，初始化院区为第一个院区
+watch(
+  hospitalOptions,
+  (newVal) => {
+    if (newVal.length === 0) return;
+    hospitalId.value = newVal[0].value;
+    onChangeHospital();
+  },
+  { immediate: true },
+);
+// #endregion
 </script>
 <template>
   <div class="page">
@@ -80,13 +119,13 @@ const displayDoctors = computed(() => {
         <div class="dept-title">科室分类</div>
 
         <div
-          v-for="item in deptList"
-          :key="item.id"
+          v-for="item in firstDeptList"
+          :key="item.CliSerGroupID"
           class="dept-item"
-          :class="{ active: currentDept === item.id }"
-          @click="currentDept = item.id"
+          :class="{ active: currentDept === item.CliSerGroupID }"
+          @click="onClickDept(item)"
         >
-          {{ item.name }}
+          {{ item.CliSerGroupName }}
         </div>
       </div>
 
@@ -95,12 +134,14 @@ const displayDoctors = computed(() => {
         <!-- 搜索区域 -->
         <div class="search-bar">
           <t-select
-            v-model="hospital"
-            style="width: 160px"
+            v-model="hospitalId"
+            @change="onChangeHospital"
           >
             <t-option
-              value="1"
-              label="千佛山院区"
+              v-for="item in hospitalOptions"
+              :key="item.value"
+              :value="item.value"
+              :label="item.label"
             />
           </t-select>
 
@@ -140,12 +181,16 @@ const displayDoctors = computed(() => {
 
         <!-- 医生列表 -->
         <div class="doctor-list">
-          <DoctorCard
+          <div
+            class="doctor-list-item"
             v-for="doc in displayDoctors"
             :key="doc.id"
-            :doctor="doc"
-            @book="handleBook"
-          />
+          >
+            <DoctorCard
+              :doctor="doc"
+              @book="handleBook"
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -257,7 +302,10 @@ const displayDoctors = computed(() => {
 /* ================= 医生列表 ================= */
 .doctor-list {
   display: flex;
-  flex-direction: column;
-  gap: @space-md;
+  flex-wrap: wrap;
+  gap: @space-xl;
+  .doctor-list-item {
+    width: 48%;
+  }
 }
 </style>

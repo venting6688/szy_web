@@ -1,5 +1,8 @@
 <script setup>
 import { useRoute, useRouter } from 'vue-router';
+import { useUserStore } from '@/store/modules/user';
+const userStore = useUserStore();
+const userInfo = userStore.userInfo;
 
 //#region 导航图标
 import home from '@/assets/image/home.png';
@@ -60,18 +63,28 @@ const isActive = (path) => {
 const getIcon = (item) => {
   return isActive(item.path) ? item.activeIcon : item.icon;
 };
+// 退出登录
+function onClickLogout() {
+  try {
+    useUserStore().logout();
+    router.push('/login');
+  } catch (error) {
+    console.error('退出登录失败:', error);
+  }
+}
 </script>
 <template>
   <div class="layout">
     <!-- 顶部栏 -->
     <div class="topbar">
-      <div class="container flex justify-between items-center">
-        <div class="logo">互联网医院</div>
+      <div class="container flex justify-end items-center">
+        <!-- <div class="logo">互联网医院</div> -->
         <div class="user flex items-center gap-3">
-          <span>欧阳朵朵</span>
+          <span>{{ userInfo.realName }}</span>
           <t-button
             size="small"
             theme="warning"
+            @click="onClickLogout"
             >退出</t-button
           >
         </div>
@@ -118,7 +131,7 @@ const getIcon = (item) => {
 
 /* ================= 顶部栏 ================= */
 .topbar {
-  height: 60px;
+  height: 54px;
   background: @primary-color;
   color: #fff;
 
@@ -136,8 +149,7 @@ const getIcon = (item) => {
 .banner {
   height: 220px;
   overflow: hidden;
-  background: @bg-white;
-
+  background: linear-gradient(90deg, #dbe3f0 0%, #ced6e3 100%);
   img {
     width: 100%;
     height: 100%;
@@ -192,7 +204,9 @@ const getIcon = (item) => {
 /* ================= 容器 ================= */
 .container {
   width: 1200px;
+  height: 54px;
   margin: 0 auto;
+  padding: 10px;
 }
 
 /* ================= 通用优化 ================= */
