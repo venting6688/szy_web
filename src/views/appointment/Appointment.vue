@@ -6,6 +6,7 @@ import DoctorCard from '@/components/DoctorCard/DoctorCard.vue';
 import { getFirstDeptsApi, getSecondDeptsApi } from '@/api/department';
 import { getSchedulesApi, getScheduleDetailApi } from '@/api/schedule';
 import { createAppointmentApi } from '@/api/appointment';
+import { AddIcon, CloudUploadIcon, SearchIcon, CloudDownloadIcon, DiscountIcon } from 'tdesign-icons-vue-next';
 import downIcon from '@/assets/image/down.png';
 import rightIcon from '@/assets/image/right.png';
 import Dialog from '@/views/appointment/Dialog.vue';
@@ -22,6 +23,7 @@ const currentDate = ref(dates[0]);
 const onlyAvailable = ref(false);
 
 const doctors = ref([]);
+const loading = ref(false);
 const format = (d) => dayjs(d).format('MM月DD日');
 
 const displayDoctors = computed(() => {
@@ -85,7 +87,7 @@ function transformSchedule(list, deptCode) {
         desc: item.DocIntruduction,
         deptName: item.DepartmentName,
         doctorType: item.DoctorSessType,
-        scheduleItemCode: item.ScheduleItemCode,
+        scheduleItemCode: [],
         schedule: [],
       });
     }
@@ -94,6 +96,7 @@ function transformSchedule(list, deptCode) {
       period: item.SessionName,
       total: Number(item.AvailableTotalNum),
       left: Number(item.AvailableLeftNum),
+      scheduleItemCode: item.ScheduleItemCode,
     });
   });
   return Array.from(map.values());
@@ -103,6 +106,7 @@ const currentSecondDept = ref(null);
 // 点击子科室
 async function onClickSecondDept(child) {
   console.log('子科室', child);
+  loading.value = true;
   currentSecondDept.value = child.CLGRPRowId;
 
   loadDoctors();
@@ -117,12 +121,14 @@ async function loadDoctors() {
   });
   doctors.value = transformSchedule(schedules, currentSecondDept.value);
   console.log('医生排班', doctors.value);
+  loading.value = false;
 }
 //#endregion
 
 // #region 院区
 // 院区
 import { useHospitalStore } from '@/store/modules/hospital';
+import { MessagePlugin } from 'tdesign-vue-next';
 const hospitalStore = useHospitalStore();
 // 院区列表
 const hospitalOptions = computed(() => hospitalStore.list);
@@ -147,14 +153,19 @@ watch(
 
 // 选择日期
 function onClickDate(date) {
+  if (!currentSecondDept.value) {
+    MessagePlugin.warning('请先选择二级科室');
+    return;
+  }
   currentDate.value = date;
   loadDoctors();
 }
 
 // 弹窗
 const dialogRef = ref(null);
-function bookEmit(doctor) {
-  dialogRef.value.book(doctor);
+function bookEmit(doctor, period) {
+  console.log('预约医生txt：', doctor, period);
+  dialogRef.value.book(doctor, period);
 }
 </script>
 <template>
@@ -212,6 +223,7 @@ function bookEmit(doctor) {
           <t-select
             v-model="hospitalId"
             @change="onChangeHospital"
+            size="large"
           >
             <t-option
               v-for="item in hospitalOptions"
@@ -222,11 +234,17 @@ function bookEmit(doctor) {
           </t-select>
 
           <t-input
+            input-class="search-input"
             placeholder="搜索科室"
-            style="width: 240px"
-          />
-
-          <t-button theme="primary">搜索</t-button>
+            v-model="searchDept"
+            size="large"
+          >
+            <template #suffix>
+              <t-button theme="primary"
+                >搜索<template #icon><search-icon /></template
+              ></t-button>
+            </template>
+          </t-input>
         </div>
 
         <!-- 日期 -->
@@ -262,6 +280,11 @@ function bookEmit(doctor) {
             v-if="loading"
             class="loading"
           >
+            <t-loading
+              v-if="loading"
+              :delay="50"
+              size="small"
+            ></t-loading>
             加载中...
           </div>
 
@@ -270,7 +293,11 @@ function bookEmit(doctor) {
             v-else-if="!doctors.length"
             class="empty"
           >
-            暂无医生
+            <t-empty
+              description="该日期暂无医生排班"
+              title="暂无数据"
+            >
+            </t-empty>
           </div>
 
           <!-- 正常列表 -->
@@ -282,7 +309,7 @@ function bookEmit(doctor) {
           >
             <DoctorCard
               :doctor="doc"
-              @book="bookEmit(doc)"
+              @book="bookEmit"
             />
           </div>
         </div>
@@ -390,6 +417,12 @@ function bookEmit(doctor) {
   display: flex;
   gap: @space-md;
   margin-bottom: @space-lg;
+  .search-input {
+    width: 56px;
+    button {
+      border-radius: 8px;
+    }
+  }
 }
 
 /* ================= 日期 ================= */
@@ -397,8 +430,10 @@ function bookEmit(doctor) {
   display: flex;
   gap: @space-md;
   margin-bottom: @space-lg;
+  justify-content: space-between;
 
   .date-item {
+    width: 13%;
     border: 1px solid @border-color;
     padding: @space-sm @space-md;
     cursor: pointer;
@@ -415,6 +450,9 @@ function bookEmit(doctor) {
       background: @primary-color;
       color: #fff;
       border-color: @primary-color;
+      .sub {
+        color: inherit;
+      }
     }
 
     .sub {
@@ -442,6 +480,12 @@ function bookEmit(doctor) {
   margin: 0 auto;
   .doctor-list-item {
     width: 448px;
+  }
+  .loading,
+  .empty {
+    width: 100%;
+    text-align: center;
+    margin-top: 100px;
   }
 }
 </style>

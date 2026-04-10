@@ -1,5 +1,5 @@
 // src/api/hospital.js
-import MessagePlugin from 'tdesign-vue-next';
+import { MessagePlugin } from 'tdesign-vue-next';
 import { get } from '@/utils/request';
 
 // 获取院区

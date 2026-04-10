@@ -69,6 +69,7 @@ export async function sendYunMsgApi(params) {
     type,
     phone,
     ...rest,
+    MessagePlugin.error(res.message || '发送短信验证码失败');
   });
   if (code !== 200) {
     MessagePlugin.error(msg || '发送短信验证码失败');

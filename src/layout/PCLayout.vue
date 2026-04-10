@@ -203,7 +203,7 @@ function onClickLogout() {
 
 /* ================= 容器 ================= */
 .container {
-  width: 1300px;
+  width: 1260px;
   height: 54px;
   margin: 0 auto;
   padding: 10px;

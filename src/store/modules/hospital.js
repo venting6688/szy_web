@@ -4,7 +4,7 @@ import { getHospitalBranchesApi } from '@/api/hospital';
 export const useHospitalStore = defineStore('hospital', {
   state: () => ({
     list: [], // 院区列表
-    current: null, // 当前院区
+    current: null, // 当前院区，即各个接口所需的hospitalId
   }),
 
   actions: {

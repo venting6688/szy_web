@@ -82,7 +82,7 @@ const emit = defineEmits(['book']);
           v-if="item.left > 0"
           size="small"
           class="btn-book"
-          @click="emit('book', doctor)"
+          @click="emit('book', doctor, item.period)"
         >
           预约
         </t-button>
@@ -90,7 +90,7 @@ const emit = defineEmits(['book']);
           v-else
           size="small"
           class="btn-wait"
-          @click="emit('book', doctor)"
+          @click="emit('book', doctor, item.period)"
         >
           +候补
         </t-button>

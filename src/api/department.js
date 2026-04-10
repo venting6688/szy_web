@@ -1,6 +1,6 @@
 // src/api/department.js
 import { get, post } from '@/utils/request';
-
+import { MessagePlugin } from 'tdesign-vue-next';
 // 大科室
 export async function getFirstDeptsApi(params = {}) {
   const { startDate, endDate, ...rest } = params;
@@ -11,7 +11,8 @@ export async function getFirstDeptsApi(params = {}) {
     ...rest,
   });
   if (code !== 200) {
-    throw new Error(msg || '获取大科室失败');
+    MessagePlugin.error(msg || '获取一级科室失败');
+    throw new Error(msg || '获取一级科室失败');
   } else {
     return data?.ResultData?.CliSerGroups || [];
   }
@@ -28,7 +29,8 @@ export async function getSecondDeptsApi(params = {}) {
     ...rest,
   });
   if (code !== 200) {
-    throw new Error(msg || '获取子科室失败');
+    MessagePlugin.error(msg || '获取二级科室失败');
+    throw new Error(msg || '获取二级科室失败');
   } else {
     return data?.ResultData?.ClinicGroups || [];
   }
