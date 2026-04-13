@@ -98,7 +98,8 @@ function goNotice() {
   dialogType.value = 'notice';
 }
 const onClickClose = () => {
-  dialogType.value = 'schedule';
+  // dialogType.value = 'schedule';
+  dialogVisible.value = false;
 };
 // #endregion
 
@@ -137,8 +138,13 @@ const noticeList = [
   },
 ];
 
+function openNotice() {
+  dialogType.value = 'notice';
+  dialogVisible.value = true;
+}
 defineExpose({
   book,
+  openNotice,
 });
 //#endregion
 </script>
@@ -309,12 +315,13 @@ defineExpose({
   height: 520px;
   padding: 20px;
   .schedule-date {
-    margin: 15px 0;
+    margin: 10px 0 0;
   }
   .schedule-list {
     display: flex;
     gap: 12px;
     flex-wrap: wrap;
+    margin-top: 20px;
     .btn-book {
       width: 104px;
       height: 32px;

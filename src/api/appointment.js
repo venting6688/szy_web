@@ -19,7 +19,7 @@ export async function createAppointmentApi({ ScheduleItemCode, PayFee, StartTime
       MobileNo: userStore.userInfo.phonenumber,
       IDCardNo: userStore.userInfo.idCard,
       CardNo: userStore.userInfo.idCard,
-      CardType: userStore.userInfo.idType,
+      CardType: '04' || userStore.userInfo.idType, // 暂时写死04，否则有未知错误
       TelePhoneNo: userStore.userInfo.phonenumber,
       PatientName: userStore.userInfo.realName,
       Gender: userStore.userInfo.gender,

@@ -86,14 +86,6 @@ const emit = defineEmits(['book']);
         >
           预约
         </t-button>
-        <t-button
-          v-else
-          size="small"
-          class="btn-wait"
-          @click="emit('book', doctor, item.period)"
-        >
-          +候补
-        </t-button>
       </div>
     </div>
   </div>

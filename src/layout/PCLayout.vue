@@ -8,6 +8,9 @@ const userInfo = userStore.userInfo;
 import home from '@/assets/image/home.png';
 import homeActive from '@/assets/image/home_active.png';
 
+import today from '@/assets/image/today.png';
+import todayActive from '@/assets/image/today_active.png';
+
 import appointment from '@/assets/image/appointment.png';
 import appointmentActive from '@/assets/image/appointment_active.png';
 
@@ -23,6 +26,12 @@ const navList = [
     path: '/home',
     icon: home,
     activeIcon: homeActive,
+  },
+  {
+    name: '当日挂号',
+    path: '/appointment-today',
+    icon: today,
+    activeIcon: todayActive,
   },
   {
     name: '预约挂号',
@@ -57,7 +66,7 @@ const go = (path) => {
   }
 };
 const isActive = (path) => {
-  return route.path.startsWith(path);
+  return route.path === path;
 };
 // 获取当前图标
 const getIcon = (item) => {
@@ -85,6 +94,7 @@ function onClickLogout() {
             size="small"
             theme="warning"
             @click="onClickLogout"
+            class="logout-btn"
             >退出</t-button
           >
         </div>
@@ -118,7 +128,7 @@ function onClickLogout() {
 
     <!-- 主体 -->
     <div class="main container">
-      <router-view />
+      <router-view :key="route.path" />
     </div>
   </div>
 </template>
@@ -160,7 +170,7 @@ function onClickLogout() {
 /* ================= 导航 ================= */
 .nav {
   background: @bg-white;
-  height: 70px;
+  height: 98px;
   border-bottom: 1px solid @border-color;
 
   .nav-item {
@@ -170,6 +180,8 @@ function onClickLogout() {
     justify-content: center;
     gap: @space-xs;
     cursor: pointer;
+    width: 240px;
+    height: 98px;
 
     .nav-icon {
       width: 24px;
@@ -192,6 +204,7 @@ function onClickLogout() {
         color: @primary-color;
         font-weight: 500;
       }
+      border-bottom: 2px solid @primary-color;
     }
   }
 }
@@ -204,9 +217,9 @@ function onClickLogout() {
 /* ================= 容器 ================= */
 .container {
   width: 1260px;
-  height: 54px;
+  height: 100%;
   margin: 0 auto;
-  padding: 10px;
+  padding: 0px;
 }
 
 /* ================= 通用优化 ================= */
@@ -215,5 +228,10 @@ function onClickLogout() {
 :deep(.t-button--theme-warning) {
   background: @warning-color;
   border-color: @warning-color;
+}
+.logout-btn {
+  width: 61px;
+  height: 26px;
+  border-radius: 14px;
 }
 </style>

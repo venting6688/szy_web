@@ -69,7 +69,6 @@ export async function sendYunMsgApi(params) {
     type,
     phone,
     ...rest,
-    MessagePlugin.error(res.message || '发送短信验证码失败');
   });
   if (code !== 200) {
     MessagePlugin.error(msg || '发送短信验证码失败');
@@ -84,6 +83,51 @@ export async function getDictDataApi() {
   if (code !== 200) {
     MessagePlugin.error(msg || '获取字典数据失败');
     throw new Error(msg || '获取字典数据失败');
+  } else {
+    return data;
+  }
+}
+
+// 更新个人信息 updateProfile
+// {
+//   "idCard": "370***************",
+//   "realName": "张三",
+//   "phonenumber": "13800138000",
+//   "address": "山东省济南市历下区xx路xx号"
+// }
+export async function updateProfileApi({ idCard, realName, phonenumber, address }) {
+  const { code, msg, data } = await post('/mobile/updateProfile', {
+    idCard,
+    realName,
+    phonenumber,
+    address,
+  });
+  if (code !== 200) {
+    MessagePlugin.error(msg || '更新个人信息失败');
+    throw new Error(msg || '更新个人信息失败');
+  } else {
+    return data;
+  }
+}
+
+/**
+ * 修改密码
+ * @param {*} oldPassword 旧密码
+ * @param {*} newPassword 新密码
+ * @param {*} confirmPassword 确认新密码
+ * @returns 修改密码结果
+ * @description 修改用户密码
+ */
+//完善updatePasswordApi函数的实现，添加具体的API调用逻辑
+export async function updatePasswordApi({ oldPassword, newPassword, confirmPassword }) {
+  const { code, msg, data } = await post('/mobile/changePassword', {
+    oldPassword,
+    newPassword,
+    confirmPassword,
+  });
+  if (code !== 200) {
+    MessagePlugin.error(msg || '修改密码失败');
+    throw new Error(msg || '修改密码失败');
   } else {
     return data;
   }

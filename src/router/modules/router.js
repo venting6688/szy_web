@@ -8,11 +8,11 @@ const routes = [
     children: [
       {
         path: '/login',
-        component: () => import('@/views/auth/login.vue'),
+        component: () => import('@/views/auth/Login.vue'),
       },
       {
         path: '/register',
-        component: () => import('@/views/auth/register.vue'),
+        component: () => import('@/views/auth/Register.vue'),
       },
     ],
   },
@@ -22,6 +22,7 @@ const routes = [
     redirect: '/appointment',
     children: [
       { path: '/appointment', component: () => import('@/views/appointment/Appointment.vue') },
+      { path: '/appointment-today', component: () => import('@/views/appointment/Appointment.vue') },
       { path: '/order', component: () => import('@/views/order/Order.vue') },
       { path: '/profile', component: () => import('@/views/profile/Profile.vue') },
     ],

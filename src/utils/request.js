@@ -13,11 +13,16 @@ const instance = axios.create({
   timeout: 10000,
   withCredentials: false,
 });
-const whiteList = ['/mobile/miniProgramLogin', '/mobile/api/sendYunMsg', '/mobile/webRegister'];
+const whiteList = [
+  '/mobile/miniProgramLogin',
+  '/mobile/api/sendYunMsg',
+  '/mobile/webRegister',
+  '/mobile/api/getHospitalBranchesByCode',
+];
 
 // ================== 请求拦截 ==================
 instance.interceptors.request.use(
-  (config) => {
+  async (config) => {
     const token = getToken();
 
     // ✔ 自动携带 token
@@ -30,6 +35,15 @@ instance.interceptors.request.use(
     }
 
     const hospitalStore = useHospitalStore();
+
+    // 如果当前院区为空且不是白名单接口，则等待初始化完成
+    if (!hospitalStore.current) {
+      try {
+        await hospitalStore.fetchHospitalList();
+      } catch (error) {
+        console.error('等待医院列表初始化失败:', error);
+      }
+    }
 
     if (config.method === 'get') {
       config.params = {

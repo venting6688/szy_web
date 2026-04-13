@@ -10,9 +10,13 @@ import { AddIcon, CloudUploadIcon, SearchIcon, CloudDownloadIcon, DiscountIcon }
 import downIcon from '@/assets/image/down.png';
 import rightIcon from '@/assets/image/right.png';
 import Dialog from '@/views/appointment/Dialog.vue';
+import { useRoute } from 'vue-router';
+
+const route = useRoute();
 
 const router = useRouter();
-const type = 'appointment';
+const type = route.path === '/appointment-today' ? 'appointment-today' : 'appointment';
+console.log('type', type);
 
 const currentDept = ref(-1);
 
@@ -167,6 +171,13 @@ function bookEmit(doctor, period) {
   console.log('预约医生txt：', doctor, period);
   dialogRef.value.book(doctor, period);
 }
+function openNoticeDialog() {
+  dialogRef.value.openNotice();
+}
+
+onMounted(() => {
+  openNoticeDialog();
+});
 </script>
 <template>
   <div class="page">
