@@ -4,6 +4,7 @@ import { MessagePlugin } from 'tdesign-vue-next';
 
 import { getAppointmentsApi, cancelAppointmentApi } from '@/api/order';
 import OrderCard from '@/components/OrderCard/OrderCard.vue';
+import dayjs from 'dayjs';
 
 const orderList = ref([]);
 
@@ -11,8 +12,8 @@ const orderList = ref([]);
 async function getOrderList() {
   const res = await getAppointmentsApi({
     // patientNo: '0010060062',
-    startDate: '2026-04-13',
-    endDate: '2026-04-13',
+    startDate: dayjs().format('YYYY-MM-DD'),
+    endDate: dayjs().add(7, 'day').format('YYYY-MM-DD'),
   });
   orderList.value = res || [];
 }
