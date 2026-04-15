@@ -53,15 +53,16 @@ router.beforeEach((to, from, next) => {
   }
 
   // 2. 白名单
-  const whiteList = ['/login', '/register', '/mobile/login', '/mobile/register'];
-
+  const whiteList = ['/login', '/register', '/mobile/login', '/mobile/register', '/forget-password'];
+  console.log(token, to.path);
   // 3. 登录判断
   if (token) {
     if (whiteList.includes(to.path)) {
-      return next(isMobileDevice ? '/mobile/appointment' : '/appointment');
+      return next(isMobileDevice ? '/mobile/appointment-today' : '/appointment-today');
     }
     return next();
   } else {
+    console.log('未登录', token);
     if (whiteList.includes(to.path)) {
       return next();
     }

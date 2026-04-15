@@ -14,27 +14,53 @@ const profileFormData = ref({
   phonenumber: userStore.userInfo.phonenumber,
   address: userStore.userInfo.address,
 });
+const profileFormRef = ref(null);
+
+import { isEmptyObject } from '@/utils/index/common';
 
 async function submitProfile() {
   console.log(profileFormData.value);
+  const isValid = await profileFormRef.value.validate();
+  console.log(isValid);
+  if (isValid !== true && !isEmptyObject(isValid)) {
+    throw new Error('个人信息表单验证失败:', isValid);
+  }
   try {
     await updateProfileApi(profileFormData.value);
     MessagePlugin.success('更新个人信息成功');
+    // 刷新用户信息
+    // userStore.userInfo = profileFormData.value;
+    // userStore.logout();
+    // nextTick(() => {
+    //   router.push('/login');
+    // });
   } catch (error) {
     MessagePlugin.error(error.message || '更新个人信息失败');
   }
 }
 const profileFormRules = ref({
-  realName: [{ required: true, message: '请输入姓名', trigger: 'blur' }],
-  idCard: [{ required: true, message: '请输入证件号', trigger: 'blur' }],
-  mobile: [{ required: true, message: '请输入手机号', trigger: 'blur' }],
-  address: [{ required: true, message: '请输入地址', trigger: 'blur' }],
+  realName: [{ required: true, message: '请输入姓名' }],
+  idCard: [{ required: true, message: '请输入证件号' }],
+  phonenumber: [
+    { required: true, message: '请输入手机号' },
+    {
+      required: true,
+      validator: (val) => /^1[3-9]\d{9}$/.test(val),
+      message: '请输入正确的11位手机号码',
+    },
+  ],
+  address: [{ required: true, message: '请输入地址' }],
 });
 
 //#endregion
 
 //#region 修改密码表单数据
 import { updatePasswordApi } from '@/api/user';
+const passwordFormRules = ref({
+  oldPassword: [{ required: true, message: '请输入旧密码' }],
+  newPassword: [{ required: true, message: '请输入新密码' }],
+  confirmPassword: [{ required: true, message: '请确认新密码' }],
+});
 const passwordFormData = ref({
   oldPassword: '',
   newPassword: '',
@@ -56,7 +82,9 @@ import router from '@/router';
 function onClickLogout() {
   try {
     useUserStore().logout();
-    router.push('/login');
+    nextTick(() => {
+      router.push('/login');
+    });
   } catch (error) {
     console.error('退出登录失败:', error);
   }
@@ -80,16 +108,20 @@ onMounted(() => {
         </div>
       </div>
       <div class="header-right">
-        <div class="profile">
+        <div class="profile-card">
           <img
-            :src="userStore.userInfo.avatar"
+            src="@/assets/image/profile_user.png"
             alt="avatar"
             class="avatar"
           />
+          <div class="profile-info">
+            <div class="realName">{{ userStore.userInfo.realName }}</div>
+            <div class="idCard">{{ userStore.userInfo.idCard }}</div>
+          </div>
           <t-button
-            size="small"
+            ghost
+            size="medium"
             class="logout-btn"
-            theme="warning"
             @click="onClickLogout"
             >退出</t-button
           >
@@ -107,6 +139,13 @@ onMounted(() => {
             src="@/assets/image/change_profile.png"
             alt="change_profile"
             class="btn-icon"
+            v-if="currentTab !== 'profile'"
+          />
+          <img
+            src="@/assets/image/change_profile_active.png"
+            alt="change_profile_active"
+            class="btn-icon"
+            v-else
           />
           <span>当前就诊人</span>
         </div>
@@ -119,6 +158,13 @@ onMounted(() => {
             src="@/assets/image/change_password.png"
             alt="change_password"
             class="btn-icon"
+            v-if="currentTab !== 'password'"
+          />
+          <img
+            src="@/assets/image/change_password_active.png"
+            alt="change_password_active"
+            class="btn-icon"
+            v-else
           />
           <span>修改密码</span>
         </div>
@@ -129,9 +175,11 @@ onMounted(() => {
           v-if="currentTab === 'profile'"
         >
           <t-form
-            :model="profileFormData"
+            ref="profileFormRef"
+            :data="profileFormData"
             :label-width="100"
             :rules="profileFormRules"
+            labelAlign="left"
           >
             <t-form-item
               label="姓名"
@@ -145,12 +193,15 @@ onMounted(() => {
               prop="idCard"
               name="idCard"
             >
-              <t-input v-model="profileFormData.idCard" />
+              <t-input
+                disabled
+                v-model="profileFormData.idCard"
+              />
             </t-form-item>
             <t-form-item
               label="手机号"
-              prop="mobile"
-              name="mobile"
+              prop="phonenumber"
+              name="phonenumber"
             >
               <t-input v-model="profileFormData.phonenumber" />
             </t-form-item>
@@ -163,8 +214,10 @@ onMounted(() => {
             </t-form-item>
           </t-form>
           <t-button
+            ghost
             type="primary"
             size="medium"
+            class="submit-btn"
             @click="submitProfile"
             >提交</t-button
           >
@@ -177,13 +230,17 @@ onMounted(() => {
             :model="passwordFormData"
             :label-width="100"
             :rules="passwordFormRules"
+            labelAlign="left"
           >
             <t-form-item
               label="旧密码"
               prop="oldPassword"
               name="oldPassword"
             >
-              <t-input v-model="passwordFormData.oldPassword" />
+              <t-input
+                type="password"
+                v-model="passwordFormData.oldPassword"
+              />
             </t-form-item>
             <t-form-item
               label="新密码"
@@ -207,8 +264,10 @@ onMounted(() => {
             </t-form-item>
           </t-form>
           <t-button
+            ghost
             type="primary"
             size="medium"
+            class="submit-btn"
             @click="submitPassword"
             >提交</t-button
           >
@@ -220,31 +279,73 @@ onMounted(() => {
 
 <style scoped lang="less">
 .profile-container {
+  padding: 20px;
   .profile-header {
-    height: 100px;
+    height: 70px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: @space-lg;
-    box-shadow: @shadow-card;
     .header-left {
       width: 276px;
       .title {
-        font-size: 20px;
+        font-size: 24px;
+        font-weight: 800;
+        line-height: 30px;
+      }
+      .info {
+        line-height: 34px;
+        font-size: @font-base;
+        font-weight: 400;
+        color: @text-regular;
       }
     }
     .header-right {
+      width: calc(100% - 276px - 15px);
+      height: 100%;
+      padding: @space-md;
       flex: 1;
-      margin-left: 20px;
+      margin-left: 15px;
       background: @bg-white;
+      border-radius: 14px;
+
+      .profile-card {
+        height: 100%;
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        .avatar {
+          width: 30px;
+          height: 30px;
+          border-radius: 50%;
+          margin-right: 20px;
+        }
+        .profile-info {
+          flex: 1;
+          .realName {
+            font-size: 16px;
+            font-weight: 800;
+            line-height: 30px;
+          }
+          .idCard {
+            font-size: 14px;
+            font-weight: 400;
+            color: @text-regular;
+          }
+        }
+        .logout-btn {
+          width: 94px;
+          height: 32px;
+          border-radius: 24px;
+        }
+      }
     }
   }
   .profile-content {
     height: 400px;
+    margin-top: 15px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: @space-lg;
     .content-left {
       box-shadow: @shadow-card;
       border-radius: 14px;
@@ -272,21 +373,22 @@ onMounted(() => {
     .content-right {
       box-shadow: @shadow-card;
       border-radius: 14px;
-      width: calc(100% - 276px - 20px);
+      width: calc(100% - 276px - 15px);
       height: 100%;
-      margin-left: 20px;
+      margin-left: 15px;
       background: @bg-white;
       .profile {
         width: 50%;
         margin-top: 40px;
-        margin-left: 20px;
+        margin-left: 35px;
       }
     }
   }
-  .logout-btn {
-    width: 61px;
-    height: 26px;
-    border-radius: 14px;
+  .submit-btn {
+    width: 94px;
+    height: 32px;
+    border-radius: 24px;
+    margin-top: 30px;
   }
 }
 </style>

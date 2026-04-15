@@ -24,7 +24,9 @@ export async function getAppointmentsApi({ startDate, endDate }) {
     credTypeCode: 1,
     cardType: '04',
   });
-  if (code !== 200) {
+  if (code === 500) {
+    MessagePlugin.warning('暂未查询到您的预约记录');
+  } else if (code !== 200) {
     MessagePlugin.error(msg || '获取预约记录失败');
     throw new Error(msg || '获取预约记录失败');
   } else {

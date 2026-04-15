@@ -49,7 +49,6 @@ export const useUserStore = defineStore('user', {
       setToken(token);
       localStorage.setItem('userInfo', JSON.stringify(userInfo));
     },
-
     logout() {
       this.token = '';
       this.userInfo = { ...defaultUserInfo };

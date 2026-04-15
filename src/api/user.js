@@ -38,6 +38,7 @@ export async function registerApi(params) {
     confirmPassword,
   });
   if (code !== 200) {
+    MessagePlugin.error(msg || '注册失败');
     throw new Error(msg || '注册失败');
   } else {
     return data;
@@ -128,6 +129,30 @@ export async function updatePasswordApi({ oldPassword, newPassword, confirmPassw
   if (code !== 200) {
     MessagePlugin.error(msg || '修改密码失败');
     throw new Error(msg || '修改密码失败');
+  } else {
+    return data;
+  }
+}
+/**
+ * 忘记密码
+ * @param {*} idCard 身份证号
+ * @param {*} verificationCode 短信验证码
+ * @param {*} password 新密码
+ * @param {*} confirmPassword 确认新密码
+ * @returns 忘记密码结果
+ * @description 忘记用户密码
+ */
+export async function forgetPasswordApi({ idCard, phone, verificationCode, newPassword, confirmPassword }) {
+  const { code, msg, data } = await post('/mobile/forgotPassword', {
+    idCard,
+    phone,
+    verificationCode,
+    newPassword,
+    confirmPassword,
+  });
+  if (code !== 200) {
+    MessagePlugin.error(msg || '忘记密码失败');
+    throw new Error(msg || '忘记密码失败');
   } else {
     return data;
   }

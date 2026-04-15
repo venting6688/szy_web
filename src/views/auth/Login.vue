@@ -30,11 +30,15 @@ async function onClickLogin() {
   }
   const data = await loginApi(form.value);
   userStore.setLogin(data.accessToken, data);
-  router.push('/appointment');
+  router.push('/appointment-today');
 }
 
 function goRegister() {
   router.push('/register');
+}
+
+function onClickForgetPassword() {
+  router.push('/forget-password');
 }
 </script>
 
@@ -82,7 +86,11 @@ function goRegister() {
             >立即注册</span
           ></span
         >
-        <span class="link">忘记密码？</span>
+        <span
+          class="link"
+          @click="onClickForgetPassword"
+          >忘记密码？</span
+        >
       </div>
     </div>
     <t-button
@@ -90,7 +98,6 @@ function goRegister() {
       block
       shape="circle"
       @click="onClickLogin"
-      @keyup.enter="onClickLogin"
       >登录</t-button
     >
 

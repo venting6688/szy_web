@@ -20,12 +20,11 @@ const form = ref({
   phoneNumber: '',
   verificationCode: '',
   nation: '',
-  province: '山东省',
-  city: '济南市',
-  district: '历城区',
-  detailAddress: '唐冶街道xxx小区1号楼1单元101',
-  password: '123456',
-  confirmPassword: '123456',
+  province: '',
+  city: '',
+  district: '',
+  detailAddress: '',
+  password: '',
 });
 
 const goLogin = () => {
@@ -46,8 +45,10 @@ const registerFormRules = ref({
     },
   ],
   verificationCode: [{ required: true, message: '请输入验证码' }],
-  password: [{ required: true, message: '请输入密码' }],
-  confirmPassword: [{ required: true, message: '请确认密码' }],
+  password: [
+    { required: true, message: '请输入密码' },
+    { min: 6, message: '密码长度至少6位' },
+  ],
   area: [{ required: true, message: '请选择所在地区' }],
 
   detailAddress: [{ required: true, message: '请输入详细地址' }],
@@ -191,12 +192,14 @@ const btnDisabled = computed(() => {
         ref="registerFormRef"
         layout="vertical"
         :rules="registerFormRules"
+        labelAlign="left"
       >
         <t-form-item
           label="姓名"
           name="realName"
         >
           <t-input
+            borderless
             v-model="form.realName"
             placeholder="请输入姓名"
           />
@@ -207,6 +210,7 @@ const btnDisabled = computed(() => {
           name="idType"
         >
           <t-select
+            borderless
             v-model="form.idType"
             placeholder="请选择证件类型"
           >
@@ -223,6 +227,7 @@ const btnDisabled = computed(() => {
           name="idCard"
         >
           <t-input
+            borderless
             v-model="form.idCard"
             placeholder="请输入证件号码"
           />
@@ -232,6 +237,7 @@ const btnDisabled = computed(() => {
           name="birthday"
         >
           <t-date-picker
+            borderless
             v-model="form.birthday"
             class="w-full"
             type="date"
@@ -243,6 +249,7 @@ const btnDisabled = computed(() => {
           name="phoneNumber"
         >
           <t-input
+            borderless
             v-model="form.phoneNumber"
             placeholder="请输入手机号码"
           />
@@ -252,6 +259,7 @@ const btnDisabled = computed(() => {
           name="verificationCode"
         >
           <t-input
+            borderless
             v-model="form.verificationCode"
             placeholder="请输入验证码"
           >
@@ -274,6 +282,7 @@ const btnDisabled = computed(() => {
           name="password"
         >
           <t-input
+            borderless
             v-model="form.password"
             type="password"
             placeholder="请输入密码"
@@ -284,6 +293,7 @@ const btnDisabled = computed(() => {
           name="gender"
         >
           <t-select
+            borderless
             v-model="form.gender"
             placeholder="请选择性别"
           >
@@ -300,6 +310,7 @@ const btnDisabled = computed(() => {
           name="nation"
         >
           <t-select
+            borderless
             v-model="form.nation"
             placeholder="请选择民族"
             value-type="object"
@@ -317,6 +328,7 @@ const btnDisabled = computed(() => {
           name="area"
         >
           <t-cascader
+            borderless
             v-model="form.area"
             :options="areaOptions"
             value-type="full"
@@ -330,6 +342,7 @@ const btnDisabled = computed(() => {
           name="detailAddress"
         >
           <t-input
+            borderless
             v-model="form.detailAddress"
             placeholder="请输入详细地址"
           />
@@ -384,6 +397,7 @@ const btnDisabled = computed(() => {
       font-size: @font-medium;
       .t-form__item {
         margin-bottom: 15px;
+        border-bottom: 1px solid #e9ecef;
       }
     }
     .get-verification-code-btn {

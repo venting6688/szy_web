@@ -92,6 +92,7 @@ async function confirmBook() {
   });
   console.log('预约挂号成功', res);
   MessagePlugin.success('预约挂号成功');
+  dialogVisible.value = false;
 }
 // 跳转预约须知
 function goNotice() {
@@ -116,7 +117,7 @@ const noticeList = [
     type: 'title',
   },
   {
-    text: '1.首次就诊的医保患者请携带身份证原件及医保卡或医保电子凭证到人工机取预约号，去各诊区侯诊;窗口建档、充值，自助机取预约号，持医保卡或医保电子凭证到诊区候诊;',
+    text: '1.首次就诊的医保患者请携带身份证原件及医保卡或医保电子凭证到人工机取预约号，去各诊区侯诊;<br>窗口建档、充值，自助机取预约号，持医保卡或医保电子凭证到诊区候诊;',
   },
   {
     text: '2.自费患者或儿童请携带身份证原件或健康码到自助机建档、充值，自助',
@@ -288,9 +289,8 @@ defineExpose({
               :key="i"
               class="line"
               :class="item.type"
-            >
-              {{ item.text }}
-            </div>
+              v-html="item.text"
+            ></div>
             <div class="btn-container">
               <t-button
                 class="btn-confirm"
@@ -351,7 +351,7 @@ defineExpose({
 
 :deep(.notice-dialog) {
   width: 520px;
-  padding: 20px;
+  padding: 20px 20px 0 20px;
   .header.title {
     width: 100%;
     text-align: center;

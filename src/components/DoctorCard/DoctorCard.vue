@@ -70,12 +70,15 @@ const emit = defineEmits(['book']);
         <div class="left">
           <span class="date">{{ doctor.date }}</span>
           <span class="period">{{ item.period }}</span>
-          <span
-            class="remain"
-            :class="item.left > 0 ? 'green' : 'gray'"
-          >
-            剩余 {{ item.left }}
-          </span>
+          <div>
+            <span>剩余</span>
+            <span
+              class="remain"
+              :class="item.left > 0 ? 'green' : 'gray'"
+            >
+              {{ item.left }}
+            </span>
+          </div>
         </div>
 
         <t-button
@@ -124,6 +127,7 @@ const emit = defineEmits(['book']);
 .title {
   font-size: @font-base;
   color: @text-secondary;
+  margin-left: @space-sm;
 }
 
 .desc {
@@ -140,7 +144,7 @@ const emit = defineEmits(['book']);
   position: absolute;
   right: 0;
   top: 0;
-  font-size: @font-medium;
+  font-size: @font-large;
   color: @warning-color;
 }
 
@@ -155,6 +159,12 @@ const emit = defineEmits(['book']);
   display: flex;
   justify-content: space-between;
   margin-bottom: @space-sm;
+  .left {
+    display: flex;
+    align-items: center;
+    width: 60%;
+    justify-content: space-between;
+  }
 }
 
 .remain {

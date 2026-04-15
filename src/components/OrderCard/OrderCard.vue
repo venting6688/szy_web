@@ -139,6 +139,7 @@ const handleCancel = () => {
     margin-top: 10px;
     text-align: right;
     .cancel-btn {
+      cursor: pointer;
       width: 98px;
       height: 32px;
       padding: 4px 10px;

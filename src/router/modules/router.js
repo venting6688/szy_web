@@ -14,12 +14,16 @@ const routes = [
         path: '/register',
         component: () => import('@/views/auth/Register.vue'),
       },
+      {
+        path: '/forget-password',
+        component: () => import('@/views/auth/ForgetPassword.vue'),
+      },
     ],
   },
   {
     path: '/',
     component: () => import('@/layout/PCLayout.vue'),
-    redirect: '/appointment',
+    redirect: '/appointment-today',
     children: [
       { path: '/appointment', component: () => import('@/views/appointment/Appointment.vue') },
       { path: '/appointment-today', component: () => import('@/views/appointment/Appointment.vue') },
@@ -30,9 +34,9 @@ const routes = [
   {
     path: '/mobile',
     component: () => import('@/layout/MobileLayout.vue'),
-    redirect: '/mobile/appointment',
+    redirect: '/mobile/appointment-today',
     children: [
-      { path: '/mobile/appointment', component: () => import('@/views/appointment/Appointment.vue') },
+      { path: '/mobile/appointment-today', component: () => import('@/views/appointment/Appointment.vue') },
       { path: '/mobile/order', component: () => import('@/views/order/Order.vue') },
       { path: '/mobile/profile', component: () => import('@/views/profile/Profile.vue') },
     ],

@@ -129,6 +129,12 @@ async function loadDoctors() {
 }
 //#endregion
 
+function initData() {
+  doctors.value = [];
+  currentSecondDept.value = null;
+  firstDeptList.value = [];
+}
+
 // #region 院区
 // 院区
 import { useHospitalStore } from '@/store/modules/hospital';
@@ -141,6 +147,7 @@ const hospitalId = ref(null);
 // 切换院区
 function onChangeHospital() {
   hospitalStore.setHospital(hospitalId.value);
+  initData();
   getFirstDepts();
 }
 // 如果监听到院区列表不为空了，初始化院区为第一个院区
@@ -181,14 +188,49 @@ onMounted(() => {
 </script>
 <template>
   <div class="page">
-    <!-- 面包屑 -->
-    <div class="breadcrumb">首页 > 预约诊疗 > <span>预约挂号</span></div>
+    <div class="header">
+      <div class="header-left">
+        <div class="title">预约挂号</div>
+        <div class="info">
+          <span>请先选择院区再选择对应的临床科室进行挂号登记</span>
+        </div>
+      </div>
+
+      <!-- 搜索区域 -->
+      <div class="search-bar">
+        <t-select
+          v-model="hospitalId"
+          @change="onChangeHospital"
+          size="large"
+          style="width: 500px"
+        >
+          <t-option
+            v-for="item in hospitalOptions"
+            :key="item.value"
+            :value="item.value"
+            :label="item.label"
+          />
+        </t-select>
+
+        <!-- <t-input
+          input-class="search-input"
+          :style="{ width: '560px' }"
+          placeholder="搜索科室"
+          v-model="searchDept"
+          size="large"
+        >
+          <template #suffix>
+            <t-button theme="primary"
+              >搜索<template #icon><search-icon /></template
+            ></t-button>
+          </template>
+        </t-input> -->
+      </div>
+    </div>
 
     <div class="content">
       <!-- 左侧科室 -->
       <div class="left">
-        <div class="dept-title">预约挂号</div>
-
         <div
           v-for="item in firstDeptList"
           :key="item.CliSerGroupID"
@@ -229,35 +271,6 @@ onMounted(() => {
 
       <!-- 右侧 -->
       <div class="right">
-        <!-- 搜索区域 -->
-        <div class="search-bar">
-          <t-select
-            v-model="hospitalId"
-            @change="onChangeHospital"
-            size="large"
-          >
-            <t-option
-              v-for="item in hospitalOptions"
-              :key="item.value"
-              :value="item.value"
-              :label="item.label"
-            />
-          </t-select>
-
-          <t-input
-            input-class="search-input"
-            placeholder="搜索科室"
-            v-model="searchDept"
-            size="large"
-          >
-            <template #suffix>
-              <t-button theme="primary"
-                >搜索<template #icon><search-icon /></template
-              ></t-button>
-            </template>
-          </t-input>
-        </div>
-
         <!-- 日期 -->
         <div
           v-if="type === 'appointment'"
@@ -278,10 +291,14 @@ onMounted(() => {
         <!-- 标题 -->
         <div class="title flex justify-between">
           <span>{{ format(currentDate) }} 坐诊医生</span>
-          <t-switch
-            v-model="onlyAvailable"
-            label="只看有号"
-          />
+          <div>
+            <span style="color: #666">只看有号 </span>
+
+            <t-switch
+              v-model="onlyAvailable"
+              label=""
+            />
+          </div>
         </div>
 
         <!-- 医生列表 -->
@@ -336,32 +353,22 @@ onMounted(() => {
   padding: @space-xl;
 }
 
-/* ================= 面包屑 ================= */
 .breadcrumb {
   color: @text-secondary;
   margin-bottom: @space-lg;
   font-size: @font-base;
 }
 
-/* ================= 主体 ================= */
 .content {
   display: flex;
 }
 
-/* ================= 左侧科室 ================= */
 .left {
   width: 260px;
   border-right: 1px solid @border-color;
-  background: @bg-white;
-
-  .dept-title {
-    font-size: 24px;
-    font-weight: 600;
-    color: @text-primary;
-    padding: @space-md;
-  }
 
   .dept-group {
+    background: @bg-white;
     border-bottom: 1px solid @border-light;
   }
 
@@ -395,7 +402,6 @@ onMounted(() => {
     }
   }
 
-  /* 二级 */
   .level-2 {
     padding-left: 36px;
     font-size: @font-base;
@@ -408,6 +414,7 @@ onMounted(() => {
       background: @primary-color-fade;
       color: @primary-color;
       font-weight: 500;
+      border-right: 2px solid #20857e;
     }
   }
 
@@ -416,27 +423,38 @@ onMounted(() => {
   }
 }
 
-/* ================= 右侧 ================= */
 .right {
   width: calc(100% - 260px);
   flex: 1;
   padding-left: @space-xl;
 }
-
-/* ================= 搜索区域 ================= */
-.search-bar {
+.header {
   display: flex;
-  gap: @space-md;
-  margin-bottom: @space-lg;
-  .search-input {
-    width: 56px;
-    button {
-      border-radius: 8px;
+  justify-content: space-between;
+  margin-bottom: 5px;
+  .title {
+    font-size: 24px;
+    font-weight: 800;
+  }
+  .info {
+    line-height: 14px;
+    font-size: @font-base;
+    font-weight: 400;
+    color: @text-regular;
+  }
+  .search-bar {
+    display: flex;
+    gap: @space-md;
+    margin-bottom: @space-lg;
+    .search-input {
+      width: 560px;
+      button {
+        border-radius: 8px;
+      }
     }
   }
 }
 
-/* ================= 日期 ================= */
 .date-bar {
   display: flex;
   gap: @space-md;
@@ -474,7 +492,6 @@ onMounted(() => {
   }
 }
 
-/* ================= 标题 ================= */
 .title {
   margin-bottom: @space-md;
   font-size: @font-medium;
@@ -482,15 +499,14 @@ onMounted(() => {
   font-weight: 500;
 }
 
-/* ================= 医生列表 ================= */
 .doctor-list {
-  width: 920px;
+  width: 100%;
   display: flex;
   flex-wrap: wrap;
   gap: 18px;
   margin: 0 auto;
   .doctor-list-item {
-    width: 448px;
+    width: 49%;
   }
   .loading,
   .empty {

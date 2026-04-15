@@ -52,6 +52,7 @@ const navList = [
     activeIcon: profileActive,
   },
 ];
+const headerTitle = ref('当日挂号');
 //#endregion
 
 const route = useRoute();
@@ -63,6 +64,7 @@ const go = (path) => {
     window.open('https://www.sdzydfy.com/', '_blank');
   } else {
     router.push(path);
+    headerTitle.value = navList.find((item) => item.path === path)?.name || '';
   }
 };
 const isActive = (path) => {
@@ -76,7 +78,9 @@ const getIcon = (item) => {
 function onClickLogout() {
   try {
     useUserStore().logout();
-    router.push('/login');
+    nextTick(() => {
+      router.push('/login');
+    });
   } catch (error) {
     console.error('退出登录失败:', error);
   }
@@ -128,6 +132,10 @@ function onClickLogout() {
 
     <!-- 主体 -->
     <div class="main container">
+      <!-- 面包屑 -->
+      <div class="breadcrumb">
+        当前位置： 首页 > 预约诊疗 > <span id="current-page">{{ headerTitle }}</span>
+      </div>
       <router-view :key="route.path" />
     </div>
   </div>
@@ -191,7 +199,7 @@ function onClickLogout() {
     }
 
     span {
-      font-size: @font-small;
+      font-size: @font-large;
       color: @text-regular;
     }
 
@@ -205,6 +213,7 @@ function onClickLogout() {
         font-weight: 500;
       }
       border-bottom: 2px solid @primary-color;
+      background: @primary-color-fade;
     }
   }
 }
@@ -220,6 +229,14 @@ function onClickLogout() {
   height: 100%;
   margin: 0 auto;
   padding: 0px;
+  .breadcrumb {
+    font-size: @font-large;
+    color: @text-regular;
+    margin: 20px 0 0 20px;
+    #current-page {
+      color: @primary-color;
+    }
+  }
 }
 
 /* ================= 通用优化 ================= */
