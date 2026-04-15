@@ -19,6 +19,7 @@ import orderActive from '@/assets/image/order_active.png';
 
 import profile from '@/assets/image/profile.png';
 import profileActive from '@/assets/image/profile_active.png';
+import Footer from '@/components/Footer/Footer.vue';
 
 const navList = [
   {
@@ -138,6 +139,9 @@ function onClickLogout() {
       </div>
       <router-view :key="route.path" />
     </div>
+
+    <!-- 底部 -->
+    <Footer />
   </div>
 </template>
 
@@ -145,6 +149,8 @@ function onClickLogout() {
 .layout {
   background: @bg-page;
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 /* ================= 顶部栏 ================= */
@@ -152,6 +158,7 @@ function onClickLogout() {
   height: 54px;
   background: @primary-color;
   color: #fff;
+  flex-shrink: 0;
 
   .logo {
     font-size: @font-medium;
@@ -168,6 +175,7 @@ function onClickLogout() {
   height: 220px;
   overflow: hidden;
   background: linear-gradient(90deg, #dbe3f0 0%, #ced6e3 100%);
+  flex-shrink: 0;
   img {
     width: 100%;
     height: 100%;
@@ -180,6 +188,7 @@ function onClickLogout() {
   background: @bg-white;
   height: 98px;
   border-bottom: 1px solid @border-color;
+  flex-shrink: 0;
 
   .nav-item {
     display: flex;
@@ -221,6 +230,7 @@ function onClickLogout() {
 /* ================= 主体 ================= */
 .main {
   padding: @space-xl 0;
+  flex: 1;
 }
 
 /* ================= 容器 ================= */

@@ -45,6 +45,11 @@ async function getFirstDepts() {
   });
   console.log('大科室', arr);
   firstDeptList.value = arr;
+
+  // 默认选中第一个一级科室并展开
+  if (arr && arr.length > 0) {
+    await onClickDept(arr[0]);
+  }
 }
 // 点击一级科室
 async function onClickDept(item) {
@@ -113,7 +118,9 @@ async function onClickSecondDept(child) {
   loading.value = true;
   currentSecondDept.value = child.CLGRPRowId;
 
+  availableDateList.value = [];
   loadDoctors();
+  loadWeekDoctors();
 }
 // 加载医生排班
 async function loadDoctors() {
@@ -124,15 +131,101 @@ async function loadDoctors() {
     endDate: currentDate.value,
   });
   doctors.value = transformSchedule(schedules, currentSecondDept.value);
+  // 如果是当天
+  // if (dayjs(currentDate.value).isSame(dayjs(), 'day')) {
+  //   availableDateList.value[0] = buildDateAvailability(schedules, currentDate.value, currentDate.value)[0];
+  // }
   console.log('医生排班', doctors.value);
+  console.log('可用号源', availableDateList.value);
   loading.value = false;
 }
-//#endregion
+const availableDateList = ref([]);
+// 构建日期可用号源
+function buildDateAvailability(scheduleList, startDate, endDate) {
+  const map = {};
+
+  // 1️⃣ 按日期累加 AvailableLeftNum
+  scheduleList.forEach((item) => {
+    const date = item.ServiceDate;
+    const left = Number(item.AvailableLeftNum || 0);
+
+    if (!map[date]) {
+      map[date] = 0;
+    }
+
+    map[date] += left;
+  });
+  console.log('map', map);
+
+  // 2️⃣ 生成完整日期区间
+  const result = [];
+  let current = dayjs(startDate);
+  const end = dayjs(endDate);
+
+  while (current.isBefore(end) || current.isSame(end)) {
+    const dateStr = current.format('YYYY-MM-DD');
+
+    const total = map[dateStr] || 0;
+
+    result.push({
+      date: dateStr,
+      hasAvailable: total > 0,
+      total, // 可选：总余号
+    });
+
+    current = current.add(1, 'day');
+  }
+
+  return result;
+}
+// 加载一周的医生排班
+let requestId = 0;
+
+async function loadWeekDoctors() {
+  const currentId = ++requestId;
+
+  availableDateList.value = [];
+
+  const todaySchedule = await getSchedulesApi({
+    deptCode: currentSecondDept.value,
+    doctorCode: null,
+    startDate: dates[0],
+    endDate: dates[0],
+  });
+
+  // ⭐ 如果不是最新请求，直接丢弃
+  if (currentId !== requestId) return;
+
+  const schedules = await getSchedulesApi({
+    deptCode: currentSecondDept.value,
+    doctorCode: null,
+    startDate: dates[1],
+    endDate: dates[dates.length - 1],
+  });
+
+  if (currentId !== requestId) return;
+
+  availableDateList.value = [
+    buildDateAvailability(todaySchedule, dates[0], dates[0])[0],
+    ...buildDateAvailability(schedules, dates[1], dates[dates.length - 1]),
+  ];
+}
+function isAvailable(date) {
+  // 使用dayjs判断是否为当前日期
+  // if (dayjs(date).isSame(dayjs(), 'day')) {
+  //   return false;
+  // }
+  return availableDateList.value.find((item) => item.date === date)?.hasAvailable;
+}
+// #//#endregion
 
 function initData() {
   doctors.value = [];
   currentSecondDept.value = null;
   firstDeptList.value = [];
+  availableDateList.value = [];
+  openDept.value = null;
+  currentDept.value = -1;
 }
 
 // #region 院区
@@ -182,6 +275,17 @@ function openNoticeDialog() {
   dialogRef.value.openNotice();
 }
 
+const weekDayMap = {
+  0: '周日',
+  1: '周一',
+  2: '周二',
+  3: '周三',
+  4: '周四',
+  5: '周五',
+  6: '周六',
+  7: '周日',
+};
+
 onMounted(() => {
   openNoticeDialog();
 });
@@ -192,7 +296,7 @@ onMounted(() => {
       <div class="header-left">
         <div class="title">预约挂号</div>
         <div class="info">
-          <span>请先选择院区再选择对应的临床科室进行挂号登记</span>
+          <!-- <span>请先选择院区再选择对应的临床科室进行挂号登记</span> -->
         </div>
       </div>
 
@@ -283,8 +387,15 @@ onMounted(() => {
             :class="{ active: currentDate === d }"
             @click="onClickDate(d)"
           >
+            <div class="week-day">{{ dayjs(d).isSame(dayjs(), 'day') ? '今天' : weekDayMap[dayjs(d).day()] }}</div>
             <div>{{ format(d) }}</div>
-            <div class="sub">有号</div>
+            <!-- 可用号源 -->
+            <div
+              class="sub"
+              :class="{ unavailable: !isAvailable(d) }"
+            >
+              {{ isAvailable(d) ? '有号' : '无号' }}
+            </div>
           </div>
         </div>
 
@@ -466,7 +577,7 @@ onMounted(() => {
     border: 1px solid @border-color;
     padding: @space-sm @space-md;
     cursor: pointer;
-    border-radius: @radius-small;
+    border-radius: 7px;
     text-align: center;
     min-width: 80px;
     transition: all 0.2s;
@@ -481,6 +592,12 @@ onMounted(() => {
       border-color: @primary-color;
       .sub {
         color: inherit;
+        &.unavailable {
+          color: inherit;
+        }
+      }
+      .week-day {
+        color: inherit;
       }
     }
 
@@ -488,6 +605,14 @@ onMounted(() => {
       font-size: @font-small;
       color: @success-color;
       margin-top: @space-xs;
+      &.unavailable {
+        color: @text-secondary;
+      }
+    }
+    .week-day {
+      font-size: @font-base;
+      color: @text-regular;
+      margin-bottom: @space-xs;
     }
   }
 }

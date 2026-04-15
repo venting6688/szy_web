@@ -47,7 +47,7 @@ onMounted(() => {
     <div class="order-header">
       <div class="title">预约记录</div>
       <div class="info">
-        <span>如需修改个人信息，请修改后点击提交按钮</span>
+        <!-- <span>如需修改个人信息，请修改后点击提交按钮</span> -->
       </div>
     </div>
     <div

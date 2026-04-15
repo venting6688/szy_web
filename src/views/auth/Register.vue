@@ -25,11 +25,31 @@ const form = ref({
   district: '',
   detailAddress: '',
   password: '',
+  confirmPassword: '',
 });
 
 const goLogin = () => {
   router.push('/login');
 };
+
+// 监听身份证号变化，自动填充出生日期和性别
+watch(
+  () => form.value.idCard,
+  (newIdCard) => {
+    if (newIdCard && newIdCard.length === 18) {
+      // 从身份证号中提取出生日期（第7-14位）
+      const birthYear = newIdCard.substring(6, 10);
+      const birthMonth = newIdCard.substring(10, 12);
+      const birthDay = newIdCard.substring(12, 14);
+      form.value.birthday = `${birthYear}-${birthMonth}-${birthDay}`;
+
+      // 从身份证号中提取性别（第17位，奇数为男，偶数为女）
+      const genderCode = parseInt(newIdCard.charAt(16), 10);
+      // 假设性别选项的值为 '0' 代表女，'1' 代表男
+      form.value.gender = genderCode % 2 === 0 ? '0' : '1';
+    }
+  },
+);
 
 import { isEmptyObject } from '@/utils/index/common';
 
@@ -47,7 +67,11 @@ const registerFormRules = ref({
   verificationCode: [{ required: true, message: '请输入验证码' }],
   password: [
     { required: true, message: '请输入密码' },
-    { min: 6, message: '密码长度至少6位' },
+    { pattern: /^(?=.*[A-Za-z])(?=.*\d).{6,}$/, message: '密码至少6位，且包含字母和数字' }, //必须包含字母和数字，两者都有
+  ],
+  confirmPassword: [
+    { required: true, message: '请确认密码' },
+    { validator: (val) => val === form.value.password, message: '两次输入密码不一致' },
   ],
   area: [{ required: true, message: '请选择所在地区' }],
 
@@ -175,6 +199,19 @@ onMounted(async () => {
   nationalityOptions.value = mapDictToOptions(data?.nationality);
   cardTypeOptions.value = mapDictToOptions(data?.card_type);
   genderOptions.value = mapDictToOptions(data?.sex).filter((item) => item.label === '男' || item.label === '女');
+
+  // 设置默认值
+  // 1. 证件类型默认：居民身份证
+  const defaultCardType = cardTypeOptions.value.find((item) => item.label === '居民身份证');
+  if (defaultCardType) {
+    form.value.idType = defaultCardType.value;
+  }
+
+  // 2. 民族默认：汉族 (因为 t-select 使用了 value-type="object")
+  const defaultNation = nationalityOptions.value.find((item) => item.label === '汉族');
+  if (defaultNation) {
+    form.value.nation = defaultNation;
+  }
 });
 
 const btnDisabled = computed(() => {
@@ -219,6 +256,7 @@ const btnDisabled = computed(() => {
               :key="item.value"
               :value="item.value"
               :label="item.label"
+              :disabled="item.label !== '居民身份证'"
             />
           </t-select>
         </t-form-item>
@@ -286,6 +324,17 @@ const btnDisabled = computed(() => {
             v-model="form.password"
             type="password"
             placeholder="请输入密码"
+          />
+        </t-form-item>
+        <t-form-item
+          label="确认密码"
+          name="confirmPassword"
+        >
+          <t-input
+            borderless
+            v-model="form.confirmPassword"
+            type="password"
+            placeholder="请确认密码"
           />
         </t-form-item>
         <t-form-item
@@ -361,8 +410,8 @@ const btnDisabled = computed(() => {
     </div>
     <t-button
       class="btn primary"
+      theme="primary"
       block
-      variant="outline"
       shape="circle"
       @click="goRegister"
     >
@@ -380,6 +429,17 @@ const btnDisabled = computed(() => {
 </template>
 
 <style scoped lang="less">
+:deep(.t-input--borderless:not(.t-input--focused):hover) {
+  border: 0;
+  background-color: transparent;
+}
+.t-input {
+  border-width: 0;
+}
+:deep(.t-select-input--borderless .t-input:hover:not(.t-input--focused)) {
+  border: 0;
+  background-color: transparent;
+}
 .auth-form {
   width: 446px;
   margin: 30px auto;
@@ -420,8 +480,6 @@ const btnDisabled = computed(() => {
     border-radius: 27px;
     font-size: @font-medium;
     &.primary {
-      background: @primary-color;
-      color: #fff;
     }
   }
 
