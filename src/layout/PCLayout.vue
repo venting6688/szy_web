@@ -78,10 +78,11 @@ const getIcon = (item) => {
 // 退出登录
 function onClickLogout() {
   try {
-    useUserStore().logout();
-    nextTick(() => {
-      router.push('/login');
-    });
+    userStore.logout();
+    router.push('/login');
+    // nextTick(() => {
+
+    // });
   } catch (error) {
     console.error('退出登录失败:', error);
   }
@@ -92,7 +93,6 @@ function onClickLogout() {
     <!-- 顶部栏 -->
     <div class="topbar">
       <div class="container flex justify-end items-center">
-        <!-- <div class="logo">互联网医院</div> -->
         <div class="user flex items-center gap-3">
           <span>{{ userInfo.realName }}</span>
           <t-button
@@ -141,7 +141,7 @@ function onClickLogout() {
     </div>
 
     <!-- 底部 -->
-    <Footer />
+    <!-- <Footer /> -->
   </div>
 </template>
 

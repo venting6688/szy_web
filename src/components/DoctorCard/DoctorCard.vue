@@ -16,29 +16,26 @@ const ellipsisState = ref({
   },
 });
 
-// 处理动态图片路径的方法
-const getImageUrl = (path) => {
-  // 检查路径是否以 '@/' 开头，如果是，则使用 new URL 进行解析
-  if (path && path.startsWith('@/')) {
-    // Vite 推荐的动态导入静态资源的方式
-    // 注意：这里的 '../../' 是因为 @/assets 实际上是相对于 src 目录的，
-    // 而当前组件在 src/components/DoctorCard，所以需要向上两级到 src，再向下到 assets
-    return new URL(path.replace('@/', '../../'), import.meta.url).href;
-  }
-  return path; // 如果不是 '@/' 开头的路径，直接返回（例如，完整的URL）
+const imgSrc = ref('');
+
+import defaultAvatar from '@/assets/image/profile_user.png';
+watch(
+  () => props.doctor,
+  (val) => {
+    console.log('val', val);
+    // if (!val) return;
+
+    imgSrc.value = `https://szyyy.sdzydfy.com/img/${val.code}.jpg`;
+  },
+  { immediate: true },
+);
+
+// 图片加载失败
+const onImgError = (e) => {
+  imgSrc.value = defaultAvatar;
 };
 
 const emit = defineEmits(['book']);
-
-// import { getScheduleDetailApi } from '@/api/schedule';
-// async function getScheduleDetail() {
-//   const res = await getScheduleDetailApi({
-//     scheduleItemCode: props.doctor.scheduleItemCode,
-//     deptCode: props.doctor.deptCode,
-//   });
-//   console.log('获取号源', res);
-// }
-// watch(() => props.doctor, getScheduleDetail, { immediate: true });
 </script>
 
 <template>
@@ -46,8 +43,9 @@ const emit = defineEmits(['book']);
     <!-- 上半部分 -->
     <div class="card-top">
       <img
-        :src="`https://szyyy.sdzydfy.com/img/${doctor.code}.jpg`"
+        :src="imgSrc"
         class="avatar"
+        @error="onImgError"
       />
       <div class="info">
         <div class="name-row">

@@ -78,13 +78,11 @@ async function submitPassword() {
 //#endregion
 
 // 退出登录
-import router from '@/router';
+const router = useRouter();
 function onClickLogout() {
   try {
-    useUserStore().logout();
-    nextTick(() => {
-      router.push('/login');
-    });
+    userStore.logout();
+    router.push('/login');
   } catch (error) {
     console.error('退出登录失败:', error);
   }

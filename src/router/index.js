@@ -45,7 +45,7 @@ router.beforeEach((to, from, next) => {
 
   // 1. 设备重定向
   if (isMobileDevice && !to.path.startsWith('/mobile')) {
-    return next('/mobile/home');
+    return next('/mobile/appointment');
   }
 
   if (!isMobileDevice && to.path.startsWith('/mobile')) {

@@ -37,6 +37,7 @@ const routes = [
     redirect: '/mobile/appointment-today',
     children: [
       { path: '/mobile/appointment-today', component: () => import('@/views/appointment/Appointment.vue') },
+      { path: '/mobile/appointment', component: () => import('@/views/appointment/Appointment.vue') },
       { path: '/mobile/order', component: () => import('@/views/order/Order.vue') },
       { path: '/mobile/profile', component: () => import('@/views/profile/Profile.vue') },
     ],
