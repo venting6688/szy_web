@@ -141,7 +141,7 @@ function onClickLogout() {
     </div>
 
     <!-- 底部 -->
-    <!-- <Footer /> -->
+    <Footer />
   </div>
 </template>
 

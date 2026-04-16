@@ -112,6 +112,7 @@ const emit = defineEmits(['book']);
     height: 120px;
     border-radius: @radius-small;
     margin-right: @space-md;
+    object-fit: cover;
   }
 }
 

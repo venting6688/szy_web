@@ -1,4 +1,9 @@
-<script setup></script>
+<script setup>
+function onClickLink(path) {
+  const url = path.startsWith('http') ? path : 'https://www.sdzydfy.com/' + path;
+  window.open(url, '_blank');
+}
+</script>
 
 <template>
   <div>
@@ -52,7 +57,7 @@
       </div>
       <div class="footer-info">
         <div class="layout">
-          <div class="footer-info-top clearfix">
+          <div class="footer-info-top">
             <div class="left-info fl clearfix">
               <a
                 href="https://bszs.conac.cn/sitename?method=show&amp;id=54014916AC404303E053012819ACE0DE"
@@ -60,6 +65,7 @@
                 class="fl institution-logo"
               >
                 <img
+                  class="img-fluid"
                   src="@/assets/image/qualification.png"
                   alt=""
                 />
@@ -123,21 +129,21 @@
         </div>
       </div>
       <div class="clearfix footlinks">
-        <div class="layout clearfix">
-          <div class="fl footlinks-item clearfix">
+        <div class="layout footlinks-content">
+          <div class="footlinks-item clearfix">
             <a
-              href="/sitemap"
-              target="_blank"
+              @click="onClickLink('/sitemap')"
+              title="网站地图"
               >网站地图</a
             >
 
             <a
-              href="/yiyuanjianjie"
-              target="_blank"
+              @click="onClickLink('/yiyuanjianjie')"
+              title="关于我们"
               >关于我们</a
             >
           </div>
-          <div class="right-author fr">
+          <div class="right-author">
             <u>技术支持</u>：<a
               href="https://www.chinzsoft.com/"
               target="_blank"
@@ -153,7 +159,6 @@
 
 <style scoped lang="less">
 .footer {
-  min-width: 1360px;
   background-color: #555555;
   .links {
     position: relative;
@@ -180,6 +185,7 @@
     border-bottom: 1px solid rgba(255, 255, 255, 0.2);
     .footer-info-top {
       display: flex;
+      justify-content: space-between;
       > div {
         flex-shrink: 0;
       }
@@ -188,6 +194,9 @@
       overflow: hidden;
       a.institution-logo {
         display: block;
+        img {
+          width: 90px;
+        }
       }
       .site-info {
         margin-left: 20px;
@@ -202,7 +211,6 @@
       }
     }
     .right-info {
-      width: 907px;
       margin-left: 40px;
       color: #fff;
       display: flex;
@@ -230,14 +238,33 @@
   .footlinks {
     height: 50px;
     line-height: 50px;
-    .footlinks-item a {
-      position: relative;
-      float: left;
-      color: #fff;
-      font-size: 0.7rem;
+    .footlinks-content {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+    }
+    .footlinks-item {
+      a {
+        cursor: pointer;
+        position: relative;
+        float: left;
+        color: #fff;
+        &:hover {
+          background: transparent;
+        }
+        &:first-child {
+          &::after {
+            content: '|';
+            margin-left: 15px;
+            width: 1px;
+            height: 12px;
+            color: #fff;
+          }
+        }
+      }
     }
     .footlinks-item a + a {
-      margin-left: 40px;
+      margin-left: 15px;
     }
     .right-author {
       color: #c4c4c4;
@@ -249,7 +276,8 @@
   }
 
   .layout {
-    width: 1360px;
+    width: 90%;
+    max-width: 1300px;
     margin: 0 auto;
   }
   .fl {

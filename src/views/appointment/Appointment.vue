@@ -266,12 +266,17 @@ function onClickDate(date) {
 }
 
 // 弹窗
+import { useNoticeStore } from '@/store/modules/notice';
 const dialogRef = ref(null);
 function bookEmit(doctor, period) {
   console.log('预约医生txt：', doctor, period);
   dialogRef.value.book(doctor, period);
 }
+// 打开通知弹窗
 function openNoticeDialog() {
+  const noticeStore = useNoticeStore();
+  if (noticeStore.isNotified) return;
+  noticeStore.setIsNotified(true);
   dialogRef.value.openNotice();
 }
 
