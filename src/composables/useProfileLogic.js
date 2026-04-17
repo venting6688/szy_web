@@ -1,4 +1,4 @@
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { useUserStore } from '@/store/modules/user';
@@ -11,6 +11,7 @@ export function useProfileLogic() {
 
   const currentTab = ref('profile');
 
+  //#region 个人信息表单数据
   const profileFormData = ref({
     realName: userStore.userInfo.realName,
     idCard: userStore.userInfo.idCard,
@@ -18,6 +19,27 @@ export function useProfileLogic() {
     address: userStore.userInfo.address,
   });
   const profileFormRef = ref(null);
+
+  async function submitProfile() {
+    console.log(profileFormData.value);
+    const isValid = await profileFormRef.value.validate();
+    console.log(isValid);
+    if (isValid !== true && !isEmptyObject(isValid)) {
+      throw new Error('个人信息表单验证失败:', isValid);
+    }
+    try {
+      await updateProfileApi(profileFormData.value);
+      MessagePlugin.success('更新个人信息成功');
+      // 刷新用户信息
+      // userStore.userInfo = profileFormData.value;
+      // userStore.logout();
+      // nextTick(() => {
+      //   router.push('/login');
+      // });
+    } catch (error) {
+      MessagePlugin.error(error.message || '更新个人信息失败');
+    }
+  }
   const profileFormRules = ref({
     realName: [{ required: true, message: '请输入姓名' }],
     idCard: [{ required: true, message: '请输入证件号' }],
@@ -32,6 +54,9 @@ export function useProfileLogic() {
     address: [{ required: true, message: '请输入地址' }],
   });
 
+  //#endregion
+
+  //#region 修改密码表单数据
   const passwordFormRules = ref({
     oldPassword: [{ required: true, message: '请输入旧密码' }],
     newPassword: [{ required: true, message: '请输入新密码' }],
@@ -42,21 +67,8 @@ export function useProfileLogic() {
     newPassword: '',
     confirmPassword: '',
   });
-
-  async function submitProfile() {
-    const isValid = await profileFormRef.value.validate();
-    if (isValid !== true && !isEmptyObject(isValid)) {
-      throw new Error('个人信息表单验证失败:', isValid);
-    }
-    try {
-      await updateProfileApi(profileFormData.value);
-      MessagePlugin.success('更新个人信息成功');
-    } catch (error) {
-      MessagePlugin.error(error.message || '更新个人信息失败');
-    }
-  }
-
   async function submitPassword() {
+    console.log(passwordFormData.value);
     try {
       await updatePasswordApi(passwordFormData.value);
       MessagePlugin.success('修改密码成功');
@@ -64,7 +76,9 @@ export function useProfileLogic() {
       MessagePlugin.error(error.message || '修改密码失败');
     }
   }
+  //#endregion
 
+  // 退出登录
   function onClickLogout() {
     try {
       userStore.logout();
@@ -74,9 +88,12 @@ export function useProfileLogic() {
     }
   }
 
-  function onClick(tab) {
+  const onClick = (tab) => {
     currentTab.value = tab;
-  }
+  };
+  onMounted(() => {
+    console.log('Component mounted!');
+  });
 
   return {
     userStore,
