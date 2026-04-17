@@ -18,7 +18,7 @@ const ellipsisState = ref({
 
 const imgSrc = ref('');
 
-import defaultAvatar from '@/assets/image/profile_user.png';
+import defaultAvatar from '@/assets/image/default_avatar.png';
 watch(
   () => props.doctor,
   (val) => {
@@ -72,7 +72,7 @@ const emit = defineEmits(['book']);
             <span>剩余</span>
             <span
               class="remain"
-              :class="item.left > 0 ? 'green' : 'gray'"
+              :class="item.left > 0 ? 'primary-color' : 'gray'"
             >
               {{ item.left }}
             </span>

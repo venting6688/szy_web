@@ -1,5 +1,6 @@
 ﻿<script setup>
 // [OLD] 原布局无脚本逻辑，仅作为简单容器承载 <router-view />
+import FooterMobile from '@/components/Footer/FooterMobile.vue';
 </script>
 
 <template>
@@ -23,16 +24,28 @@
         <router-view />
       </div>
     </section>
+
+    <!-- 移动端页脚 -->
+    <div class="auth-footer-mobile">
+      <FooterMobile />
+    </div>
   </div>
 </template>
 
 <style scoped lang="less">
+.auth-footer-mobile {
+  margin-bottom: 100px;
+}
 /* [FIXED] 认证页整体改为上下分区布局，顶部展示品牌视觉图，底部承载子页面内容 */
 .mobile-auth-layout {
-  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
   background: @bg-page;
   overflow-x: hidden;
-  overflow-y: auto;
+  /* [OLD] overflow-y: auto; */
+  /* [FIXED] 滚动由 auth-panel 内部子页面承担，外层布局保持固定 */
+  overflow-y: hidden;
 }
 
 /* [FIXED] 顶部视觉区直接使用设计图，叠加品牌文案提高识别度 */
@@ -91,12 +104,19 @@
 /* [FIXED] 下方内容区采用上浮卡片感承接 router-view，避免直接贴边 */
 .auth-panel {
   position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
   margin-top: -4px;
 }
 
 .mobile-auth-card {
   width: 100%;
-  height: calc(100vh - 170px);
+  /* [OLD] height: calc(100vh - 170px); */
+  /* [FIXED] 改为自动高度，让内容自然延伸，footer 固定在底部 */
+  flex: 1;
+  min-height: 0;
   max-width: 560px;
   margin: 0 auto;
   background: transparent;

@@ -58,14 +58,14 @@ onBeforeUnmount(() => {
       <span>{{ pullHint }}</span>
     </div> -->
 
-    <section class="hero-card">
+    <!-- <section class="hero-card">
       <div class="hero-title">预约记录</div>
       <div class="hero-subtitle">查看历史预约并支持可退单据取消</div>
       <div class="hero-stats">
         <span class="stat-pill">总计 {{ orderList.length }} 条</span>
         <span class="stat-pill cancelable">可取消 {{ cancellableCount }} 条</span>
       </div>
-    </section>
+    </section> -->
 
     <section class="list-panel">
       <div
@@ -100,16 +100,6 @@ onBeforeUnmount(() => {
           :key="item.OrderCode"
           class="order-card"
         >
-          <div class="card-header">
-            <div class="patient">{{ item.OrderApptUser || '-' }}</div>
-            <span
-              class="status"
-              :class="item.OrderStatus || 'normal'"
-            >
-              {{ statusMap[item.OrderStatus] || '未知状态' }}
-            </span>
-          </div>
-
           <div class="card-grid">
             <div class="row">
               <span class="label">就诊人姓名</span>
@@ -253,9 +243,9 @@ onBeforeUnmount(() => {
 .order-card {
   padding: clamp(14px, 3.8vw, 18px);
   background: linear-gradient(180deg, #fff 0%, #fcfdfd 100%);
-  border: 1px solid @border-light;
+  border: 1.5px solid @border-light;
   border-radius: clamp(14px, 3.5vw, 18px);
-  box-shadow: 0 8px 18px rgb(0 0 0 / 4%);
+  box-shadow: 0 8px 18px rgb(0 0 0 / 10%);
   transform: translateZ(0);
 }
 

@@ -1,5 +1,5 @@
 <script setup>
-import Footer from '@/components/Footer/Footer.vue';
+import FooterMobile from '@/components/Footer/FooterMobile.vue';
 </script>
 
 <template>
@@ -15,7 +15,7 @@ import Footer from '@/components/Footer/Footer.vue';
         </div>
       </div>
     </div>
-    <Footer />
+    <FooterMobile />
   </div>
 </template>
 

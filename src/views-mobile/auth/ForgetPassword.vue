@@ -381,7 +381,7 @@ onBeforeUnmount(() => {
   padding-right: 0;
   /* [OLD] padding-bottom: env(safe-area-inset-bottom); */
   /* [FIXED] 为底部固定按钮留出空间 */
-  padding-bottom: calc(110px + env(safe-area-inset-bottom));
+  padding-bottom: calc(0px + env(safe-area-inset-bottom));
   padding-left: 0;
   background-color: #fff;
 }

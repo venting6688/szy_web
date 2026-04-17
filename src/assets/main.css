@@ -14,6 +14,9 @@ a,
   text-decoration: none;
   transition: 0.4s;
 }
+.primary-color {
+  color: var(--td-brand-color);
+}
 
 @media (hover: hover) {
   a:hover {

@@ -9,6 +9,7 @@ import downIcon from '@/assets/image/down.png';
 import rightIcon from '@/assets/image/right.png';
 import Dialog from '@/views/appointment/Dialog.vue';
 import { useAppointmentData } from '@/composables/useAppointmentData';
+import defaultAvatar from '@/assets/image/default_avatar.png';
 
 const route = useRoute();
 
@@ -81,6 +82,30 @@ const currentSecondDeptList = computed(() => {
   return secondDeptMap.value[currentDept.value] || [];
 });
 
+// [FIXED] 参照 DoctorCard，根据医生 code 生成头像地址并支持加载失败回退
+const imgSrcMap = ref({});
+
+watch(
+  () => displayDoctors.value,
+  (list) => {
+    list.forEach((doc) => {
+      if (doc && doc.code) {
+        imgSrcMap.value[doc.code] = `https://szyyy.sdzydfy.com/img/${doc.code}.jpg`;
+      }
+    });
+  },
+  { immediate: true, deep: true },
+);
+
+function getDoctorImgSrc(doc) {
+  if (!doc || !doc.code) return defaultAvatar;
+  return imgSrcMap.value[doc.code] || `https://szyyy.sdzyyyf.com/img/${doc.code}.jpg`;
+}
+
+function onDoctorImgError(e) {
+  e.target.src = defaultAvatar;
+}
+
 const pullHint = computed(() => {
   if (isRefreshing.value) return '刷新中...';
   return pullDistance.value > 64 ? '松开立即刷新' : '下拉刷新';
@@ -123,7 +148,6 @@ async function refreshPageData() {
     isRefreshing.value = false;
   }
 }
-
 
 function onTouchMove(event) {
   if (!isPulling.value || isRefreshing.value) return;
@@ -258,7 +282,7 @@ onBeforeUnmount(() => {
       <span>{{ pullHint }}</span>
     </div> -->
 
-    <section class="hero-card">
+    <!-- <section class="hero-card">
       <div class="hero-main">
         <div class="hero-title">预约挂号</div>
         <div class="hero-subtitle">请选择院区与科室后查看坐诊医生</div>
@@ -266,7 +290,7 @@ onBeforeUnmount(() => {
       <div class="hero-badge">
         {{ mobileType === 'appointment-today' ? '当日挂号' : '预约挂号' }}
       </div>
-    </section>
+    </section> -->
 
     <section class="filter-section">
       <button
@@ -378,18 +402,37 @@ onBeforeUnmount(() => {
           :key="doc.code"
           class="doctor-card"
         >
-          <div class="doctor-head">
-            <div class="doctor-meta">
-              <div class="name-row">
-                <span class="name">{{ doc.name }}</span>
-                <span class="title-tag">{{ doc.doctorType }}</span>
-              </div>
-              <div class="dept-row">{{ doc.deptName }}</div>
+          <div class="flex-box">
+            <div class="left">
+              <!-- [OLD]
+              <img
+                :src="imgSrc"
+                class="avatar"
+                @error="onImgError"
+              />
+              -->
+              <!-- [FIXED] 参照 DoctorCard，根据医生 code 动态生成头像地址并支持加载失败回退 -->
+              <img
+                :src="getDoctorImgSrc(doc)"
+                class="avatar"
+                @error="onDoctorImgError"
+              />
             </div>
-            <div class="price">￥{{ doc.price }}</div>
-          </div>
+            <div class="right">
+              <div class="doctor-head">
+                <div class="doctor-meta">
+                  <div class="name-row">
+                    <span class="name">{{ doc.name }}</span>
+                    <span class="title-tag">{{ doc.doctorType }}</span>
+                  </div>
+                  <div class="dept-row">{{ doc.deptName }}</div>
+                </div>
+                <div class="price">￥{{ doc.price }}</div>
+              </div>
 
-          <div class="doctor-desc">{{ doc.desc || '暂无医生介绍' }}</div>
+              <div class="doctor-desc">{{ doc.desc || '暂无医生介绍' }}</div>
+            </div>
+          </div>
 
           <div class="schedule-group">
             <div
@@ -403,7 +446,7 @@ onBeforeUnmount(() => {
               </div>
               <div
                 class="remain"
-                :class="item.left > 0 ? 'green' : 'gray'"
+                :class="item.left > 0 ? 'primary-color' : 'gray'"
               >
                 剩余 {{ item.left }}
               </div>
@@ -787,6 +830,20 @@ onBeforeUnmount(() => {
   border-radius: clamp(14px, 3.5vw, 18px);
   box-shadow: 0 8px 18px rgb(0 0 0 / 4%);
   transform: translateZ(0);
+  .flex-box {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    justify-content: space-between;
+    .left {
+      flex-shrink: 0;
+      .avatar {
+        width: 65px;
+        max-height: 85px;
+        object-fit: contain;
+      }
+    }
+  }
 }
 
 .doctor-head {
@@ -909,8 +966,8 @@ onBeforeUnmount(() => {
 .btn-book {
   min-width: 76px;
   height: 32px;
-  color: @primary-color;
-  background: @primary-color-fade;
+  color: #fff;
+  background: @primary-color;
   border: 0;
   border-radius: 999px;
   transform: translateZ(0);

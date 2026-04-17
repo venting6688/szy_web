@@ -1,6 +1,7 @@
 <script setup>
 import { useRoute, useRouter } from 'vue-router';
 import { useUserStore } from '@/store/modules/user';
+import FooterMobile from '@/components/Footer/FooterMobile.vue';
 
 const userStore = useUserStore();
 const route = useRoute();
@@ -112,6 +113,9 @@ function onClickLogout() {
         <span>{{ item.name }}</span>
       </div>
     </div>
+
+    <!-- 移动端页脚 -->
+    <FooterMobile />
   </div>
 </template>
 
@@ -156,7 +160,6 @@ function onClickLogout() {
 .mobile-main {
   flex: 1;
   overflow-y: auto;
-  padding-bottom: 60px; // 为底部导航留出空间
 }
 
 /* ================= 底部导航 ================= */

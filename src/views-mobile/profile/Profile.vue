@@ -24,20 +24,8 @@ const {
   <div
     ref="pageRef"
     class="mobile-profile-page"
-
   >
-    <!-- <div
-      class="pull-indicator"
-      :style="pullIndicatorStyle"
-    >
-      <t-loading
-        v-if="isRefreshing"
-        size="small"
-      />
-      <span>{{ pullHint }}</span>
-    </div> -->
-
-    <section class="hero-card">
+    <!-- <section class="hero-card">
       <div class="user-row">
         <img
           src="@/assets/image/profile_user.png"
@@ -56,7 +44,7 @@ const {
           退出
         </button>
       </div>
-    </section>
+    </section> -->
 
     <section class="tab-panel">
       <!-- 与 PC 差异：sidebar 改为顶部分段切换，减少横向占用 -->
@@ -246,6 +234,7 @@ const {
   height: 42px;
   border-radius: 50%;
   border: 2px solid rgb(255 255 255 / 46%);
+  background-color: #fff;
 }
 
 .user-meta {

@@ -155,7 +155,6 @@ defineExpose({
     <t-dialog
       :dialog-class-name="dialogType === 'notice' ? 'notice-dialog' : 'schedule-dialog'"
       :closeBtn="true"
-      :preventScrollThrough="false"
       :footer="false"
       placement="center"
       v-model:visible="dialogVisible"
@@ -291,17 +290,17 @@ defineExpose({
               :class="item.type"
               v-html="item.text"
             ></div>
-            <div class="btn-container">
-              <t-button
-                class="btn-confirm"
-                shape="round"
-                theme="primary"
-                block
-                @click="onClickClose"
-              >
-                我已知晓
-              </t-button>
-            </div>
+          </div>
+          <div class="btn-container">
+            <t-button
+              class="btn-confirm"
+              shape="round"
+              theme="primary"
+              block
+              @click="onClickClose"
+            >
+              我已知晓
+            </t-button>
           </div>
         </div>
       </div>
@@ -361,6 +360,15 @@ defineExpose({
     font-size: 20px;
     color: @primary-color;
     font-weight: 600;
+  }
+}
+@media screen and (max-width: 900px) {
+  :deep(.t-dialog__ctx .t-dialog__position) {
+    padding: 0;
+  }
+  .notice {
+    height: 65vh;
+    overflow: auto;
   }
 }
 .notice {

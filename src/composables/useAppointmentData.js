@@ -296,7 +296,7 @@ export function useAppointmentData() {
   };
 
   onMounted(() => {
-    // openNoticeDialog();
+    openNoticeDialog();
   });
 
   return {
