@@ -59,8 +59,14 @@ export function useProfileLogic() {
   //#region 修改密码表单数据
   const passwordFormRules = ref({
     oldPassword: [{ required: true, message: '请输入旧密码' }],
-    newPassword: [{ required: true, message: '请输入新密码' }],
-    confirmPassword: [{ required: true, message: '请确认新密码' }],
+    newPassword: [
+      { required: true, message: '请输入密码' },
+      { pattern: /^(?=.*[A-Za-z])(?=.*\d).{6,}$/, message: '密码至少6位，且包含字母和数字' }, //必须包含字母和数字，两者都有
+    ],
+    confirmPassword: [
+      { required: true, message: '请确认新密码' },
+      { validator: (val) => val === passwordFormData.value.newPassword, message: '两次输入密码不一致' },
+    ],
   });
   const passwordFormData = ref({
     oldPassword: '',
@@ -69,11 +75,14 @@ export function useProfileLogic() {
   });
   async function submitPassword() {
     console.log(passwordFormData.value);
-    try {
-      await updatePasswordApi(passwordFormData.value);
-      MessagePlugin.success('修改密码成功');
-    } catch (error) {
-      MessagePlugin.error(error.message || '修改密码失败');
+
+    const res = await updatePasswordApi(passwordFormData.value);
+    if (res) {
+      MessagePlugin.success('修改密码成功，请重新登录！');
+      setTimeout(() => {
+        userStore.logout();
+        router.push('/login');
+      }, 500);
     }
   }
   //#endregion

@@ -225,102 +225,6 @@ const btnDisabled = computed(() => {
 // [FIXED] PC 模板中存在 @change="onChangeArea"，补齐处理函数以避免运行时告警
 function onChangeArea() {}
 
-// [FIXED] 移动端触控体验：下拉刷新（重置表单）
-const pageRef = ref(null);
-const pullDistance = ref(0);
-const pullStartY = ref(0);
-const isPulling = ref(false);
-const isRefreshing = ref(false);
-
-const pullHint = computed(() => {
-  if (isRefreshing.value) return '刷新中...';
-  return pullDistance.value > 64 ? '松开立即刷新' : '下拉刷新';
-});
-
-const pullIndicatorStyle = computed(() => {
-  return {
-    transform: `translate3d(0, ${Math.max(pullDistance.value - 48, -48)}px, 0)`,
-    opacity: pullDistance.value > 0 || isRefreshing.value ? 1 : 0,
-  };
-});
-
-function getScrollContainer() {
-  return pageRef.value;
-}
-
-// [FIXED] 统一读取真实滚动位置：优先可滚动容器，兜底文档滚动，避免误判顶部导致回滚被拦截
-function getCurrentScrollTop() {
-  const scrollContainer = getScrollContainer();
-  const containerScrollTop = scrollContainer?.scrollTop || 0;
-  const docScrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
-  const isContainerScrollable = !!scrollContainer && scrollContainer.scrollHeight > scrollContainer.clientHeight + 1;
-  return isContainerScrollable ? containerScrollTop : Math.max(containerScrollTop, docScrollTop);
-}
-
-function resetForm() {
-  form.value.idCard = '';
-  form.value.realName = '';
-  form.value.birthday = '';
-  form.value.gender = '';
-  form.value.phoneNumber = '';
-  form.value.verificationCode = '';
-  form.value.province = '';
-  form.value.city = '';
-  form.value.district = '';
-  form.value.detailAddress = '';
-  form.value.password = '';
-  form.value.confirmPassword = '';
-  form.value.area = [];
-}
-
-async function refreshPageData() {
-  if (isRefreshing.value) return;
-  isRefreshing.value = true;
-  try {
-    resetForm();
-  } finally {
-    pullDistance.value = 0;
-    isRefreshing.value = false;
-  }
-}
-
-function onTouchStart(event) {
-  const scrollContainer = getScrollContainer();
-  // [OLD] if (!scrollContainer || scrollContainer.scrollTop > 0) {
-  // [FIXED] 使用真实滚动位置判断是否在顶部，避免底部回滚手势被误拦截
-  if (!scrollContainer || getCurrentScrollTop() > 0) {
-    isPulling.value = false;
-    return;
-  }
-  pullStartY.value = event.touches[0].clientY;
-  isPulling.value = true;
-}
-
-function onTouchMove(event) {
-  if (!isPulling.value || isRefreshing.value) return;
-  const delta = event.touches[0].clientY - pullStartY.value;
-  if (delta <= 0) {
-    pullDistance.value = 0;
-    return;
-  }
-  pullDistance.value = Math.min(delta * 0.45, 88);
-  // [OLD] if (pullDistance.value > 0) {
-  // [FIXED] 仅在可取消事件中阻止默认行为，避免浏览器滚动链路被锁死
-  if (pullDistance.value > 0 && event.cancelable) {
-    event.preventDefault();
-  }
-}
-
-function onTouchEnd() {
-  if (!isPulling.value) return;
-  isPulling.value = false;
-  if (pullDistance.value >= 64) {
-    refreshPageData();
-    return;
-  }
-  pullDistance.value = 0;
-}
-
 onBeforeUnmount(() => {
   if (timer) {
     clearInterval(timer);
@@ -333,9 +237,6 @@ onBeforeUnmount(() => {
   <div
     ref="pageRef"
     class="mobile-register-page"
-    @touchstart="onTouchStart"
-    @touchmove="onTouchMove"
-    @touchend="onTouchEnd"
   >
     <!-- <div
       class="pull-indicator"
@@ -611,8 +512,6 @@ onBeforeUnmount(() => {
   overflow-y: auto;
   overscroll-behavior-y: contain;
   touch-action: manipulation;
-  /* [FIXED] iOS 惯性滚动兼容 */
-  -webkit-overflow-scrolling: touch;
 }
 
 .pull-indicator {

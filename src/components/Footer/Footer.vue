@@ -207,6 +207,13 @@ function onClickLink(path) {
           u {
             color: #c4c4c4;
           }
+          a {
+            color: #fff;
+            &:hover {
+              color: @warning-color;
+              background: transparent;
+            }
+          }
         }
       }
     }

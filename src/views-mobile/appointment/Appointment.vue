@@ -97,15 +97,6 @@ function getScrollContainer() {
   return pageRef.value?.closest('.mobile-main') || pageRef.value?.parentElement;
 }
 
-// [FIXED] 统一读取真实滚动位置：优先可滚动容器，兜底文档滚动，避免误判顶部导致回滚被拦截
-function getCurrentScrollTop() {
-  const scrollContainer = getScrollContainer();
-  const containerScrollTop = scrollContainer?.scrollTop || 0;
-  const docScrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
-  const isContainerScrollable = !!scrollContainer && scrollContainer.scrollHeight > scrollContainer.clientHeight + 1;
-  return isContainerScrollable ? containerScrollTop : Math.max(containerScrollTop, docScrollTop);
-}
-
 function resetVisibleDoctors() {
   doctorVisibleCount.value = 6;
 }
@@ -133,17 +124,6 @@ async function refreshPageData() {
   }
 }
 
-function onTouchStart(event) {
-  const scrollContainer = getScrollContainer();
-  // [OLD] if (!scrollContainer || scrollContainer.scrollTop > 0 || showHospitalSheet.value || showDeptSheet.value) {
-  // [FIXED] 使用真实滚动位置判断顶部状态，避免底部回滚手势被误拦截
-  if (!scrollContainer || getCurrentScrollTop() > 0 || showHospitalSheet.value || showDeptSheet.value) {
-    isPulling.value = false;
-    return;
-  }
-  pullStartY.value = event.touches[0].clientY;
-  isPulling.value = true;
-}
 
 function onTouchMove(event) {
   if (!isPulling.value || isRefreshing.value) return;
@@ -153,9 +133,7 @@ function onTouchMove(event) {
     return;
   }
   pullDistance.value = Math.min(delta * 0.45, 88);
-  // [OLD] if (pullDistance.value > 0) {
-  // [FIXED] 仅在可取消事件中阻止默认行为，避免浏览器滚动链路被锁死
-  if (pullDistance.value > 0 && event.cancelable) {
+  if (pullDistance.value > 0) {
     event.preventDefault();
   }
 }
@@ -268,9 +246,6 @@ onBeforeUnmount(() => {
   <div
     ref="pageRef"
     class="mobile-appointment-page"
-    @touchstart="onTouchStart"
-    @touchmove="onTouchMove"
-    @touchend="onTouchEnd"
   >
     <!-- <div
       class="pull-indicator"

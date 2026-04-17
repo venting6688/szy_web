@@ -3,11 +3,8 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useOrderData } from '@/composables/useOrderData';
 
 const { orderList, loading, cancelEmit, getOrderList } = useOrderData();
-
-const pageRef = ref(null);
 const pullDistance = ref(0);
-const pullStartY = ref(0);
-const isPulling = ref(false);
+
 const isRefreshing = ref(false);
 const visibleCount = ref(8);
 const loadMoreRef = ref(null);
@@ -32,123 +29,13 @@ const canLoadMore = computed(() => {
   return renderedOrders.value.length < orderList.value.length;
 });
 
-const pullHint = computed(() => {
-  if (isRefreshing.value) return '刷新中...';
-  return pullDistance.value > 64 ? '松开立即刷新' : '下拉刷新';
-});
-
-const pullIndicatorStyle = computed(() => {
-  return {
-    transform: `translate3d(0, ${Math.max(pullDistance.value - 48, -48)}px, 0)`,
-    opacity: pullDistance.value > 0 || isRefreshing.value ? 1 : 0,
-  };
-});
-
 function canCancel(order) {
   return order.AllowRefundFlag === 'Y' && order.OrderStatus === 'normal';
-}
-
-function getScrollContainer() {
-  return pageRef.value?.closest('.mobile-main') || pageRef.value?.parentElement;
-}
-
-function resetVisibleOrders() {
-  visibleCount.value = 8;
-}
-
-function increaseVisibleOrders() {
-  if (!canLoadMore.value) return;
-  visibleCount.value += 8;
-}
-
-async function refreshList() {
-  if (isRefreshing.value) return;
-  isRefreshing.value = true;
-  try {
-    await getOrderList();
-    resetVisibleOrders();
-  } finally {
-    pullDistance.value = 0;
-    isRefreshing.value = false;
-  }
 }
 
 async function onClickCancel(order) {
   await cancelEmit(order);
 }
-
-function onTouchStart(event) {
-  const scrollContainer = getScrollContainer();
-  if (!scrollContainer || scrollContainer.scrollTop > 0) {
-    isPulling.value = false;
-    return;
-  }
-  pullStartY.value = event.touches[0].clientY;
-  isPulling.value = true;
-}
-
-function onTouchMove(event) {
-  if (!isPulling.value || isRefreshing.value) return;
-  const delta = event.touches[0].clientY - pullStartY.value;
-  if (delta <= 0) {
-    pullDistance.value = 0;
-    return;
-  }
-  pullDistance.value = Math.min(delta * 0.45, 88);
-  if (pullDistance.value > 0) {
-    event.preventDefault();
-  }
-}
-
-function onTouchEnd() {
-  if (!isPulling.value) return;
-  isPulling.value = false;
-  if (pullDistance.value >= 64) {
-    refreshList();
-    return;
-  }
-  pullDistance.value = 0;
-}
-
-function setupLoadMoreObserver() {
-  if (io) {
-    io.disconnect();
-    io = null;
-  }
-  const target = loadMoreRef.value;
-  const root = getScrollContainer();
-  if (!target || !root) return;
-  io = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          increaseVisibleOrders();
-        }
-      });
-    },
-    {
-      root,
-      rootMargin: '0px 0px 120px 0px',
-      threshold: 0.1,
-    },
-  );
-  io.observe(target);
-}
-
-watch(
-  () => orderList.value,
-  async () => {
-    resetVisibleOrders();
-    await nextTick();
-    setupLoadMoreObserver();
-  },
-  { deep: true },
-);
-
-onMounted(async () => {
-  await nextTick();
-  setupLoadMoreObserver();
-});
 
 onBeforeUnmount(() => {
   if (io) io.disconnect();
@@ -159,9 +46,6 @@ onBeforeUnmount(() => {
   <div
     ref="pageRef"
     class="mobile-order-page"
-    @touchstart="onTouchStart"
-    @touchmove="onTouchMove"
-    @touchend="onTouchEnd"
   >
     <!-- <div
       class="pull-indicator"

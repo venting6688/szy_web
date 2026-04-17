@@ -121,7 +121,7 @@ export async function updateProfileApi({ idCard, realName, phonenumber, address 
  */
 //完善updatePasswordApi函数的实现，添加具体的API调用逻辑
 export async function updatePasswordApi({ oldPassword, newPassword, confirmPassword }) {
-  const { code, msg, data } = await post('/mobile/changePassword', {
+  const { code, msg } = await post('/mobile/changePassword', {
     oldPassword,
     newPassword,
     confirmPassword,
@@ -130,7 +130,7 @@ export async function updatePasswordApi({ oldPassword, newPassword, confirmPassw
     MessagePlugin.error(msg || '修改密码失败');
     throw new Error(msg || '修改密码失败');
   } else {
-    return data;
+    return true;
   }
 }
 /**

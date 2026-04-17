@@ -12,8 +12,8 @@
       />
       <div class="hero-mask"></div>
       <div class="hero-content">
-        <!-- <div class="hero-badge">山东省中医院</div>
-        <div class="hero-title">互联网医院</div>
+        <div class="hero-badge">山东省中医院</div>
+        <!-- <div class="hero-title">互联网医院</div>
         <div class="hero-subtitle">挂号预约、个人中心、就诊服务一体化</div> -->
       </div>
     </section>
@@ -71,11 +71,9 @@
   display: inline-flex;
   align-items: center;
   padding: 5px 10px;
-  margin-bottom: 10px;
-  border: 1px solid rgb(255 255 255 / 32%);
+  margin-bottom: 20px;
   border-radius: 999px;
-  background: rgb(255 255 255 / 14%);
-  font-size: 12px;
+  font-size: 24px;
 }
 
 .hero-title {
