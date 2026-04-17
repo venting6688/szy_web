@@ -44,7 +44,7 @@ async function book(doctor, period) {
   activeTab.value = period;
   await getScheduleDetail();
 }
-// 可能的值：上午、下午、晚上
+// 可能的值：上午、下午、晚上、全天
 const activeTab = ref('');
 
 const scheduleDetailList = ref([]);
@@ -317,11 +317,14 @@ defineExpose({
   .schedule-date {
     margin: 10px 0 0;
   }
+  margin: 0 20px;
   .schedule-list {
     display: flex;
     gap: 12px;
     flex-wrap: wrap;
     margin-top: 20px;
+    max-height: 320px;
+    overflow: auto;
     .btn-book {
       width: 104px;
       height: 32px;

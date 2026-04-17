@@ -44,7 +44,19 @@ router.beforeEach((to, from, next) => {
   const isMobileDevice = isMobile();
 
   // 1. 设备重定向
+  // [OLD] 移动端访问非 /mobile 路由时统一跳转到 /mobile/appointment
+  // if (isMobileDevice && !to.path.startsWith('/mobile')) {
+  //   return next('/mobile/appointment');
+  // }
+  // [FIXED] 移动端保留登录/注册/忘记密码访问意图，其它仍跳转移动端业务首页
   if (isMobileDevice && !to.path.startsWith('/mobile')) {
+    if (to.path === '/login') return next('/mobile/login');
+    if (to.path === '/register') return next('/mobile/register');
+    if (to.path === '/forget-password') return next('/mobile/forget-password');
+    if (to.path === '/appointment-today') return next('/mobile/appointment-today');
+    if (to.path === '/appointment') return next('/mobile/appointment');
+    if (to.path === '/order') return next('/mobile/order');
+    if (to.path === '/profile') return next('/mobile/profile');
     return next('/mobile/appointment');
   }
 
@@ -53,7 +65,16 @@ router.beforeEach((to, from, next) => {
   }
 
   // 2. 白名单
-  const whiteList = ['/login', '/register', '/mobile/login', '/mobile/register', '/forget-password'];
+  // [OLD] const whiteList = ['/login', '/register', '/mobile/login', '/mobile/register', '/forget-password'];
+  // [FIXED] 新增移动端忘记密码白名单
+  const whiteList = [
+    '/login',
+    '/register',
+    '/mobile/login',
+    '/mobile/register',
+    '/forget-password',
+    '/mobile/forget-password',
+  ];
   console.log(token, to.path);
   // 3. 登录判断
   if (token) {

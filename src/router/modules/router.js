@@ -21,6 +21,24 @@ const routes = [
     ],
   },
   {
+    path: '/mobile-auth',
+    component: () => import('@/views-mobile/auth/Layout.vue'),
+    children: [
+      {
+        path: '/mobile/login',
+        component: () => import('@/views-mobile/auth/Login.vue'),
+      },
+      {
+        path: '/mobile/register',
+        component: () => import('@/views-mobile/auth/Register.vue'),
+      },
+      {
+        path: '/mobile/forget-password',
+        component: () => import('@/views-mobile/auth/ForgetPassword.vue'),
+      },
+    ],
+  },
+  {
     path: '/',
     component: () => import('@/layout/PCLayout.vue'),
     redirect: '/appointment-today',
@@ -36,10 +54,16 @@ const routes = [
     component: () => import('@/layout/MobileLayout.vue'),
     redirect: '/mobile/appointment-today',
     children: [
-      { path: '/mobile/appointment-today', component: () => import('@/views/appointment/Appointment.vue') },
-      { path: '/mobile/appointment', component: () => import('@/views/appointment/Appointment.vue') },
-      { path: '/mobile/order', component: () => import('@/views/order/Order.vue') },
-      { path: '/mobile/profile', component: () => import('@/views/profile/Profile.vue') },
+      // [OLD] 旧逻辑：移动端直接复用 PC 视图
+      // { path: '/mobile/appointment-today', component: () => import('@/views/appointment/Appointment.vue') },
+      // { path: '/mobile/appointment', component: () => import('@/views/appointment/Appointment.vue') },
+      // { path: '/mobile/order', component: () => import('@/views/order/Order.vue') },
+      // { path: '/mobile/profile', component: () => import('@/views/profile/Profile.vue') },
+      // [FIXED] 新逻辑：移动端路由指向 views-mobile 分层页面
+      { path: '/mobile/appointment-today', component: () => import('@/views-mobile/appointment/Appointment.vue') },
+      { path: '/mobile/appointment', component: () => import('@/views-mobile/appointment/Appointment.vue') },
+      { path: '/mobile/order', component: () => import('@/views-mobile/order/Order.vue') },
+      { path: '/mobile/profile', component: () => import('@/views-mobile/profile/Profile.vue') },
     ],
   },
 ];
