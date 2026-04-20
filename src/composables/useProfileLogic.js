@@ -31,18 +31,7 @@ export function useProfileLogic() {
     if (isValid !== true && !isEmptyObject(isValid)) {
       throw new Error('个人信息表单验证失败:', isValid);
     }
-    try {
-      await updateProfileApi(profileFormData.value);
-      MessagePlugin.success('更新个人信息成功');
-      // 刷新用户信息
-      // userStore.userInfo = profileFormData.value;
-      // userStore.logout();
-      // nextTick(() => {
-      //   router.push('/login');
-      // });
-    } catch (error) {
-      MessagePlugin.error(error.message || '更新个人信息失败');
-    }
+    await updateProfileApi(profileFormData.value);
   }
   const profileFormRules = ref({
     realName: [{ required: true, message: '请输入姓名' }],

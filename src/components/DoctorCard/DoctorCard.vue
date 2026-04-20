@@ -194,5 +194,8 @@ const emit = defineEmits(['book']);
   color: @primary-color;
   border-radius: 29px;
   border: 0;
+  &:hover {
+    color: #fff;
+  }
 }
 </style>

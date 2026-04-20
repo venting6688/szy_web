@@ -107,6 +107,7 @@ export async function updateProfileApi({ idCard, realName, phonenumber, address 
     MessagePlugin.error(msg || '更新个人信息失败');
     throw new Error(msg || '更新个人信息失败');
   } else {
+    MessagePlugin.success('更新个人信息成功');
     return data;
   }
 }
