@@ -1,7 +1,4 @@
 ﻿<script setup>
-// [OLD] 旧逻辑：移动端直接复用 PC 页面，无法满足移动端布局与交互需求
-// [OLD] import AppointmentView from '@/views/appointment/Appointment.vue';
-// [OLD] <AppointmentView />
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import dayjs from 'dayjs';
@@ -39,6 +36,9 @@ const {
   loadDoctors,
   loadWeekDoctors,
   getFirstDepts,
+  noticeDialogRef,
+  openNoticeDialogOnce,
+  openNoticeDialog,
 } = useAppointmentData();
 
 // [FIXED] 兼容 mobile 路由路径，避免 `/mobile/appointment-today` 被识别为普通预约页
@@ -577,7 +577,11 @@ onBeforeUnmount(() => {
       </transition>
     </Teleport>
 
-    <Dialog ref="dialogRef" />
+    <Dialog
+      ref="dialogRef"
+      @open="openNoticeDialog"
+    />
+    <Dialog ref="noticeDialogRef" />
   </div>
 </template>
 
@@ -672,7 +676,7 @@ onBeforeUnmount(() => {
 
 .filter-label {
   flex-shrink: 0;
-  font-size: 12px;
+  font-size: 14px;
   color: @text-secondary;
 }
 
@@ -681,7 +685,7 @@ onBeforeUnmount(() => {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-size: clamp(13px, 3.4vw, 15px);
+  font-size: clamp(14px, 3.4vw, 15px);
   font-weight: 500;
   color: @text-primary;
   white-space: nowrap;
@@ -921,7 +925,7 @@ onBeforeUnmount(() => {
   gap: 12px;
   align-items: center;
   justify-content: space-between;
-  padding: 12px;
+  padding: 2px;
   background: #f8fbfb;
   border-radius: 14px;
 }
@@ -971,6 +975,7 @@ onBeforeUnmount(() => {
   border: 0;
   border-radius: 999px;
   transform: translateZ(0);
+  font-size: 14px;
 
   &:active {
     transform: scale(0.96) translateZ(0);
@@ -1023,7 +1028,7 @@ onBeforeUnmount(() => {
   align-items: center;
   justify-content: space-between;
   padding: 16px 16px 12px;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 700;
   color: @text-primary;
   border-bottom: 1px solid @border-light;
@@ -1087,7 +1092,7 @@ onBeforeUnmount(() => {
   justify-content: space-between;
   width: 100%;
   padding: 14px 12px;
-  font-size: 13px;
+  font-size: 14px;
   color: @text-regular;
   text-align: left;
   background: transparent;

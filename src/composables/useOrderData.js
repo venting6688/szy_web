@@ -20,17 +20,28 @@ export function useOrderData() {
 
   async function cancelEmit(order) {
     console.log('取消预约', order);
-    loading.value = true;
-    MessagePlugin.loading('取消预约中...', 1000);
-    const { ResultCode } = await cancelAppointmentApi({
-      transactionId: order.SeqCode,
-      orderNo: order.OrderCode,
+    // 确认取消预约
+    const confirmInstance = await DialogPlugin.confirm({
+      header: '确认取消预约',
+      body: '确认取消预约吗？',
+      // className: 't-dialog-new-class1 t-dialog-new-class2',
+      // style: 'color: rgba(0, 0, 0, 0.6)',
+      onConfirm: async () => {
+        loading.value = true;
+        MessagePlugin.loading('取消预约中...', 1000);
+        const { ResultCode } = await cancelAppointmentApi({
+          transactionId: order.SeqCode,
+          orderNo: order.OrderCode,
+        });
+        if (ResultCode == '0') {
+          confirmInstance.hide();
+          setTimeout(() => {
+            getOrderList();
+            loading.value = false;
+          }, 1000);
+        }
+      },
     });
-    if (ResultCode == '0') {
-      setTimeout(() => {
-        getOrderList();
-      }, 1000);
-    }
   }
 
   const loading = ref(false);

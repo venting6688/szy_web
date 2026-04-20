@@ -275,13 +275,19 @@ export function useAppointmentData() {
     console.log('预约医生txt：', doctor, period);
     dialogRef.value.book(doctor, period);
   }
-
+  // 通知弹窗
+  const noticeDialogRef = ref(null);
   // 打开通知弹窗
-  function openNoticeDialog() {
+  function openNoticeDialogOnce() {
+    console.log('openNoticeDialog1');
     const noticeStore = useNoticeStore();
     if (noticeStore.isNotified) return;
     noticeStore.setIsNotified(true);
-    dialogRef.value.openNotice();
+    noticeDialogRef.value.openNotice();
+  }
+  function openNoticeDialog() {
+    console.log('openNoticeDialog2');
+    noticeDialogRef.value.openNotice();
   }
 
   const weekDayMap = {
@@ -296,7 +302,7 @@ export function useAppointmentData() {
   };
 
   onMounted(() => {
-    openNoticeDialog();
+    openNoticeDialogOnce();
   });
 
   return {
@@ -329,5 +335,7 @@ export function useAppointmentData() {
     getFirstDepts,
     downIcon,
     rightIcon,
+    noticeDialogRef,
+    openNoticeDialog,
   };
 }

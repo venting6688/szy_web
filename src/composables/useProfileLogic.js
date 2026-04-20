@@ -10,6 +10,10 @@ export function useProfileLogic() {
   const router = useRouter();
 
   const currentTab = ref('profile');
+  const isModify = ref(false);
+  function onClickModify() {
+    isModify.value = true;
+  }
 
   //#region 个人信息表单数据
   const profileFormData = ref({
@@ -116,5 +120,7 @@ export function useProfileLogic() {
     submitPassword,
     onClickLogout,
     onClick,
+    isModify,
+    onClickModify,
   };
 }

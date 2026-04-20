@@ -88,11 +88,7 @@ function onClickLink(path) {
                 <p class="site-address"><u>预约电话：</u>0531-58675126</p>
               </div>
               <div class="qr-code fr clearfix">
-                <a
-                  href="#"
-                  target="_blank"
-                  rel="nofollow"
-                >
+                <a rel="nofollow">
                   <img
                     src="https://www.sdzydfy.com/oss/20220926/183557369.jpg"
                     alt=""
@@ -100,11 +96,7 @@ function onClickLink(path) {
                   <span>医院微信服务号</span>
                 </a>
 
-                <a
-                  href="#"
-                  target="_blank"
-                  rel="nofollow"
-                >
+                <a rel="nofollow">
                   <img
                     src="https://www.sdzydfy.com/oss/20221031/093800382.jpg"
                     alt=""
@@ -112,11 +104,7 @@ function onClickLink(path) {
                   <span>内部办公企业号</span>
                 </a>
 
-                <a
-                  href="#"
-                  target="_blank"
-                  rel="nofollow"
-                >
+                <a rel="nofollow">
                   <img
                     src="https://www.sdzydfy.com/oss/20220926/183509968.jpg"
                     alt=""

@@ -7,6 +7,12 @@ function onClickLink(path) {
 
 <template>
   <footer class="mobile-footer">
+    <div class="img-box">
+      <img
+        src="@/assets/image/qualification.png"
+        alt=""
+      />
+    </div>
     <!-- 版权与备案信息 -->
     <div class="footer-info">
       <p class="copyright">版权所有：山东中医药大学附属医院 山东省中医院</p>
@@ -33,6 +39,13 @@ function onClickLink(path) {
   font-size: 12px;
   line-height: 1.8;
   text-align: center;
+  display: flex;
+  .img-box {
+    img {
+      width: 50px;
+      margin: 0 5px;
+    }
+  }
 }
 
 .footer-info {

@@ -27,8 +27,10 @@ const {
   onChangeHospital,
   onClickDate,
   dialogRef,
+  noticeDialogRef,
   bookEmit,
   weekDayMap,
+  openNoticeDialog,
 } = useAppointmentData();
 </script>
 <template>
@@ -196,7 +198,11 @@ const {
       </div>
     </div>
     <!-- 预约弹窗 -->
-    <Dialog ref="dialogRef" />
+    <Dialog
+      ref="dialogRef"
+      @open="openNoticeDialog"
+    />
+    <Dialog ref="noticeDialogRef" />
   </div>
 </template>
 <style scoped lang="less">
@@ -322,6 +328,7 @@ const {
     text-align: center;
     min-width: 80px;
     transition: all 0.2s;
+    background: @bg-white;
 
     &:hover {
       border-color: @primary-color;

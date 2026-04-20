@@ -19,9 +19,9 @@ a,
 }
 
 @media (hover: hover) {
-  a:hover {
+  /* a:hover {
     background-color: hsl(160deg 100% 37% / 20%);
-  }
+  } */
 }
 
 @media (min-width: 1024px) {

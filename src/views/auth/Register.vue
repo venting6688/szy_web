@@ -54,6 +54,7 @@ watch(
 import { isEmptyObject } from '@/utils/index/common';
 
 const registerFormRef = ref(null);
+const loading = ref(false); // [FIXED] 注册提交状态控制
 const registerFormRules = ref({
   realName: [{ required: true, message: '请输入姓名' }],
   idCard: [{ required: true, message: '请输入证件号' }],
@@ -81,6 +82,8 @@ const registerFormRules = ref({
   birthday: [{ required: true, message: '请选择出生日期' }],
   gender: [{ required: true, message: '请选择性别' }],
 });
+
+/* [OLD]
 async function goRegister() {
   const isValid = await registerFormRef.value.validate();
   console.log(isValid);
@@ -98,6 +101,36 @@ async function goRegister() {
   const res = await registerApi(formData);
   router.push('/login');
   console.log(res);
+}
+*/
+
+// [FIXED] 实现防抖/节流：增加 loading 锁，防止重复提交
+async function goRegister() {
+  if (loading.value) return;
+  const isValid = await registerFormRef.value.validate();
+  console.log(isValid);
+  if (isValid !== true && !isEmptyObject(isValid)) {
+    console.error('注册表单验证失败:', isValid);
+    return;
+  }
+  try {
+    loading.value = true;
+    const formData = {
+      ...form.value,
+    };
+    formData.nation = formData.nation.label;
+    const areaText = getAreaText(formData.area, areaOptions);
+    formData.province = areaText[0];
+    formData.city = areaText[1];
+    formData.district = areaText[2];
+    const res = await registerApi(formData);
+    console.log(res);
+    router.push('/login');
+  } catch (error) {
+    console.error('注册提交异常:', error);
+  } finally {
+    loading.value = false;
+  }
 }
 const countdown = ref(0); // 倒计时秒数
 let timer = null; // 定时器实例
@@ -413,6 +446,7 @@ const btnDisabled = computed(() => {
       theme="primary"
       block
       shape="circle"
+      :loading="loading"
       @click="goRegister"
     >
       注册

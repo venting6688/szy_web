@@ -6,6 +6,7 @@ import { getScheduleDetailApi } from '@/api/schedule';
 onMounted(() => {
   console.log('Component mounted!');
 });
+const emit = defineEmits(['open']);
 
 //#region 预约
 // 弹窗类型
@@ -96,46 +97,49 @@ async function confirmBook() {
 }
 // 跳转预约须知
 function goNotice() {
-  dialogType.value = 'notice';
+  // dialogType.value = 'notice';
+  // noticeDialogRef.value.openNotice();
+  console.log('goNotice');
+  emit('open');
 }
-const onClickClose = () => {
-  // dialogType.value = 'schedule';
+function onClickClose() {
+  // if (dialogType.value === 'notice') {
+  //   dialogType.value = 'schedule';
+  // }
   dialogVisible.value = false;
-};
+}
 // #endregion
 
 const noticeList = [
   {
-    text: '1.每天18:00点开放号源，您可预约一周之内的号源。',
+    text: '1、我院实行实名制预约、就诊制度，就诊人应使用本人姓名、身份信息进行预约、就诊，务必做到人证相符。',
   },
   {
-    text: '2.我院实行实名制预约，预约时请使用患者真实信息，否则无法就诊;预约成功后请于就诊当天提前15分钟到医院取预约号。',
-    type: 'highlight',
+    text: '2、跨省异地医保患者首次就诊，请提前从国家医保平台app进行联网备案，再到自助取号机取号候诊。',
   },
   {
-    text: '首次就诊需建档：',
-    type: 'title',
+    text: '3、我院门诊专家、普通号源均可以通过：山东中医药大学附属医院微信公众号、官方网站（www.sdzydfy.com)、支付宝：山东中医药大学附属医院、预约电话等方式进行预约。预约成功后请于就诊当天提前10分钟到医院取号机取预约号等待就诊。',
   },
   {
-    text: '1.首次就诊的医保患者请携带身份证原件及医保卡或医保电子凭证到人工机取预约号，去各诊区侯诊;<br>窗口建档、充值，自助机取预约号，持医保卡或医保电子凭证到诊区候诊;',
+    text: '4、自2024年9月2日起，开放号源时间由早上7点改为晚上8点（例如: 本周周一晚20:00开放下周二的号源）。每天早上8:00官方预约热线0531-58675126，0531-96558电话预约放号，您可预约一周之内的号源。公众号预约截止时间为医生开诊前一日22:00。',
   },
   {
-    text: '2.自费患者或儿童请携带身份证原件或健康码到自助机建档、充值，自助',
+    text: '5、如遇特殊情况不能如约就诊时，请于就诊前一天22:00前取消预约，否则视为违约。同一账号，一天内取消预约3次，则当日无法再预约，如累计违约达到3次或一周内累计取消预约达到6次，系统将限制该账号线上预约。',
   },
   {
-    text: '3.预约时请您填写有效的联系方式(最好是随身手机号)，以方便您在就诊程中能收到短信提示。',
+    text: '6、为提供更优质高效的服务，预约时请您务必提供真实有效的手机号码，以便及时接收验证码、预约确认、停诊通知等系统短信。',
   },
   {
-    text: '4.如遇特殊情况不能如约就诊时,请提前一天取消，否则视为违约。如果一个月违约累计3次或同一账号一周取消累计6次，系统将自动锁定，半年内无法预约;如果一天取消3次，则当日无法预约。',
+    text: '7、坐诊医生因应急、突发事件等原因可能会有工作安排变动，以当日实际坐诊医生为准，敬请谅解。',
   },
   {
-    text: '5.挂号当日有效，坐诊医生因应急、突发事件等原因可能会有变动，以当日实际坐诊医生为准，敬请谅解。',
+    text: '8、慢病患者开药请到慢病管理中心：东区慢病管理中心位于扁鹊楼五楼。',
   },
   {
-    text: '6.电话预约0531-82166666，受理时间每天上午8:00-11:30;下午13:30-17:00。预约电话0531-82168888(节假日除外)',
+    text: '9、我院实行门诊号源全预约制度，专家门诊及普通门诊号源全部放开预约，预约剩余号源自动转到医师坐诊当日现场，若号源已约满则现场无号；除部分科室（儿科、小儿推拿科、小儿骨科、妇二科、产科）外，其他科室诊次医院预留了部分老年人专属号源，若老年人预留号源没有预约，现场患者也可以在医院各诊区自助机进行现场选号，当日预约和现场选号不再限制患者年龄。',
   },
   {
-    text: '7.【停车温馨提示】医院停车资源紧张，为避免广大患者因停车滞留时间长而延误就诊，您可将车辆停在医院周边的停车场，或乘坐公共交通工具来院就诊,谢谢。',
+    text: '10、我院官网开设互联网医院，线上咨询，为不便来院患者提供便利。线上就诊流程：选择医生→填写问诊信息→线上支付→等待医生接诊→问诊结束→查看诊断报告。',
   },
 ];
 
@@ -206,7 +210,7 @@ defineExpose({
               prop="doctor"
             >
               <t-input
-                readonly
+                disabled
                 v-model="appointmentInfo.doctor"
               />
             </t-form-item>
@@ -215,7 +219,7 @@ defineExpose({
               prop="department"
             >
               <t-input
-                readonly
+                disabled
                 v-model="appointmentInfo.department"
               />
             </t-form-item>
@@ -224,7 +228,7 @@ defineExpose({
               prop="location"
             >
               <t-input
-                readonly
+                disabled
                 v-model="appointmentInfo.location"
               />
             </t-form-item>
@@ -233,7 +237,7 @@ defineExpose({
               prop="price"
             >
               <t-input
-                readonly
+                disabled
                 :value="appointmentInfo.price + '元'"
               />
             </t-form-item>
@@ -242,7 +246,7 @@ defineExpose({
               prop="date"
             >
               <t-input
-                readonly
+                disabled
                 :value="
                   appointmentInfo.date +
                   ' ' +
@@ -257,7 +261,7 @@ defineExpose({
               prop="patient"
             >
               <t-input
-                readonly
+                disabled
                 v-model="appointmentInfo.patient"
               />
             </t-form-item>
@@ -283,11 +287,11 @@ defineExpose({
         </div>
         <div v-show="dialogType === 'notice'">
           <div class="notice">
+            尊敬的患者及家属：
             <div
               v-for="(item, i) in noticeList"
               :key="i"
               class="line"
-              :class="item.type"
               v-html="item.text"
             ></div>
           </div>

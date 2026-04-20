@@ -13,6 +13,8 @@ const {
   submitPassword,
   onClickLogout,
   onClick,
+  isModify,
+  onClickModify,
 } = useProfileLogic();
 </script>
 
@@ -104,7 +106,10 @@ const {
               prop="realName"
               name="realName"
             >
-              <t-input v-model="profileFormData.realName" />
+              <t-input
+                :disabled="!isModify"
+                v-model="profileFormData.realName"
+              />
             </t-form-item>
             <t-form-item
               label="证件号"
@@ -121,17 +126,34 @@ const {
               prop="phonenumber"
               name="phonenumber"
             >
-              <t-input v-model="profileFormData.phonenumber" />
+              <t-input
+                :disabled="!isModify"
+                v-model="profileFormData.phonenumber"
+              />
             </t-form-item>
             <t-form-item
               label="家庭住址"
               prop="address"
               name="address"
             >
-              <t-input v-model="profileFormData.address" />
+              <t-input
+                :disabled="!isModify"
+                v-model="profileFormData.address"
+              />
             </t-form-item>
           </t-form>
           <t-button
+            v-if="!isModify"
+            block
+            class="submit-btn"
+            theme="primary"
+            size="medium"
+            @click="onClickModify"
+          >
+            修改
+          </t-button>
+          <t-button
+            v-if="isModify"
             ghost
             type="primary"
             size="medium"
