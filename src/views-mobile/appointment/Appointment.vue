@@ -1080,7 +1080,7 @@ onBeforeUnmount(() => {
   justify-content: space-between;
   width: 100%;
   padding: 14px 12px;
-  font-size: 14px;
+  font-size: 15px;
   color: @text-regular;
   text-align: left;
   background: transparent;

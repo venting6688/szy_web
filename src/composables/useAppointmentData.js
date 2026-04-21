@@ -271,7 +271,7 @@ export function useAppointmentData() {
     hospitalOptions,
     (newVal) => {
       if (newVal.length === 0) return;
-      hospitalId.value = newVal[0].value;
+      hospitalId.value = hospitalStore.current || newVal[0].value;
       onChangeHospital();
     },
     { immediate: true },
