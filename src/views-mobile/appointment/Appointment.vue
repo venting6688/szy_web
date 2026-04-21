@@ -7,7 +7,7 @@ import rightIcon from '@/assets/image/right.png';
 import Dialog from '@/views/appointment/Dialog.vue';
 import { useAppointmentData } from '@/composables/useAppointmentData';
 import defaultAvatar from '@/assets/image/default_avatar.png';
-
+import { LoadingPlugin } from 'tdesign-vue-next';
 const route = useRoute();
 
 const {
@@ -42,23 +42,14 @@ const {
   subLoading,
 } = useAppointmentData();
 
-// [FIXED] 兼容 mobile 路由路径，避免 `/mobile/appointment-today` 被识别为普通预约页
 const mobileType = computed(() => {
   return route.path.includes('appointment-today') ? 'appointment-today' : type;
 });
 
 // 移动端附加状态：筛选面板、下拉刷新、上拉渐进加载
-const pageRef = ref(null);
 const showHospitalSheet = ref(false);
 const showDeptSheet = ref(false);
-const pullDistance = ref(0);
-const isRefreshing = ref(false);
-const pullStartY = ref(0);
-const isPulling = ref(false);
 const doctorVisibleCount = ref(6);
-const loadMoreRef = ref(null);
-
-let io = null;
 
 const renderedDoctors = computed(() => {
   return displayDoctors.value.slice(0, doctorVisibleCount.value);
@@ -83,7 +74,6 @@ const currentSecondDeptList = computed(() => {
   return secondDeptMap.value[currentDept.value] || [];
 });
 
-// [FIXED] 参照 DoctorCard，根据医生 code 生成头像地址并支持加载失败回退
 const imgSrcMap = ref({});
 
 watch(
@@ -105,72 +95,6 @@ function getDoctorImgSrc(doc) {
 
 function onDoctorImgError(e) {
   e.target.src = defaultAvatar;
-}
-
-const pullHint = computed(() => {
-  if (isRefreshing.value) return '刷新中...';
-  return pullDistance.value > 64 ? '松开立即刷新' : '下拉刷新';
-});
-
-const pullIndicatorStyle = computed(() => {
-  return {
-    transform: `translate3d(0, ${Math.max(pullDistance.value - 48, -48)}px, 0)`,
-    opacity: pullDistance.value > 0 || isRefreshing.value ? 1 : 0,
-  };
-});
-
-function getScrollContainer() {
-  return pageRef.value?.closest('.mobile-main') || pageRef.value?.parentElement;
-}
-
-function resetVisibleDoctors() {
-  doctorVisibleCount.value = 6;
-}
-
-function increaseVisibleDoctors() {
-  if (!canLoadMore.value) return;
-  doctorVisibleCount.value += 6;
-}
-
-async function refreshPageData() {
-  if (isRefreshing.value) return;
-  isRefreshing.value = true;
-  try {
-    if (!currentSecondDept.value) {
-      await getFirstDepts();
-    } else {
-      await loadDoctors();
-      if (mobileType.value === 'appointment') {
-        await loadWeekDoctors();
-      }
-    }
-  } finally {
-    pullDistance.value = 0;
-    isRefreshing.value = false;
-  }
-}
-
-function onTouchMove(event) {
-  if (!isPulling.value || isRefreshing.value) return;
-  const delta = event.touches[0].clientY - pullStartY.value;
-  if (delta <= 0) {
-    pullDistance.value = 0;
-    return;
-  }
-  pullDistance.value = Math.min(delta * 0.45, 88);
-  if (pullDistance.value > 0) {
-    event.preventDefault();
-  }
-}
-
-function onTouchEnd() {
-  if (!isPulling.value) return;
-  isPulling.value = false;
-  if (pullDistance.value >= 64) {
-    refreshPageData();
-    return;
-  }
-  pullDistance.value = 0;
 }
 
 function onOpenHospitalSheet() {
@@ -198,73 +122,9 @@ function onSelectHospital(item) {
 async function onSelectSecondDept(child) {
   await onClickSecondDept(child);
   showDeptSheet.value = false;
-  resetVisibleDoctors();
   await nextTick();
   setupLoadMoreObserver();
 }
-
-function onScrollToNextChunk() {
-  increaseVisibleDoctors();
-}
-
-function setupLoadMoreObserver() {
-  if (io) {
-    io.disconnect();
-    io = null;
-  }
-
-  const target = loadMoreRef.value;
-  const root = getScrollContainer();
-
-  if (!target || !root) return;
-
-  io = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          onScrollToNextChunk();
-        }
-      });
-    },
-    {
-      root,
-      rootMargin: '0px 0px 120px 0px',
-      threshold: 0.1,
-    },
-  );
-
-  io.observe(target);
-}
-
-watch(
-  () => displayDoctors.value,
-  async () => {
-    resetVisibleDoctors();
-    await nextTick();
-    setupLoadMoreObserver();
-  },
-  { deep: true },
-);
-
-watch(
-  () => currentDate.value,
-  async () => {
-    resetVisibleDoctors();
-    await nextTick();
-    setupLoadMoreObserver();
-  },
-);
-
-onMounted(async () => {
-  await nextTick();
-  setupLoadMoreObserver();
-});
-
-onBeforeUnmount(() => {
-  if (io) {
-    io.disconnect();
-  }
-});
 </script>
 
 <template>
@@ -554,30 +414,25 @@ onBeforeUnmount(() => {
               </button>
             </div>
 
-            <div
-              class="dept-sub-list"
-              v-loading="true"
-            >
-              <t-loading :loading="false">
-                <button
-                  v-for="child in currentSecondDeptList"
-                  :key="child.CLGRPRowId"
-                  class="dept-sub-item"
-                  :class="{ active: currentSecondDept === child.CLGRPRowId }"
-                  type="button"
-                  @click="onSelectSecondDept(child)"
-                >
-                  {{ child.CLGRPDesc }}
-                </button>
-                <!-- loading -->
-                <div></div>
-                <div
-                  v-if="!currentSecondDeptList.length"
-                  class="dept-empty"
-                >
-                  暂无子科室
-                </div>
-              </t-loading>
+            <div class="dept-sub-list">
+              <button
+                v-for="child in currentSecondDeptList"
+                :key="child.CLGRPRowId"
+                class="dept-sub-item"
+                :class="{ active: currentSecondDept === child.CLGRPRowId }"
+                type="button"
+                @click="onSelectSecondDept(child)"
+              >
+                {{ child.CLGRPDesc }}
+              </button>
+              <!-- loading -->
+              <div></div>
+              <div
+                v-if="!currentSecondDeptList.length"
+                class="dept-empty"
+              >
+                暂无子科室
+              </div>
             </div>
           </div>
         </div>

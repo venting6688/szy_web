@@ -59,6 +59,11 @@ export function useAppointmentData() {
     const id = item.CliSerGroupID;
     subLoading.value = true;
 
+    // const loadingInstance = await LoadingPlugin({
+    //   text: '加载中...',
+    //   fullscreen: true,
+    // });
+
     // 切换展开状态
     if (openDept.value === id) {
       openDept.value = null;
@@ -81,9 +86,10 @@ export function useAppointmentData() {
     } else {
       secondDeptMap.value[id] = [data];
     }
-    $nextTick(() => {
+    nextTick(() => {
       subLoading.value = false;
     });
+    // loadingInstance.hide();
     console.log('子科室', secondDeptMap.value[id]);
   }
 

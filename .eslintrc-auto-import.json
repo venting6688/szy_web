@@ -10,6 +10,7 @@
     "ExtractPropTypes": true,
     "ExtractPublicPropTypes": true,
     "InjectionKey": true,
+    "LoadingPlugin": true,
     "MaybeRef": true,
     "MaybeRefOrGetter": true,
     "PropType": true,
