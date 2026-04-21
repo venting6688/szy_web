@@ -39,6 +39,7 @@ const {
   noticeDialogRef,
   openNoticeDialogOnce,
   openNoticeDialog,
+  subLoading,
 } = useAppointmentData();
 
 // [FIXED] 兼容 mobile 路由路径，避免 `/mobile/appointment-today` 被识别为普通预约页
@@ -553,24 +554,30 @@ onBeforeUnmount(() => {
               </button>
             </div>
 
-            <div class="dept-sub-list">
-              <button
-                v-for="child in currentSecondDeptList"
-                :key="child.CLGRPRowId"
-                class="dept-sub-item"
-                :class="{ active: currentSecondDept === child.CLGRPRowId }"
-                type="button"
-                @click="onSelectSecondDept(child)"
-              >
-                {{ child.CLGRPDesc }}
-              </button>
-
-              <div
-                v-if="!currentSecondDeptList.length"
-                class="dept-empty"
-              >
-                暂无子科室
-              </div>
+            <div
+              class="dept-sub-list"
+              v-loading="true"
+            >
+              <t-loading :loading="false">
+                <button
+                  v-for="child in currentSecondDeptList"
+                  :key="child.CLGRPRowId"
+                  class="dept-sub-item"
+                  :class="{ active: currentSecondDept === child.CLGRPRowId }"
+                  type="button"
+                  @click="onSelectSecondDept(child)"
+                >
+                  {{ child.CLGRPDesc }}
+                </button>
+                <!-- loading -->
+                <div></div>
+                <div
+                  v-if="!currentSecondDeptList.length"
+                  class="dept-empty"
+                >
+                  暂无子科室
+                </div>
+              </t-loading>
             </div>
           </div>
         </div>
@@ -668,10 +675,6 @@ onBeforeUnmount(() => {
   border-radius: clamp(12px, 3.5vw, 16px);
   box-shadow: @shadow-card;
   transform: translateZ(0);
-
-  &:active {
-    transform: scale(0.98) translateZ(0);
-  }
 }
 
 .filter-label {
@@ -736,10 +739,6 @@ onBeforeUnmount(() => {
   border-radius: 14px;
   box-shadow: @shadow-card;
   transform: translateZ(0);
-
-  &:active {
-    transform: scale(0.96) translateZ(0);
-  }
 
   &.active {
     color: #fff;
@@ -976,10 +975,6 @@ onBeforeUnmount(() => {
   border-radius: 999px;
   transform: translateZ(0);
   font-size: 14px;
-
-  &:active {
-    transform: scale(0.96) translateZ(0);
-  }
 }
 
 .btn-disabled {
@@ -1130,10 +1125,6 @@ onBeforeUnmount(() => {
   background: #fafbfb;
   border: 1px solid @border-light;
   border-radius: 12px;
-
-  &:active {
-    transform: scale(0.98);
-  }
 
   &.active {
     font-weight: 600;

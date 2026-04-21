@@ -16,6 +16,8 @@ export function useAppointmentData() {
   const type = route.path === '/appointment-today' ? 'appointment-today' : 'appointment';
   console.log('type', type);
 
+  const subLoading = ref(false);
+
   const currentDept = ref(-1);
 
   const dates = Array.from({ length: 7 }, (_, i) => dayjs().add(i, 'day').format('YYYY-MM-DD'));
@@ -55,6 +57,7 @@ export function useAppointmentData() {
   // 点击一级科室
   async function onClickDept(item) {
     const id = item.CliSerGroupID;
+    subLoading.value = true;
 
     // 切换展开状态
     if (openDept.value === id) {
@@ -78,6 +81,9 @@ export function useAppointmentData() {
     } else {
       secondDeptMap.value[id] = [data];
     }
+    $nextTick(() => {
+      subLoading.value = false;
+    });
     console.log('子科室', secondDeptMap.value[id]);
   }
 

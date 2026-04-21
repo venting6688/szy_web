@@ -1,45 +1,16 @@
 ﻿<script setup>
-import { computed, ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { MessagePlugin } from 'tdesign-vue-next';
-import { isEmptyObject } from '@/utils/index/common';
-import { useUserStore } from '@/store/modules/user';
-import { loginApi } from '@/api/user';
+import { useLoginLogic } from '@/composables/useLoginLogic';
 
-const userStore = useUserStore();
-const router = useRouter();
-
-const loginFormRef = ref(null);
-
-const form = ref({
-  username: '',
-  password: '',
+const { loginFormRef, form, loginFormRules, onClickLogin, goRegister, onClickForgetPassword } = useLoginLogic({
+  successPath: '/mobile/appointment-today',
 });
 
-// 登录表单验证规则
-const loginFormRules = ref({
-  username: [{ required: true, message: '请输入身份证号' }],
-  password: [{ required: true, message: '请输入密码' }],
-});
-
-async function onClickLogin() {
-  const isValid = await loginFormRef.value.validate();
-  console.log(isValid);
-  if (isValid !== true && !isEmptyObject(isValid)) {
-    throw new Error('登录表单验证失败:', isValid);
-  }
-
-  const data = await loginApi(form.value);
-  userStore.setLogin(data.accessToken, data);
-  router.push('/mobile/appointment-today');
+function handleRegister() {
+  goRegister('/mobile/register');
 }
 
-function goRegister() {
-  router.push('/mobile/register');
-}
-
-function onClickForgetPassword() {
-  router.push('/mobile/forget-password');
+function handleForgetPassword() {
+  onClickForgetPassword('/mobile/forget-password');
 }
 </script>
 
@@ -93,7 +64,7 @@ function onClickForgetPassword() {
           <button
             type="button"
             class="link"
-            @click="goRegister"
+            @click="handleRegister"
           >
             立即注册
           </button>
@@ -101,7 +72,7 @@ function onClickForgetPassword() {
         <button
           type="button"
           class="link"
-          @click="onClickForgetPassword"
+          @click="handleForgetPassword"
         >
           忘记密码？
         </button>
@@ -123,7 +94,7 @@ function onClickForgetPassword() {
         block
         variant="outline"
         shape="round"
-        @click="goRegister"
+        @click="handleRegister"
       >
         注册
       </t-button>

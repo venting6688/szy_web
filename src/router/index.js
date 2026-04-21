@@ -37,12 +37,13 @@ const router = createRouter({
     };
   },
 });
-
+let isFirstRoute = true;
 router.beforeEach((to, from, next) => {
   NProgress.start();
   const token = getToken();
   const isMobileDevice = isMobile();
-
+  const firstEnter = isFirstRoute;
+  isFirstRoute = false;
   // 1. 设备重定向
   // [OLD] 移动端访问非 /mobile 路由时统一跳转到 /mobile/appointment
   // if (isMobileDevice && !to.path.startsWith('/mobile')) {
@@ -88,7 +89,10 @@ router.beforeEach((to, from, next) => {
       return next();
     }
     // 未登录跳转登录页
-    MessagePlugin.warning('请先登录');
+    if (!firstEnter) {
+      MessagePlugin.warning('请先登录');
+    }
+    // MessagePlugin.warning('请先登录');
     return next(isMobileDevice ? '/mobile/login' : '/login');
   }
 });

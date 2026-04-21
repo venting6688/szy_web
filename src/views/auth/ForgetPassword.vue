@@ -1,85 +1,17 @@
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { forgetPasswordApi } from '@/api/user';
-import { useUserStore } from '@/store/modules/user';
-import { sendYunMsgApi } from '@/api/user';
+import { useForgetPasswordLogic } from '@/composables/useForgetPasswordLogic';
 
-const userStore = useUserStore();
-const router = useRouter();
-const form = ref({
-  idType: '',
-  idCard: '',
-  realName: '',
-  birthday: '',
-  gender: '',
-  phone: '',
-  verificationCode: '',
-  newPassword: '',
-  confirmPassword: '',
-});
-
-import { isEmptyObject } from '@/utils/index/common';
-
-const forgetPasswordFormRef = ref(null);
-const forgetPasswordFormRules = ref({
-  idCard: [{ required: true, message: '请输入证件号' }],
-  phone: [
-    { required: true, message: '请输入手机号' },
-    {
-      validator: (val) => /^1[3-9]\d{9}$/.test(val),
-      message: '请输入正确的11位手机号码',
-    },
-  ],
-  verificationCode: [{ required: true, message: '请输入验证码' }],
-  newPassword: [{ required: true, message: '请输入新密码' }],
-  confirmPassword: [{ required: true, message: '请确认新密码' }],
-});
-async function onClickForgetPassword() {
-  const isValid = await forgetPasswordFormRef.value.validate();
-  console.log(isValid);
-  if (isValid !== true && !isEmptyObject(isValid)) {
-    throw new Error('忘记密码表单验证失败:', isValid);
-  }
-  const formData = {
-    ...form.value,
-  };
-
-  const res = await forgetPasswordApi(formData);
-  router.push('/login');
-  console.log(res);
-}
-const countdown = ref(0); // 倒计时秒数
-let timer = null; // 定时器实例
-
-// 验证码
-async function onClickGetVerificationCode() {
-  console.log(form.value.phone);
-
-  if (countdown.value > 0) return; // 防止重复点击
-
-  console.log('获取验证码');
-  const res = await sendYunMsgApi({
-    type: 'kopebe',
-    phone: form.value.phone,
-  });
-
-  // 开始倒计时
-  countdown.value = 60;
-  timer = setInterval(() => {
-    if (countdown.value > 0) {
-      countdown.value--;
-    } else {
-      clearInterval(timer);
-      timer = null;
-    }
-  }, 1000);
-}
-
-onMounted(async () => {});
-
-const btnDisabled = computed(() => {
-  return !form.value.phone || countdown.value > 0;
+const {
+  form,
+  forgetPasswordFormRef,
+  forgetPasswordFormRules,
+  countdown,
+  btnDisabled,
+  onClickGetVerificationCode,
+  onClickForgetPassword,
+  goLogin,
+} = useForgetPasswordLogic({
+  loginPath: '/login',
 });
 </script>
 
@@ -171,7 +103,7 @@ const btnDisabled = computed(() => {
       block
       variant="outline"
       shape="circle"
-      @click="router.push('/login')"
+      @click="goLogin"
     >
       返回登录
     </t-button>
