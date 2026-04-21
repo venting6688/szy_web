@@ -113,6 +113,41 @@ function onCloseSheets() {
   showDeptSheet.value = false;
 }
 
+const isAnySheetOpen = computed(() => showHospitalSheet.value || showDeptSheet.value);
+let bodyScrollTop = 0;
+
+function lockBodyScroll() {
+  bodyScrollTop = window.scrollY || document.documentElement.scrollTop || 0;
+  document.body.style.position = 'fixed';
+  document.body.style.top = `-${bodyScrollTop}px`;
+  document.body.style.left = '0';
+  document.body.style.right = '0';
+  document.body.style.width = '100%';
+  document.body.style.overflow = 'hidden';
+}
+
+function unlockBodyScroll() {
+  document.body.style.position = '';
+  document.body.style.top = '';
+  document.body.style.left = '';
+  document.body.style.right = '';
+  document.body.style.width = '';
+  document.body.style.overflow = '';
+  window.scrollTo(0, bodyScrollTop);
+}
+
+watch(isAnySheetOpen, (opened) => {
+  if (opened) {
+    lockBodyScroll();
+  } else {
+    unlockBodyScroll();
+  }
+});
+
+onBeforeUnmount(() => {
+  unlockBodyScroll();
+});
+
 function onSelectHospital(item) {
   hospitalId.value = item.value;
   onChangeHospital();
@@ -228,7 +263,7 @@ async function onSelectSecondDept(child) {
         class="state-block"
       >
         <t-empty
-          description="请先选择二级科室"
+          description="请先选择科室"
           title="等待选择"
         />
       </div>
@@ -265,14 +300,6 @@ async function onSelectSecondDept(child) {
         >
           <div class="flex-box">
             <div class="left">
-              <!-- [OLD]
-              <img
-                :src="imgSrc"
-                class="avatar"
-                @error="onImgError"
-              />
-              -->
-              <!-- [FIXED] 参照 DoctorCard，根据医生 code 动态生成头像地址并支持加载失败回退 -->
               <img
                 :src="getDoctorImgSrc(doc)"
                 class="avatar"
@@ -413,27 +440,26 @@ async function onSelectSecondDept(child) {
                 />
               </button>
             </div>
-
-            <div class="dept-sub-list">
-              <button
-                v-for="child in currentSecondDeptList"
-                :key="child.CLGRPRowId"
-                class="dept-sub-item"
-                :class="{ active: currentSecondDept === child.CLGRPRowId }"
-                type="button"
-                @click="onSelectSecondDept(child)"
-              >
-                {{ child.CLGRPDesc }}
-              </button>
-              <!-- loading -->
-              <div></div>
-              <div
-                v-if="!currentSecondDeptList.length"
-                class="dept-empty"
-              >
-                暂无子科室
+            <t-loading :loading="subLoading">
+              <div class="dept-sub-list">
+                <button
+                  v-for="child in currentSecondDeptList"
+                  :key="child.CLGRPRowId"
+                  class="dept-sub-item"
+                  :class="{ active: currentSecondDept === child.CLGRPRowId }"
+                  type="button"
+                  @click="onSelectSecondDept(child)"
+                >
+                  {{ child.CLGRPDesc }}
+                </button>
+                <!-- <div
+                  v-if="!currentSecondDeptList.length"
+                  class="dept-empty"
+                >
+                  暂无子科室
+                </div> -->
               </div>
-            </div>
+            </t-loading>
           </div>
         </div>
       </transition>
@@ -929,11 +955,14 @@ async function onSelectSecondDept(child) {
   display: grid;
   grid-template-columns: minmax(112px, 34vw) 1fr;
   min-height: 52vh;
+  height: 70vh;
 }
 
 .dept-group-list {
   overflow-y: auto;
   background: #f7f8fa;
+  transform: translateZ(0);
+  touch-action: manipulation;
 }
 
 .dept-group-item {
@@ -947,6 +976,7 @@ async function onSelectSecondDept(child) {
   text-align: left;
   background: transparent;
   border: 0;
+  transform: translateZ(0);
 
   &:active {
     opacity: 0.76;
@@ -968,6 +998,10 @@ async function onSelectSecondDept(child) {
 .dept-sub-list {
   padding: 8px 14px 16px;
   overflow-y: auto;
+}
+
+:deep(.t-loading--center .t-loading__gradient-conic) {
+  transform: none !important;
 }
 
 .dept-sub-item {

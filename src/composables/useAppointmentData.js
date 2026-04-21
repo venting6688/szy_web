@@ -28,7 +28,7 @@ export function useAppointmentData() {
 
   const doctors = ref([]);
   const loading = ref(false);
-  const format = (d) => dayjs(d).format('MM月DD日');
+  const format = (d) => dayjs(d).format('M月D日');
 
   const displayDoctors = computed(() => {
     if (!onlyAvailable.value) return doctors.value;
@@ -51,13 +51,18 @@ export function useAppointmentData() {
     // 默认选中第一个一级科室并展开
     if (arr && arr.length > 0) {
       await onClickDept(arr[0]);
+      // 默认选中第一个二级科室
+      const firstDeptId = arr[0].CliSerGroupID;
+      const secondDepts = secondDeptMap.value[firstDeptId];
+      if (secondDepts && secondDepts.length > 0) {
+        await onClickSecondDept(secondDepts[0]);
+      }
     }
   }
 
   // 点击一级科室
   async function onClickDept(item) {
     const id = item.CliSerGroupID;
-    subLoading.value = true;
 
     // const loadingInstance = await LoadingPlugin({
     //   text: '加载中...',
@@ -75,7 +80,7 @@ export function useAppointmentData() {
 
     // 如果已经加载过，就不再请求
     if (secondDeptMap.value[id]) return;
-
+    subLoading.value = true;
     const data = await getSecondDeptsApi({
       departmentGroupCode: id,
       startDate: currentDate.value,
@@ -90,7 +95,7 @@ export function useAppointmentData() {
       subLoading.value = false;
     });
     // loadingInstance.hide();
-    console.log('子科室', secondDeptMap.value[id]);
+    console.log('subLoading.value', subLoading.value);
   }
 
   function transformSchedule(list, deptCode) {
@@ -349,5 +354,6 @@ export function useAppointmentData() {
     rightIcon,
     noticeDialogRef,
     openNoticeDialog,
+    subLoading,
   };
 }

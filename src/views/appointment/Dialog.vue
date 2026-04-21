@@ -358,6 +358,7 @@ defineExpose({
 :deep(.notice-dialog) {
   width: 520px;
   padding: 20px 20px 0 20px;
+  margin: 0 20px;
   .header.title {
     width: 100%;
     text-align: center;
