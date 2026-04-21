@@ -42,6 +42,7 @@ export async function registerApi(params) {
     MessagePlugin.error(msg || '注册失败');
     throw new Error(msg || '注册失败');
   } else {
+    MessagePlugin.success(msg || '注册成功');
     return data;
   }
 }

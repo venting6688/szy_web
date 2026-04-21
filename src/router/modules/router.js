@@ -46,7 +46,7 @@ const routes = [
       { path: '/appointment', component: () => import('@/views/appointment/Appointment.vue') },
       { path: '/appointment-today', component: () => import('@/views/appointment/Appointment.vue') },
       { path: '/order', component: () => import('@/views/order/Order.vue') },
-      { path: '/profile', component: () => import('@/views/profile/Profile.vue') },
+      { path: '/profile-user', component: () => import('@/views/profile/Profile.vue') },
     ],
   },
   {
@@ -54,12 +54,6 @@ const routes = [
     component: () => import('@/layout/MobileLayout.vue'),
     redirect: '/mobile/appointment-today',
     children: [
-      // [OLD] 旧逻辑：移动端直接复用 PC 视图
-      // { path: '/mobile/appointment-today', component: () => import('@/views/appointment/Appointment.vue') },
-      // { path: '/mobile/appointment', component: () => import('@/views/appointment/Appointment.vue') },
-      // { path: '/mobile/order', component: () => import('@/views/order/Order.vue') },
-      // { path: '/mobile/profile', component: () => import('@/views/profile/Profile.vue') },
-      // [FIXED] 新逻辑：移动端路由指向 views-mobile 分层页面
       { path: '/mobile/appointment-today', component: () => import('@/views-mobile/appointment/Appointment.vue') },
       { path: '/mobile/appointment', component: () => import('@/views-mobile/appointment/Appointment.vue') },
       { path: '/mobile/order', component: () => import('@/views-mobile/order/Order.vue') },
@@ -68,15 +62,3 @@ const routes = [
   },
 ];
 export default routes;
-// export default [
-//   {
-//     path: '/',
-//     name: 'home',
-//     component: () => import('@/views/HomeView.vue'),
-//   },
-//   {
-//     path: '/pinia',
-//     name: 'pinia',
-//     component: () => import('@/views/PiniaView.vue'),
-//   },
-// ];

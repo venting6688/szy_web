@@ -14,6 +14,7 @@ const emit = defineEmits(['open']);
 // appointment: 确认预约
 // notice: 预约挂号通知
 const dialogType = ref('schedule');
+const submitting = ref(false);
 const headerTitle = computed(() => {
   if (dialogType.value === 'schedule') return '选择号源';
   if (dialogType.value === 'appointment') return '预约信息';
@@ -83,17 +84,25 @@ function bookDisabled(item) {
 import { createAppointmentApi } from '@/api/appointment';
 import { MessagePlugin } from 'tdesign-vue-next';
 async function confirmBook() {
+  if (submitting.value) return;
   console.log('确认预约', appointmentInfo.value);
 
-  const res = await createAppointmentApi({
-    ScheduleItemCode: appointmentInfo.value.scheduleItemCode,
-    PayFee: appointmentInfo.value.price,
-    StartTime: appointmentInfo.value.startTime,
-    EndTime: appointmentInfo.value.endTime,
-  });
-  console.log('预约挂号成功', res);
-  MessagePlugin.success('预约挂号成功');
-  dialogVisible.value = false;
+  try {
+    submitting.value = true;
+    const res = await createAppointmentApi({
+      ScheduleItemCode: appointmentInfo.value.scheduleItemCode,
+      PayFee: appointmentInfo.value.price,
+      StartTime: appointmentInfo.value.startTime,
+      EndTime: appointmentInfo.value.endTime,
+    });
+    console.log('预约挂号成功', res);
+    MessagePlugin.success('预约挂号成功');
+    dialogVisible.value = false;
+  } catch (error) {
+    console.error('预约挂号失败', error);
+  } finally {
+    submitting.value = false;
+  }
 }
 // 跳转预约须知
 function goNotice() {
@@ -272,6 +281,8 @@ defineExpose({
               shape="round"
               theme="primary"
               block
+              :loading="submitting"
+              :disabled="submitting"
               @click="confirmBook"
             >
               确认预约

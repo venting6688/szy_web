@@ -57,7 +57,7 @@ router.beforeEach((to, from, next) => {
     if (to.path === '/appointment-today') return next('/mobile/appointment-today');
     if (to.path === '/appointment') return next('/mobile/appointment');
     if (to.path === '/order') return next('/mobile/order');
-    if (to.path === '/profile') return next('/mobile/profile');
+    if (to.path === '/profile-user') return next('/mobile/profile');
     return next('/mobile/appointment');
   }
 

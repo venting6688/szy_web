@@ -34,7 +34,7 @@ const { orderList, loading, cancelEmit } = useOrderData();
     </div>
     <!-- 空状态 -->
     <div
-      v-if="!orderList.length"
+      v-else
       class="empty"
     >
       <t-empty

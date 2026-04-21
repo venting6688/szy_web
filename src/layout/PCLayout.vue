@@ -48,7 +48,7 @@ const navList = [
   },
   {
     name: '个人中心',
-    path: '/profile',
+    path: '/profile-user',
     icon: profile,
     activeIcon: profileActive,
   },
