@@ -2,16 +2,27 @@
 import OrderCard from '@/components/OrderCard/OrderCard.vue';
 import { useOrderData } from '@/composables/useOrderData';
 
-const { orderList, loading, cancelEmit } = useOrderData();
+const { orderList, loading, hospitalOptions, cancelEmit, hospitalId, onChangeHospital } = useOrderData();
 </script>
 
 <template>
   <div class="order-container">
     <div class="order-header">
       <div class="title">预约记录</div>
-      <div class="info">
-        <!-- <span>如需修改个人信息，请修改后点击提交按钮</span> -->
-      </div>
+
+      <t-select
+        v-model="hospitalId"
+        @change="onChangeHospital"
+        size="large"
+        style="width: 500px"
+      >
+        <t-option
+          v-for="item in hospitalOptions"
+          :key="item.value"
+          :value="item.value"
+          :label="item.label"
+        />
+      </t-select>
     </div>
     <div
       v-if="loading"
@@ -50,6 +61,9 @@ const { orderList, loading, cancelEmit } = useOrderData();
 .order-container {
   padding: 20px;
   .order-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     margin-bottom: 20px;
     .title {
       font-size: 24px;

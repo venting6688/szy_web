@@ -2,20 +2,7 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useOrderData } from '@/composables/useOrderData';
 
-const { orderList, loading, cancelEmit, getOrderList } = useOrderData();
-const pullDistance = ref(0);
-
-const isRefreshing = ref(false);
-
-const statusMap = {
-  normal: '已预约',
-  cancel: '已取消',
-  finished: '已完成',
-};
-
-const cancellableCount = computed(() => {
-  return orderList.value.filter((item) => item.AllowRefundFlag === 'Y' && item.OrderStatus === 'normal').length;
-});
+const { orderList, loading, cancelEmit, getOrderList, hospitalOptions, hospitalId, onChangeHospital } = useOrderData();
 
 function canCancel(order) {
   return order.AllowRefundFlag === 'Y' && order.OrderStatus === 'normal';
@@ -24,8 +11,6 @@ function canCancel(order) {
 async function onClickCancel(order) {
   await cancelEmit(order);
 }
-
-onBeforeUnmount(() => {});
 </script>
 
 <template>
@@ -52,6 +37,27 @@ onBeforeUnmount(() => {});
         <span class="stat-pill cancelable">可取消 {{ cancellableCount }} 条</span>
       </div>
     </section> -->
+
+    <section
+      v-if="hospitalOptions.length"
+      class="filter-bar"
+    >
+      <div class="filter-label">当前院区</div>
+      <t-select
+        v-model="hospitalId"
+        size="large"
+        placeholder="请选择院区"
+        @change="onChangeHospital"
+        class="filter-select"
+      >
+        <t-option
+          v-for="item in hospitalOptions"
+          :key="item.value"
+          :value="item.value"
+          :label="item.label"
+        />
+      </t-select>
+    </section>
 
     <section class="list-panel">
       <div
@@ -183,6 +189,24 @@ onBeforeUnmount(() => {});
   margin-top: 12px;
 }
 
+.filter-bar {
+  margin-bottom: clamp(12px, 4vw, 18px);
+  padding: 12px;
+  background: @bg-white;
+  border-radius: clamp(14px, 4vw, 18px);
+  box-shadow: @shadow-card;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+
+  .filter-label {
+    font-size: 15px;
+    color: @text-secondary;
+    width: 30%;
+  }
+}
+
 .stat-pill {
   padding: 4px 10px;
   font-size: 12px;
@@ -196,7 +220,7 @@ onBeforeUnmount(() => {});
 }
 
 .list-panel {
-  padding: clamp(14px, 4vw, 18px);
+  padding: 12px;
   background: @bg-white;
   border-radius: clamp(16px, 4vw, 20px);
   box-shadow: @shadow-card;

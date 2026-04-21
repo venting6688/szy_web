@@ -3,10 +3,37 @@ import { MessagePlugin } from 'tdesign-vue-next';
 
 import { getAppointmentsApi, cancelAppointmentApi } from '@/api/order';
 import dayjs from 'dayjs';
+import { useHospitalStore } from '@/store/modules/hospital';
+const hospitalStore = useHospitalStore();
 
 export function useOrderData() {
-  const orderList = ref([]);
+  onMounted(() => {
+    console.log('Component mounted!');
+    getOrderList();
+  });
+  const loading = ref(false);
 
+  const orderList = ref([]);
+  const hospitalId = ref('');
+  // 院区列表
+  const hospitalOptions = computed(() => hospitalStore.list);
+  // 切换院区
+  function onChangeHospital() {
+    loading.value = true;
+    hospitalStore.setHospital(hospitalId.value);
+    console.log('切换院区', hospitalId.value);
+    getOrderList();
+  }
+  // 如果监听到院区列表不为空了，初始化院区为第一个院区
+  watch(
+    hospitalOptions,
+    (newVal) => {
+      if (newVal.length === 0) return;
+      hospitalId.value = hospitalStore.current || newVal[0].value;
+      onChangeHospital();
+    },
+    { immediate: true },
+  );
   // 获取订单列表
   async function getOrderList() {
     const res = await getAppointmentsApi({
@@ -44,16 +71,14 @@ export function useOrderData() {
     });
   }
 
-  const loading = ref(false);
-
-  onMounted(() => {
-    console.log('Component mounted!');
-    getOrderList();
-  });
-
   return {
     orderList,
     loading,
+    hospitalId,
+    hospitalOptions,
+    // 切换院区
+    onChangeHospital,
+    // 取消预约
     cancelEmit,
     getOrderList,
   };
