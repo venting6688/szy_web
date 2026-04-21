@@ -52,6 +52,7 @@ const showDeptSheet = ref(false);
 const doctorVisibleCount = ref(6);
 
 const renderedDoctors = computed(() => {
+  console.log('renderedDoctors', displayDoctors.value, doctorVisibleCount.value);
   return displayDoctors.value.slice(0, doctorVisibleCount.value);
 });
 
@@ -157,9 +158,107 @@ function onSelectHospital(item) {
 async function onSelectSecondDept(child) {
   await onClickSecondDept(child);
   showDeptSheet.value = false;
+  resetVisibleDoctors();
   await nextTick();
   setupLoadMoreObserver();
 }
+// #region
+const pageRef = ref(null);
+const loadMoreRef = ref(null);
+
+let io = null;
+let isLoadingMore = false; // 加载锁
+function getScrollContainer() {
+  return pageRef.value?.closest('.mobile-main') || pageRef.value?.parentElement;
+}
+
+function resetVisibleDoctors() {
+  doctorVisibleCount.value = 6;
+}
+
+function increaseVisibleDoctors() {
+  if (!canLoadMore.value) return;
+  doctorVisibleCount.value += 6;
+}
+
+async function onScrollToNextChunk() {
+  if (isLoadingMore || !canLoadMore.value) return;
+  isLoadingMore = true;
+
+  try {
+    // 循环增加数量，直到加载锚点被移出视口或没有更多数据
+    while (canLoadMore.value) {
+      doctorVisibleCount.value += 6;
+      await nextTick();
+
+      if (!loadMoreRef.value) break;
+
+      const rect = loadMoreRef.value.getBoundingClientRect();
+      // 如果锚点已经移出视口（加上 150px 预加载边距），则停止本次加载，等待下一次滚动触发
+      if (rect.top >= window.innerHeight + 150) {
+        break;
+      }
+    }
+  } finally {
+    isLoadingMore = false;
+  }
+}
+
+function setupLoadMoreObserver() {
+  if (io) {
+    io.disconnect();
+    io = null;
+  }
+
+  const target = loadMoreRef.value;
+  if (!target) return;
+
+  io = new IntersectionObserver(
+    (entries) => {
+      if (entries[0].isIntersecting) {
+        onScrollToNextChunk();
+      }
+    },
+    {
+      root: null, // 使用视口，适配各种移动端滚动环境
+      rootMargin: '0px 0px 150px 0px', // 提前 150px 预加载
+      threshold: 0,
+    },
+  );
+
+  io.observe(target);
+}
+
+watch(
+  () => displayDoctors.value,
+  async () => {
+    resetVisibleDoctors();
+    await nextTick();
+    setupLoadMoreObserver();
+  },
+  { deep: true },
+);
+
+watch(
+  () => currentDate.value,
+  async () => {
+    resetVisibleDoctors();
+    await nextTick();
+    setupLoadMoreObserver();
+  },
+);
+
+onMounted(async () => {
+  await nextTick();
+  setupLoadMoreObserver();
+});
+
+onBeforeUnmount(() => {
+  if (io) {
+    io.disconnect();
+  }
+});
+// #endregion
 </script>
 
 <template>
@@ -948,21 +1047,31 @@ async function onSelectSecondDept(child) {
 
 .dept-sheet {
   max-height: min(78vh, 720px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 /* 与 PC 差异：sidebar 树结构收纳到底部面板，通过双列 grid 保留层级信息 */
 .dept-grid {
   display: grid;
   grid-template-columns: minmax(112px, 34vw) 1fr;
-  min-height: 52vh;
-  height: 70vh;
+  flex: 1;
+  min-height: 0;
+  height: auto;
+  overflow: hidden;
 }
 
 .dept-group-list {
+  min-height: 0;
   overflow-y: auto;
+  overflow-x: hidden;
   background: #f7f8fa;
   transform: translateZ(0);
   touch-action: manipulation;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: #c9ced6 transparent;
 }
 
 .dept-group-item {
@@ -996,8 +1105,36 @@ async function onSelectSecondDept(child) {
 }
 
 .dept-sub-list {
+  height: 100%;
+  min-height: 0;
   padding: 8px 14px 16px;
   overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: #c9ced6 transparent;
+}
+
+.dept-group-list::-webkit-scrollbar,
+.dept-sub-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.dept-group-list::-webkit-scrollbar-track,
+.dept-sub-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.dept-group-list::-webkit-scrollbar-thumb,
+.dept-sub-list::-webkit-scrollbar-thumb {
+  background: #c9ced6;
+  border-radius: 999px;
+}
+
+.dept-grid :deep(.t-loading),
+.dept-grid :deep(.t-loading__parent) {
+  height: 100%;
+  min-height: 0;
 }
 
 :deep(.t-loading--center .t-loading__gradient-conic) {

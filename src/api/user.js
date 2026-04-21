@@ -1,6 +1,7 @@
 // src/api/user.js
 import { MessagePlugin } from 'tdesign-vue-next';
 import { post, get } from '@/utils/request';
+const hospitalId = 'SZYBTQYQ';
 
 export async function registerApi(params) {
   const {
@@ -20,7 +21,7 @@ export async function registerApi(params) {
     confirmPassword,
   } = params;
   const { code, msg, data } = await post('/mobile/webRegister', {
-    hospitalId: 'SZYBTQYQ',
+    hospitalId,
     registerSource: 'H5',
     idType,
     idCard,
@@ -50,7 +51,7 @@ export async function loginApi(params) {
   const { idCard, password, ...rest } = params;
   const { code, msg, data } = await post('/mobile/miniProgramLogin', {
     loginType: 'web',
-    hospitalId: 'SZYBTQYQ',
+    hospitalId,
     idCard,
     password,
     ...rest,

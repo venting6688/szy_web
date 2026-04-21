@@ -6,10 +6,6 @@ const { orderList, loading, cancelEmit, getOrderList } = useOrderData();
 const pullDistance = ref(0);
 
 const isRefreshing = ref(false);
-const visibleCount = ref(8);
-const loadMoreRef = ref(null);
-
-let io = null;
 
 const statusMap = {
   normal: '已预约',
@@ -17,16 +13,8 @@ const statusMap = {
   finished: '已完成',
 };
 
-const renderedOrders = computed(() => {
-  return orderList.value.slice(0, visibleCount.value);
-});
-
 const cancellableCount = computed(() => {
   return orderList.value.filter((item) => item.AllowRefundFlag === 'Y' && item.OrderStatus === 'normal').length;
-});
-
-const canLoadMore = computed(() => {
-  return renderedOrders.value.length < orderList.value.length;
 });
 
 function canCancel(order) {
@@ -37,9 +25,7 @@ async function onClickCancel(order) {
   await cancelEmit(order);
 }
 
-onBeforeUnmount(() => {
-  if (io) io.disconnect();
-});
+onBeforeUnmount(() => {});
 </script>
 
 <template>
@@ -96,7 +82,7 @@ onBeforeUnmount(() => {
       >
         <!-- 与 PC 差异：多行信息卡统一改为移动端单列流式卡片 -->
         <article
-          v-for="item in renderedOrders"
+          v-for="item in orderList"
           :key="item.OrderCode"
           class="order-card"
         >
@@ -136,14 +122,6 @@ onBeforeUnmount(() => {
             </span>
           </div>
         </article>
-
-        <div
-          v-if="canLoadMore"
-          ref="loadMoreRef"
-          class="load-more-anchor"
-        >
-          上拉加载更多记录
-        </div>
       </div>
     </section>
   </div>
@@ -343,13 +321,6 @@ onBeforeUnmount(() => {
   text-align: center;
   background: #f2f3f5;
   border-radius: 999px;
-}
-
-.load-more-anchor {
-  padding: 8px 0 4px;
-  font-size: 12px;
-  color: @text-secondary;
-  text-align: center;
 }
 
 @media (orientation: landscape) {

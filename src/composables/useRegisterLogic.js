@@ -69,6 +69,10 @@ export function useRegisterLogic({ loginPath }) {
     },
   );
 
+  onBeforeUnmount(() => {
+    if (timer) clearInterval(timer);
+  });
+
   const countdown = ref(0);
   let timer = null;
 

@@ -53,10 +53,12 @@ export function useAppointmentData() {
       await onClickDept(arr[0]);
       // 默认选中第一个二级科室
       const firstDeptId = arr[0].CliSerGroupID;
-      const secondDepts = secondDeptMap.value[firstDeptId];
-      if (secondDepts && secondDepts.length > 0) {
-        await onClickSecondDept(secondDepts[0]);
-      }
+      nextTick(async () => {
+        const secondDepts = secondDeptMap.value[firstDeptId];
+        if (secondDepts && secondDepts.length > 0) {
+          await onClickSecondDept(secondDepts[0]);
+        }
+      });
     }
   }
 
