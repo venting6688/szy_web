@@ -1,7 +1,7 @@
 // src/api/user.js
 import { MessagePlugin } from 'tdesign-vue-next';
 import { post, get } from '@/utils/request';
-const hospitalId = 'SZYBTQYQ';
+const hospitalId = import.meta.env.VITE_HOSPITAL_ID;
 
 export async function registerApi(params) {
   const {

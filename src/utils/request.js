@@ -44,17 +44,21 @@ instance.interceptors.request.use(
         console.error('等待医院列表初始化失败:', error);
       }
     }
+    const hospitalId =
+      hospitalStore.current === hospitalStore.list.find((item) => item.appointment === false).value
+        ? import.meta.env.VITE_HOSPITAL_ID
+        : hospitalStore.current;
 
     if (config.method === 'get') {
       config.params = {
-        hospitalId: hospitalStore.current,
+        hospitalId,
         ...config.params,
       };
     }
 
     if (config.method === 'post') {
       config.data = {
-        hospitalId: hospitalStore.current,
+        hospitalId,
         ...config.data,
       };
     }

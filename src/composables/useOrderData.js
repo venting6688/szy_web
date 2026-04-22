@@ -9,14 +9,14 @@ const hospitalStore = useHospitalStore();
 export function useOrderData() {
   onMounted(() => {
     console.log('Component mounted!');
-    getOrderList();
+    // getOrderList();
   });
   const loading = ref(false);
 
   const orderList = ref([]);
   const hospitalId = ref('');
   // 院区列表
-  const hospitalOptions = computed(() => hospitalStore.list);
+  const hospitalOptions = computed(() => hospitalStore.list.filter((item) => item.appointment === true));
   // 切换院区
   function onChangeHospital() {
     loading.value = true;
@@ -29,7 +29,8 @@ export function useOrderData() {
     hospitalOptions,
     (newVal) => {
       if (newVal.length === 0) return;
-      hospitalId.value = hospitalStore.current || newVal[0].value;
+      const isCBD = hospitalStore.current === hospitalStore.list.find((item) => item.appointment === false).value;
+      hospitalId.value = (isCBD ? import.meta.env.VITE_HOSPITAL_ID : hospitalStore.current) || newVal[0].value;
       onChangeHospital();
     },
     { immediate: true },

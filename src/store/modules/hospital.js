@@ -24,6 +24,8 @@ export const useHospitalStore = defineStore('hospital', {
           this.list = branches.map((item) => ({
             label: item.branchName,
             value: item.branchCode,
+            // value: item.appointment === true ? item.branchCode : 'SZYQFSYQ',
+            appointment: item.appointment === true,
           }));
 
           // 默认选中第一个

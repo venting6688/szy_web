@@ -1,5 +1,8 @@
 import { get } from '@/utils/request';
 import { MessagePlugin } from 'tdesign-vue-next';
+import { useHospitalStore } from '@/store/modules/hospital';
+
+const hospitalStore = useHospitalStore();
 
 // 医生排班
 export async function getSchedulesApi(params) {
@@ -10,6 +13,7 @@ export async function getSchedulesApi(params) {
     deptCode,
     startDate,
     endDate,
+    isCBDFlag: hospitalStore.current === hospitalStore.list.find((item) => item.appointment === false).value ? 'Y' : '',
   });
   if (code !== 200) {
     MessagePlugin.error(msg || '获取排班失败');
