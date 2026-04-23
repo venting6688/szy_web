@@ -21,19 +21,19 @@ const routes = [
     ],
   },
   {
-    path: '/mobile-auth',
+    path: '/h5-auth',
     component: () => import('@/views-mobile/auth/Layout.vue'),
     children: [
       {
-        path: '/mobile/login',
+        path: '/h5/login',
         component: () => import('@/views-mobile/auth/Login.vue'),
       },
       {
-        path: '/mobile/register',
+        path: '/h5/register',
         component: () => import('@/views-mobile/auth/Register.vue'),
       },
       {
-        path: '/mobile/forget-password',
+        path: '/h5/forget-password',
         component: () => import('@/views-mobile/auth/ForgetPassword.vue'),
       },
     ],
@@ -50,14 +50,14 @@ const routes = [
     ],
   },
   {
-    path: '/mobile',
+    path: '/h5',
     component: () => import('@/layout/MobileLayout.vue'),
-    redirect: '/mobile/appointment-today',
+    redirect: '/h5/appointment-today',
     children: [
-      { path: '/mobile/appointment-today', component: () => import('@/views-mobile/appointment/Appointment.vue') },
-      { path: '/mobile/appointment', component: () => import('@/views-mobile/appointment/Appointment.vue') },
-      { path: '/mobile/order', component: () => import('@/views-mobile/order/Order.vue') },
-      { path: '/mobile/profile', component: () => import('@/views-mobile/profile/Profile.vue') },
+      { path: '/h5/appointment-today', component: () => import('@/views-mobile/appointment/Appointment.vue') },
+      { path: '/h5/appointment', component: () => import('@/views-mobile/appointment/Appointment.vue') },
+      { path: '/h5/order', component: () => import('@/views-mobile/order/Order.vue') },
+      { path: '/h5/profile', component: () => import('@/views-mobile/profile/Profile.vue') },
     ],
   },
 ];

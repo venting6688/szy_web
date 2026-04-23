@@ -23,25 +23,25 @@ import profileActive from '@/assets/image/profile_active.png';
 const navList = [
   {
     name: '当日挂号',
-    path: '/mobile/appointment-today',
+    path: '/h5/appointment-today',
     icon: today,
     activeIcon: todayActive,
   },
   {
     name: '预约挂号',
-    path: '/mobile/appointment',
+    path: '/h5/appointment',
     icon: appointment,
     activeIcon: appointmentActive,
   },
   {
     name: '预约记录',
-    path: '/mobile/order',
+    path: '/h5/order',
     icon: order,
     activeIcon: orderActive,
   },
   {
     name: '个人中心',
-    path: '/mobile/profile',
+    path: '/h5/profile',
     icon: profile,
     activeIcon: profileActive,
   },
@@ -65,7 +65,7 @@ const getIcon = (item) => {
 function onClickLogout() {
   try {
     userStore.logout();
-    router.push('/mobile/login');
+    router.push('/h5/login');
   } catch (error) {
     console.error('退出登录失败:', error);
   }

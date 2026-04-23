@@ -17,7 +17,7 @@ const {
   goLogin,
   onChangeArea,
 } = useRegisterLogic({
-  loginPath: '/mobile/login',
+  loginPath: '/h5/login',
 });
 </script>
 

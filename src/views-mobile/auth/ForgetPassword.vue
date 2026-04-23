@@ -12,7 +12,7 @@ const {
   onClickForgetPassword,
   goLogin,
 } = useForgetPasswordLogic({
-  loginPath: '/mobile/login',
+  loginPath: '/h5/login',
 });
 
 const pageRef = ref(null);

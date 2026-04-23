@@ -1,16 +1,16 @@
-﻿<script setup>
+<script setup>
 import { useLoginLogic } from '@/composables/useLoginLogic';
 
 const { loginFormRef, form, loginFormRules, onClickLogin, goRegister, onClickForgetPassword } = useLoginLogic({
-  successPath: '/mobile/appointment-today',
+  successPath: '/h5/appointment-today',
 });
 
 function handleRegister() {
-  goRegister('/mobile/register');
+  goRegister('/h5/register');
 }
 
 function handleForgetPassword() {
-  onClickForgetPassword('/mobile/forget-password');
+  onClickForgetPassword('/h5/forget-password');
 }
 </script>
 

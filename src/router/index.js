@@ -45,42 +45,42 @@ router.beforeEach((to, from, next) => {
   const firstEnter = isFirstRoute;
   isFirstRoute = false;
   // 1. 设备重定向
-  // [OLD] 移动端访问非 /mobile 路由时统一跳转到 /mobile/appointment
-  // if (isMobileDevice && !to.path.startsWith('/mobile')) {
-  //   return next('/mobile/appointment');
+  // [OLD] 移动端访问非 /h5 路由时统一跳转到 /h5/appointment
+  // if (isMobileDevice && !to.path.startsWith('/h5')) {
+  //   return next('/h5/appointment');
   // }
   // [FIXED] 移动端保留登录/注册/忘记密码访问意图，其它仍跳转移动端业务首页
-  if (isMobileDevice && !to.path.startsWith('/mobile')) {
-    if (to.path === '/login') return next('/mobile/login');
-    if (to.path === '/register') return next('/mobile/register');
-    if (to.path === '/forget-password') return next('/mobile/forget-password');
-    if (to.path === '/appointment-today') return next('/mobile/appointment-today');
-    if (to.path === '/appointment') return next('/mobile/appointment');
-    if (to.path === '/order') return next('/mobile/order');
-    if (to.path === '/profile-user') return next('/mobile/profile');
-    return next('/mobile/appointment');
+  if (isMobileDevice && !to.path.startsWith('/h5')) {
+    if (to.path === '/login') return next('/h5/login');
+    if (to.path === '/register') return next('/h5/register');
+    if (to.path === '/forget-password') return next('/h5/forget-password');
+    if (to.path === '/appointment-today') return next('/h5/appointment-today');
+    if (to.path === '/appointment') return next('/h5/appointment');
+    if (to.path === '/order') return next('/h5/order');
+    if (to.path === '/profile-user') return next('/h5/profile');
+    return next('/h5/appointment');
   }
 
-  if (!isMobileDevice && to.path.startsWith('/mobile')) {
+  if (!isMobileDevice && to.path.startsWith('/h5')) {
     return next('/');
   }
 
   // 2. 白名单
-  // [OLD] const whiteList = ['/login', '/register', '/mobile/login', '/mobile/register', '/forget-password'];
+  // [OLD] const whiteList = ['/login', '/register', '/h5/login', '/h5/register', '/forget-password'];
   // [FIXED] 新增移动端忘记密码白名单
   const whiteList = [
     '/login',
     '/register',
-    '/mobile/login',
-    '/mobile/register',
+    '/h5/login',
+    '/h5/register',
     '/forget-password',
-    '/mobile/forget-password',
+    '/h5/forget-password',
   ];
   console.log(token, to.path);
   // 3. 登录判断
   if (token) {
     if (whiteList.includes(to.path)) {
-      return next(isMobileDevice ? '/mobile/appointment-today' : '/appointment-today');
+      return next(isMobileDevice ? '/h5/appointment-today' : '/appointment-today');
     }
     return next();
   } else {
@@ -93,7 +93,7 @@ router.beforeEach((to, from, next) => {
       MessagePlugin.warning('请先登录');
     }
     // MessagePlugin.warning('请先登录');
-    return next(isMobileDevice ? '/mobile/login' : '/login');
+    return next(isMobileDevice ? '/h5/login' : '/login');
   }
 });
 
