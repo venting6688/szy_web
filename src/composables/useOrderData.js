@@ -8,7 +8,6 @@ const hospitalStore = useHospitalStore();
 
 export function useOrderData() {
   onMounted(() => {
-    console.log('Component mounted!');
     // getOrderList();
   });
   const loading = ref(false);
@@ -21,7 +20,6 @@ export function useOrderData() {
   function onChangeHospital() {
     loading.value = true;
     hospitalStore.setHospital(hospitalId.value);
-    console.log('切换院区', hospitalId.value);
     getOrderList();
   }
   // 如果监听到院区列表不为空了，初始化院区为第一个院区
@@ -47,7 +45,6 @@ export function useOrderData() {
   }
 
   async function cancelEmit(order) {
-    console.log('取消预约', order);
     // 确认取消预约
     const confirmInstance = await DialogPlugin.confirm({
       header: '确认取消预约',

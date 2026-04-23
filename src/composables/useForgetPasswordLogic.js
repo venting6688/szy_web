@@ -46,7 +46,6 @@ export function useForgetPasswordLogic({ loginPath }) {
       type: 'kopebe',
       phone: form.value.phone,
     });
-    console.log(res);
 
     countdown.value = 60;
     timer = setInterval(() => {
@@ -69,7 +68,6 @@ export function useForgetPasswordLogic({ loginPath }) {
     };
 
     const res = await forgetPasswordApi(formData);
-    console.log(res);
     router.push(loginPath);
   }
 
@@ -95,4 +93,3 @@ export function useForgetPasswordLogic({ loginPath }) {
     goLogin,
   };
 }
-

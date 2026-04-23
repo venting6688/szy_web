@@ -52,7 +52,6 @@ const showDeptSheet = ref(false);
 const doctorVisibleCount = ref(6);
 
 const renderedDoctors = computed(() => {
-  console.log('renderedDoctors', displayDoctors.value, doctorVisibleCount.value);
   return displayDoctors.value.slice(0, doctorVisibleCount.value);
 });
 

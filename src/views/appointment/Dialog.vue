@@ -2,10 +2,6 @@
 import { ref, reactive, computed, watch, onMounted } from 'vue';
 import dayjs from 'dayjs';
 import { getScheduleDetailApi } from '@/api/schedule';
-
-onMounted(() => {
-  console.log('Component mounted!');
-});
 const emit = defineEmits(['open']);
 
 //#region 预约
@@ -39,9 +35,7 @@ async function book(doctor, period) {
     date: dayjs(doctorCardInfo.value.date).format('YYYY-MM-DD'),
     patient: userStore.userInfo?.realName,
   };
-  console.log('预约信息', appointmentInfo.value);
   dialogType.value = 'schedule';
-  console.log('预约医生：', doctorCardInfo.value);
   dialogVisible.value = true;
   activeTab.value = period;
   await getScheduleDetail();
@@ -55,7 +49,8 @@ async function getScheduleDetail() {
     scheduleItemCode: doctorCardInfo.value.schedule.find((item) => item.period === activeTab.value)?.scheduleItemCode,
     deptCode: doctorCardInfo.value.deptCode,
   });
-  console.log('获取号源', data);
+
+
   scheduleDetailList.value = data;
 }
 const weekDayMap = {
@@ -71,7 +66,7 @@ const formatWeekDay = (weekDay) => weekDayMap[weekDay] || '未知';
 const formatDate = (date) => dayjs(date).format('YYYY年MM月DD日');
 
 function onClickBookTime(item) {
-  console.log('点击时间', item);
+
   dialogType.value = 'appointment';
   appointmentInfo.value.startTime = item.StartTime;
   appointmentInfo.value.endTime = item.EndTime;
@@ -85,7 +80,7 @@ import { createAppointmentApi } from '@/api/appointment';
 import { MessagePlugin } from 'tdesign-vue-next';
 async function confirmBook() {
   if (submitting.value) return;
-  console.log('确认预约', appointmentInfo.value);
+
 
   try {
     submitting.value = true;
@@ -95,7 +90,8 @@ async function confirmBook() {
       StartTime: appointmentInfo.value.startTime,
       EndTime: appointmentInfo.value.endTime,
     });
-    console.log('预约挂号成功', res);
+
+
     MessagePlugin.success('预约挂号成功');
     dialogVisible.value = false;
   } catch (error) {
@@ -108,7 +104,8 @@ async function confirmBook() {
 function goNotice() {
   // dialogType.value = 'notice';
   // noticeDialogRef.value.openNotice();
-  console.log('goNotice');
+
+
   emit('open');
 }
 function onClickClose() {

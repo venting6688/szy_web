@@ -76,7 +76,6 @@ instance.interceptors.response.use(
   },
   (error) => {
     const { response } = error;
-    console.log('response', response);
     // ✔ token 失效 / 未登录
     if (response?.status === 401) {
       removeToken();

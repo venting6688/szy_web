@@ -65,7 +65,6 @@ const props = defineProps({
     required: true,
   },
 });
-console.log(props.order);
 
 const emit = defineEmits(['cancel']);
 

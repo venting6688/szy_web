@@ -14,7 +14,6 @@ export function useAppointmentData() {
   const router = useRouter();
 
   const type = route.path === '/appointment-today' ? 'appointment-today' : 'appointment';
-  console.log('type', type);
 
   const subLoading = ref(false);
 
@@ -45,7 +44,6 @@ export function useAppointmentData() {
       startDate: currentDate.value,
       endDate: currentDate.value,
     });
-    console.log('大科室', arr);
     firstDeptList.value = arr;
 
     // 默认选中第一个一级科室并展开
@@ -97,7 +95,6 @@ export function useAppointmentData() {
       subLoading.value = false;
     });
     // loadingInstance.hide();
-    console.log('subLoading.value', subLoading.value);
   }
 
   function transformSchedule(list, deptCode) {
@@ -135,7 +132,6 @@ export function useAppointmentData() {
 
   // 点击子科室
   async function onClickSecondDept(child) {
-    console.log('子科室', child);
     loading.value = true;
     currentSecondDept.value = child.CLGRPRowId;
 
@@ -157,8 +153,6 @@ export function useAppointmentData() {
     // if (dayjs(currentDate.value).isSame(dayjs(), 'day')) {
     //   availableDateList.value[0] = buildDateAvailability(schedules, currentDate.value, currentDate.value)[0];
     // }
-    console.log('医生排班', doctors.value);
-    console.log('可用号源', availableDateList.value);
     loading.value = false;
   }
 
@@ -179,7 +173,6 @@ export function useAppointmentData() {
 
       map[date] += left;
     });
-    console.log('map', map);
 
     // 2️⃣ 生成完整日期区间
     const result = [];
@@ -291,21 +284,18 @@ export function useAppointmentData() {
   // 弹窗
   const dialogRef = ref(null);
   function bookEmit(doctor, period) {
-    console.log('预约医生txt：', doctor, period);
     dialogRef.value.book(doctor, period);
   }
   // 通知弹窗
   const noticeDialogRef = ref(null);
   // 打开通知弹窗
   function openNoticeDialogOnce() {
-    console.log('openNoticeDialog1');
     const noticeStore = useNoticeStore();
     if (noticeStore.isNotified) return;
     noticeStore.setIsNotified(true);
     noticeDialogRef.value.openNotice();
   }
   function openNoticeDialog() {
-    console.log('openNoticeDialog2');
     noticeDialogRef.value.openNotice();
   }
 

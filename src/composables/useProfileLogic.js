@@ -25,9 +25,7 @@ export function useProfileLogic() {
   const profileFormRef = ref(null);
 
   async function submitProfile() {
-    console.log(profileFormData.value);
     const isValid = await profileFormRef.value.validate();
-    console.log(isValid);
     if (isValid !== true && !isEmptyObject(isValid)) {
       throw new Error('个人信息表单验证失败:', isValid);
     }
@@ -67,8 +65,6 @@ export function useProfileLogic() {
     confirmPassword: '',
   });
   async function submitPassword() {
-    console.log(passwordFormData.value);
-
     const res = await updatePasswordApi(passwordFormData.value);
     if (res) {
       MessagePlugin.success('修改密码成功，请重新登录！');
@@ -93,9 +89,6 @@ export function useProfileLogic() {
   const onClick = (tab) => {
     currentTab.value = tab;
   };
-  onMounted(() => {
-    console.log('Component mounted!');
-  });
 
   return {
     userStore,

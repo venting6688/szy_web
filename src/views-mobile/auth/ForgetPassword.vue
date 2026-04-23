@@ -137,27 +137,7 @@ async function refreshPageData() {
           </t-form-item>
         </t-form>
       </div>
-      <!-- [OLD]
-      <t-button
-        class="btn primary"
-        block
-        shape="round"
-        @click="onClickForgetPassword"
-      >
-        重置密码
-      </t-button>
-      <t-button
-        class="btn"
-        block
-        variant="outline"
-        shape="round"
-        @click="goLogin"
-      >
-        返回登录
-      </t-button>
-      -->
     </section>
-    <!-- [FIXED] 底部固定操作区 -->
     <div class="fixed-actions">
       <t-button
         class="btn primary"
@@ -297,7 +277,6 @@ async function refreshPageData() {
 .mobile-forget-page {
   padding-top: env(safe-area-inset-top);
   padding-right: 0;
-  /* [OLD] padding-bottom: env(safe-area-inset-bottom); */
   /* [FIXED] 为底部固定按钮留出空间 */
   padding-bottom: calc(0px + env(safe-area-inset-bottom));
   padding-left: 0;

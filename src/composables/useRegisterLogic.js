@@ -83,7 +83,6 @@ export function useRegisterLogic({ loginPath }) {
       type: 'kopebe',
       phone: form.value.phoneNumber,
     });
-    console.log(res);
 
     countdown.value = 60;
     timer = setInterval(() => {
@@ -191,7 +190,6 @@ export function useRegisterLogic({ loginPath }) {
       formData.city = areaText[1];
       formData.district = areaText[2];
       const res = await registerApi(formData);
-      console.log(res);
       router.push(loginPath);
     } catch (error) {
       console.error('注册提交异常:', error);

@@ -1,5 +1,4 @@
 ﻿<script setup>
-// [OLD] 原布局无脚本逻辑，仅作为简单容器承载 <router-view />
 import FooterMobile from '@/components/Footer/FooterMobile.vue';
 </script>
 
@@ -43,7 +42,6 @@ import FooterMobile from '@/components/Footer/FooterMobile.vue';
   flex-direction: column;
   background: @bg-page;
   overflow-x: hidden;
-  /* [OLD] overflow-y: auto; */
   /* [FIXED] 滚动由 auth-panel 内部子页面承担，外层布局保持固定 */
   overflow-y: hidden;
 }
@@ -113,8 +111,6 @@ import FooterMobile from '@/components/Footer/FooterMobile.vue';
 
 .mobile-auth-card {
   width: 100%;
-  /* [OLD] height: calc(100vh - 170px); */
-  /* [FIXED] 改为自动高度，让内容自然延伸，footer 固定在底部 */
   flex: 1;
   min-height: 0;
   max-width: 560px;

@@ -8,7 +8,6 @@ const hospitalStore = useHospitalStore();
 
 // 预约挂号
 export async function createAppointmentApi({ ScheduleItemCode, PayFee, StartTime, EndTime }) {
-  console.log('预约挂号', ScheduleItemCode, PayFee, StartTime, EndTime);
   const { code, msg, data } = await post(
     '/mobile/api/dh/appoint/register',
     {

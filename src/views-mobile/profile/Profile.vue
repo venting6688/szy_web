@@ -1,8 +1,4 @@
 ﻿<script setup>
-// [OLD] 旧逻辑：移动端直接复用 PC 页面
-// [OLD] import ProfileView from '@/views/profile/Profile.vue';
-// [OLD] <ProfileView />
-import { computed, ref } from 'vue';
 import { useProfileLogic } from '@/composables/useProfileLogic';
 
 const {

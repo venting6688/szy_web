@@ -22,7 +22,6 @@ import defaultAvatar from '@/assets/image/default_avatar.png';
 watch(
   () => props.doctor,
   (val) => {
-    console.log('val', val);
     // if (!val) return;
 
     imgSrc.value = `https://szyyy.sdzydfy.com/img/${val.code}.jpg`;
