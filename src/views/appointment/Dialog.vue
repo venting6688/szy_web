@@ -50,7 +50,6 @@ async function getScheduleDetail() {
     deptCode: doctorCardInfo.value.deptCode,
   });
 
-
   scheduleDetailList.value = data;
 }
 const weekDayMap = {
@@ -66,7 +65,6 @@ const formatWeekDay = (weekDay) => weekDayMap[weekDay] || '未知';
 const formatDate = (date) => dayjs(date).format('YYYY年MM月DD日');
 
 function onClickBookTime(item) {
-
   dialogType.value = 'appointment';
   appointmentInfo.value.startTime = item.StartTime;
   appointmentInfo.value.endTime = item.EndTime;
@@ -81,7 +79,6 @@ import { MessagePlugin } from 'tdesign-vue-next';
 async function confirmBook() {
   if (submitting.value) return;
 
-
   try {
     submitting.value = true;
     const res = await createAppointmentApi({
@@ -90,7 +87,6 @@ async function confirmBook() {
       StartTime: appointmentInfo.value.startTime,
       EndTime: appointmentInfo.value.endTime,
     });
-
 
     MessagePlugin.success('预约挂号成功');
     dialogVisible.value = false;
@@ -104,7 +100,6 @@ async function confirmBook() {
 function goNotice() {
   // dialogType.value = 'notice';
   // noticeDialogRef.value.openNotice();
-
 
   emit('open');
 }
@@ -387,7 +382,8 @@ defineExpose({
 .notice {
   line-height: 1.6;
   color: @text-regular;
-
+  max-height: 65vh;
+  overflow-y: scroll;
   .line {
   }
 
