@@ -37,7 +37,7 @@ const {
   <div class="page">
     <div class="header">
       <div class="header-left">
-        <div class="title">预约挂号</div>
+        <div class="title">{{ type === 'schedule' ? '医生排班' : '预约挂号' }}</div>
         <div class="info">
           <!-- <span>请先选择院区再选择对应的临床科室进行挂号登记</span> -->
         </div>
@@ -120,7 +120,7 @@ const {
       <div class="right">
         <!-- 日期 -->
         <div
-          v-if="type === 'appointment'"
+          v-if="type === 'appointment' || type === 'schedule'"
           class="date-bar"
         >
           <div
@@ -136,6 +136,7 @@ const {
             <div
               class="sub"
               :class="{ unavailable: !isAvailable(d) }"
+              v-if="type !== 'schedule'"
             >
               {{ isAvailable(d) ? '有号' : '无号' }}
             </div>
@@ -145,7 +146,7 @@ const {
         <!-- 标题 -->
         <div class="title flex justify-between">
           <span>{{ format(currentDate) }} 坐诊医生</span>
-          <div>
+          <div v-if="type !== 'schedule'">
             <span style="color: #666">只看有号 </span>
 
             <t-switch
@@ -192,6 +193,7 @@ const {
             <DoctorCard
               :doctor="doc"
               @book="bookEmit"
+              :type="type"
             />
           </div>
         </div>

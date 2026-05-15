@@ -13,8 +13,13 @@ export function useAppointmentData() {
   const route = useRoute();
   const router = useRouter();
 
-  const type = route.path === '/appointment-today' ? 'appointment-today' : 'appointment';
-
+  // const type = route.path === '/appointment-today' ? 'appointment-today' : 'appointment';
+  // const type = route.path.split('/')[1];
+  const type = route.path.includes('schedule')
+    ? 'schedule'
+    : route.path.includes('appointment-today')
+      ? 'appointment-today'
+      : 'appointment';
   const subLoading = ref(false);
 
   const currentDept = ref(-1);
@@ -311,6 +316,7 @@ export function useAppointmentData() {
   };
 
   onMounted(() => {
+    if (type === 'schedule') return;
     openNoticeDialogOnce();
   });
 

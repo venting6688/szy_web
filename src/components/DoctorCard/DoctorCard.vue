@@ -3,6 +3,7 @@ import { defineProps } from 'vue';
 
 const props = defineProps({
   doctor: Object,
+  type: String,
 });
 
 const ellipsisState = ref({
@@ -58,7 +59,10 @@ const emit = defineEmits(['book']);
     </div>
 
     <!-- 下半部分 -->
-    <div class="card-bottom">
+    <div
+      class="card-bottom"
+      v-if="type !== 'schedule'"
+    >
       <div
         class="time-row"
         v-for="item in doctor.schedule"
@@ -78,14 +82,26 @@ const emit = defineEmits(['book']);
           </div>
         </div>
 
-        <t-button
-          v-if="item.left > 0"
-          size="small"
-          class="btn-book"
-          @click="emit('book', doctor, item.period)"
+        <div
+          class="schedule-action"
+          v-if="type !== 'schedule'"
         >
-          预约
-        </t-button>
+          <t-button
+            v-if="item.left > 0"
+            size="small"
+            class="btn-book"
+            @click="emit('book', doctor, item.period)"
+          >
+            预约
+          </t-button>
+          <t-button
+            v-else
+            size="small"
+            class="btn-wait"
+          >
+            已约满
+          </t-button>
+        </div>
       </div>
     </div>
   </div>
@@ -184,6 +200,7 @@ const emit = defineEmits(['book']);
   color: @warning-color;
   border-radius: 29px;
   border: 0;
+  pointer-events: none;
 }
 
 .btn-book {

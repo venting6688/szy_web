@@ -45,6 +45,7 @@ router.beforeEach((to, from, next) => {
   const firstEnter = isFirstRoute;
   isFirstRoute = false;
   if (isMobileDevice && !to.path.startsWith('/h5')) {
+    if (to.path === '/schedule') return next('/h5/schedule');
     if (to.path === '/login') return next('/h5/login');
     if (to.path === '/register') return next('/h5/register');
     if (to.path === '/forget-password') return next('/h5/forget-password');

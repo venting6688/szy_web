@@ -3,6 +3,14 @@ const routes = [
   // { path: '/auth/login', component: () => import('@/views/auth/Login.vue') },
   // { path: '/auth/register', component: () => import('@/views/auth/Register.vue') },
   {
+    path: '/schedule',
+    component: () => import('@/views/appointment/Appointment.vue'),
+  },
+  {
+    path: '/h5/schedule',
+    component: () => import('@/views-mobile/appointment/Appointment.vue'),
+  },
+  {
     path: '/auth',
     component: AuthLayout,
     children: [

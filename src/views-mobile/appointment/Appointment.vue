@@ -42,9 +42,9 @@ const {
   subLoading,
 } = useAppointmentData();
 
-const mobileType = computed(() => {
-  return route.path.includes('appointment-today') ? 'appointment-today' : type;
-});
+// const mobileType = computed(() => {
+//   return route.path.includes('appointment-today') ? 'appointment-today' : type;
+// });
 
 // 移动端附加状态：筛选面板、下拉刷新、上拉渐进加载
 const showHospitalSheet = ref(false);
@@ -314,10 +314,9 @@ onBeforeUnmount(() => {
     </section>
 
     <section
-      v-if="mobileType === 'appointment'"
+      v-if="type === 'appointment' || type === 'schedule'"
       class="date-section"
     >
-      <div class="section-title">可预约日期</div>
       <div class="date-scroll">
         <button
           v-for="d in dates"
@@ -332,6 +331,7 @@ onBeforeUnmount(() => {
           <span
             class="status"
             :class="{ unavailable: !isAvailable(d) }"
+            v-if="type !== 'schedule'"
           >
             {{ isAvailable(d) ? '有号' : '无号' }}
           </span>
@@ -347,7 +347,10 @@ onBeforeUnmount(() => {
             {{ currentDeptLabel }}
           </div>
         </div>
-        <label class="switch-box">
+        <label
+          class="switch-box"
+          v-if="type !== 'schedule'"
+        >
           <span>只看有号</span>
           <t-switch
             v-model="onlyAvailable"
@@ -420,7 +423,10 @@ onBeforeUnmount(() => {
             </div>
           </div>
 
-          <div class="schedule-group">
+          <div
+            class="schedule-group"
+            v-if="type !== 'schedule'"
+          >
             <div
               v-for="item in doc.schedule"
               :key="`${doc.code}-${item.period}`"
