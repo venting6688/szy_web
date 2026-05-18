@@ -460,6 +460,21 @@ onBeforeUnmount(() => {
               </div>
             </div>
           </div>
+          <div
+            v-else
+            class="schedule-group-schedule"
+          >
+            <span>{{ doc.date }}</span>
+            <span>
+              <span
+                v-for="(item, index) in doc.schedule"
+                :key="`${doc.code}-${item.period}`"
+              >
+                <span>{{ item.period }}</span>
+                <span v-show="index < doc.schedule.length - 1">、</span>
+              </span>
+            </span>
+          </div>
         </article>
 
         <div
@@ -901,6 +916,13 @@ onBeforeUnmount(() => {
   flex-direction: column;
   gap: 10px;
   margin-top: 14px;
+}
+
+.schedule-group-schedule {
+  display: flex;
+  gap: 30px;
+  margin-top: 14px;
+  font-size: 14px;
 }
 
 /* 与 PC 差异：横向时间行重排为竖向信息卡，便于触屏点击 */

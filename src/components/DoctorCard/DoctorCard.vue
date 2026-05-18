@@ -52,7 +52,11 @@ const emit = defineEmits(['book']);
           <span class="name">{{ doctor.name }}</span>
           <span class="title">{{ doctor.doctorType }}</span>
         </div>
-        <t-typography-paragraph :ellipsis="ellipsisState">{{ doctor.desc }}</t-typography-paragraph>
+        <t-typography-paragraph
+          :ellipsis="ellipsisState"
+          style="line-height: 25px"
+          >{{ doctor.desc }}</t-typography-paragraph
+        >
       </div>
 
       <div class="price">￥{{ doctor.price }}</div>
@@ -82,10 +86,7 @@ const emit = defineEmits(['book']);
           </div>
         </div>
 
-        <div
-          class="schedule-action"
-          v-if="type !== 'schedule'"
-        >
+        <div class="schedule-action">
           <t-button
             v-if="item.left > 0"
             size="small"
@@ -103,6 +104,21 @@ const emit = defineEmits(['book']);
           </t-button>
         </div>
       </div>
+    </div>
+    <div
+      v-else
+      class="schedule-group-schedule"
+    >
+      <span>{{ doctor.date }}</span>
+      <span>
+        <span
+          v-for="(item, index) in doctor.schedule"
+          :key="`${doctor.code}-${item.period}`"
+        >
+          <span>{{ item.period }}</span>
+          <span v-show="index < doctor.schedule.length - 1">、</span>
+        </span>
+      </span>
     </div>
   </div>
 </template>
@@ -213,5 +229,12 @@ const emit = defineEmits(['book']);
   &:hover {
     color: #fff;
   }
+}
+
+.schedule-group-schedule {
+  display: flex;
+  gap: 150px;
+  margin-top: 14px;
+  font-size: 14px;
 }
 </style>
