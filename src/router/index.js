@@ -59,7 +59,16 @@ router.beforeEach((to, from, next) => {
   if (!isMobileDevice && to.path.startsWith('/h5')) {
     return next('/');
   }
-  const whiteList = ['/login', '/register', '/h5/login', '/h5/register', '/forget-password', '/h5/forget-password'];
+  const whiteList = [
+    '/login',
+    '/register',
+    '/h5/login',
+    '/h5/register',
+    '/forget-password',
+    '/h5/forget-password',
+    '/schedule',
+    '/h5/schedule',
+  ];
   // 3. 登录判断
   if (token) {
     if (whiteList.includes(to.path)) {
