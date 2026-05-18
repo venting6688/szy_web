@@ -59,16 +59,8 @@ router.beforeEach((to, from, next) => {
   if (!isMobileDevice && to.path.startsWith('/h5')) {
     return next('/');
   }
-  const whiteList = [
-    '/login',
-    '/register',
-    '/h5/login',
-    '/h5/register',
-    '/forget-password',
-    '/h5/forget-password',
-    '/schedule',
-    '/h5/schedule',
-  ];
+  const whiteList = ['/login', '/register', '/h5/login', '/h5/register', '/forget-password', '/h5/forget-password'];
+  const scheduleWhiteList = ['/schedule', '/h5/schedule'];
   // 3. 登录判断
   if (token) {
     if (whiteList.includes(to.path)) {
@@ -76,7 +68,7 @@ router.beforeEach((to, from, next) => {
     }
     return next();
   } else {
-    if (whiteList.includes(to.path)) {
+    if (whiteList.includes(to.path) || scheduleWhiteList.includes(to.path)) {
       return next();
     }
     // 未登录跳转登录页
