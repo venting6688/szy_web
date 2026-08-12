@@ -30,6 +30,8 @@ export function useProfileLogic() {
       throw new Error('个人信息表单验证失败:', isValid);
     }
     await updateProfileApi(profileFormData.value);
+    // 更新个人信息后重置编辑状态，避免界面仍处于编辑模式
+    isModify.value = false;
   }
   const profileFormRules = ref({
     realName: [{ required: true, message: '请输入姓名' }],
