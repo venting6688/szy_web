@@ -222,13 +222,10 @@ const emit = defineEmits(['book']);
 .btn-book {
   width: 72px;
   height: 28px;
-  background: @primary-color-fade;
-  color: @primary-color;
+  background: @primary-color;
+  color: #fff;
   border-radius: 29px;
   border: 0;
-  &:hover {
-    color: #fff;
-  }
 }
 
 .schedule-group-schedule {
