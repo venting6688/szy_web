@@ -22,6 +22,7 @@ const {
   currentSecondDept,
   onClickSecondDept,
   isAvailable,
+  weekLoading,
   hospitalOptions,
   hospitalId,
   onChangeHospital,
@@ -135,10 +136,11 @@ const {
             <!-- 可用号源 -->
             <div
               class="sub"
-              :class="{ unavailable: !isAvailable(d) }"
+              :class="{ unavailable: !weekLoading && !isAvailable(d) }"
               v-if="type !== 'schedule'"
             >
-              {{ isAvailable(d) ? '有号' : '无号' }}
+              <template v-if="weekLoading">加载中</template>
+              <template v-else>{{ isAvailable(d) ? '有号' : '无号' }}</template>
             </div>
           </div>
         </div>

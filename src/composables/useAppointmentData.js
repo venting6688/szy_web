@@ -174,6 +174,7 @@ export function useAppointmentData() {
   }
 
   const availableDateList = ref([]);
+  const weekLoading = ref(false);
 
   // 构建日期可用号源
   function buildDateAvailability(scheduleList, startDate, endDate) {
@@ -218,20 +219,26 @@ export function useAppointmentData() {
 
   async function loadWeekDoctors() {
     const currentId = ++requestId;
+    weekLoading.value = true;
 
     availableDateList.value = [];
+    try {
+      const schedules = await getSchedulesApi({
+        deptCode: currentSecondDept.value,
+        doctorCode: null,
+        startDate: dates[0],
+        endDate: dates[dates.length - 1],
+      });
 
-    const schedules = await getSchedulesApi({
-      deptCode: currentSecondDept.value,
-      doctorCode: null,
-      startDate: dates[0],
-      endDate: dates[dates.length - 1],
-    });
+      // ⭐ 如果不是最新请求，直接丢弃，用于解决连续点击多个科室导致的并发请求问题
+      if (currentId !== requestId) return;
 
-    // ⭐ 如果不是最新请求，直接丢弃，用于解决连续点击多个科室导致的并发请求问题
-    if (currentId !== requestId) return;
-
-    availableDateList.value = buildDateAvailability(schedules, dates[0], dates[dates.length - 1]);
+      availableDateList.value = buildDateAvailability(schedules, dates[0], dates[dates.length - 1]);
+    } finally {
+      if (currentId === requestId) {
+        weekLoading.value = false;
+      }
+    }
   }
 
   function isAvailable(date) {
@@ -249,6 +256,7 @@ export function useAppointmentData() {
     firstDeptList.value = [];
     secondDeptMap.value = {};
     availableDateList.value = [];
+    weekLoading.value = false;
     openDept.value = null;
     currentDept.value = -1;
   }
@@ -338,6 +346,7 @@ export function useAppointmentData() {
     currentSecondDept,
     onClickSecondDept,
     availableDateList,
+    weekLoading,
     isAvailable,
     hospitalOptions,
     hospitalId,

@@ -8,7 +8,7 @@ const emit = defineEmits(['open']);
 // 弹窗类型
 // schedule: 选择预约时间
 // appointment: 确认预约
-// notice: 预约挂号通知
+// notice: 预约须知
 const dialogType = ref('schedule');
 const submitting = ref(false);
 const headerTitle = computed(() => {
@@ -159,7 +159,7 @@ defineExpose({
   <div>
     <t-dialog
       :dialog-class-name="dialogType === 'notice' ? 'notice-dialog' : 'schedule-dialog'"
-      :closeBtn="true"
+      :closeBtn="dialogType === 'notice' ? false : true"
       :footer="false"
       placement="center"
       v-model:visible="dialogVisible"

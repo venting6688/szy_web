@@ -26,6 +26,7 @@ const {
   currentSecondDept,
   onClickSecondDept,
   isAvailable,
+  weekLoading,
   hospitalOptions,
   hospitalId,
   onChangeHospital,
@@ -330,10 +331,11 @@ onBeforeUnmount(() => {
           <span class="day">{{ format(d) }}</span>
           <span
             class="status"
-            :class="{ unavailable: !isAvailable(d) }"
+            :class="{ unavailable: !weekLoading && !isAvailable(d) }"
             v-if="type !== 'schedule'"
           >
-            {{ isAvailable(d) ? '有号' : '无号' }}
+            <template v-if="weekLoading">加载中</template>
+            <template v-else>{{ isAvailable(d) ? '有号' : '无号' }}</template>
           </span>
         </button>
       </div>
