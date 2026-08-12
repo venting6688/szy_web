@@ -8,6 +8,10 @@ import { MessagePlugin } from 'tdesign-vue-next';
 import { useNoticeStore } from '@/store/modules/notice';
 import downIcon from '@/assets/image/down.png';
 import rightIcon from '@/assets/image/right.png';
+// 缓存一级科室和二级科室，因为使用了composables，所以不需要使用Pinia了，直接使用Map缓存在本模块中即可
+// 是按院区存储的，Map 有多少条取决于访问过多少个院区
+const firstDeptCache = new Map();
+const secondDeptCache = new Map();
 
 export function useAppointmentData() {
   const route = useRoute();
@@ -45,10 +49,15 @@ export function useAppointmentData() {
   const openDept = ref(null); // 当前展开的一级科室
 
   async function getFirstDepts() {
-    const arr = await getFirstDeptsApi({
-      startDate: currentDate.value,
-      endDate: currentDate.value,
-    });
+    const cacheKey = hospitalStore.current;
+    let arr = firstDeptCache.get(cacheKey);
+    if (!firstDeptCache.has(cacheKey)) {
+      arr = await getFirstDeptsApi({
+        startDate: currentDate.value,
+        endDate: currentDate.value,
+      });
+      firstDeptCache.set(cacheKey, arr);
+    }
     firstDeptList.value = arr;
 
     // 默认选中第一个一级科室并展开
@@ -68,6 +77,7 @@ export function useAppointmentData() {
   // 点击一级科室
   async function onClickDept(item) {
     const id = item.CliSerGroupID;
+    const cacheKey = `${hospitalStore.current}:${id}`;
 
     // const loadingInstance = await LoadingPlugin({
     //   text: '加载中...',
@@ -85,17 +95,19 @@ export function useAppointmentData() {
 
     // 如果已经加载过，就不再请求
     if (secondDeptMap.value[id]) return;
+    if (secondDeptCache.has(cacheKey)) {
+      secondDeptMap.value[id] = secondDeptCache.get(cacheKey);
+      return;
+    }
     subLoading.value = true;
     const data = await getSecondDeptsApi({
       departmentGroupCode: id,
       startDate: currentDate.value,
       endDate: currentDate.value,
     });
-    if (Array.isArray(data)) {
-      secondDeptMap.value[id] = data;
-    } else {
-      secondDeptMap.value[id] = [data];
-    }
+    const secondDepts = Array.isArray(data) ? data : [data];
+    secondDeptMap.value[id] = secondDepts;
+    secondDeptCache.set(cacheKey, secondDepts);
     nextTick(() => {
       subLoading.value = false;
     });
@@ -247,6 +259,7 @@ export function useAppointmentData() {
     doctors.value = [];
     currentSecondDept.value = null;
     firstDeptList.value = [];
+    secondDeptMap.value = {};
     availableDateList.value = [];
     openDept.value = null;
     currentDept.value = -1;
