@@ -221,29 +221,17 @@ export function useAppointmentData() {
 
     availableDateList.value = [];
 
-    const todaySchedule = await getSchedulesApi({
-      deptCode: currentSecondDept.value,
-      doctorCode: null,
-      startDate: dates[0],
-      endDate: dates[0],
-    });
-
-    // ⭐ 如果不是最新请求，直接丢弃
-    if (currentId !== requestId) return;
-
     const schedules = await getSchedulesApi({
       deptCode: currentSecondDept.value,
       doctorCode: null,
-      startDate: dates[1],
+      startDate: dates[0],
       endDate: dates[dates.length - 1],
     });
 
+    // ⭐ 如果不是最新请求，直接丢弃，用于解决连续点击多个科室导致的并发请求问题
     if (currentId !== requestId) return;
 
-    availableDateList.value = [
-      buildDateAvailability(todaySchedule, dates[0], dates[0])[0],
-      ...buildDateAvailability(schedules, dates[1], dates[dates.length - 1]),
-    ];
+    availableDateList.value = buildDateAvailability(schedules, dates[0], dates[dates.length - 1]);
   }
 
   function isAvailable(date) {
