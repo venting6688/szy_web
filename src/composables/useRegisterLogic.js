@@ -64,7 +64,9 @@ export function useRegisterLogic({ loginPath }) {
         form.value.birthday = `${birthYear}-${birthMonth}-${birthDay}`;
 
         const genderCode = parseInt(newIdCard.charAt(16), 10);
-        form.value.gender = genderCode % 2 === 0 ? '0' : '1';
+        const genderLabel = genderCode % 2 === 0 ? '女' : '男';
+        const matchedGender = genderOptions.value.find((item) => item.label === genderLabel);
+        form.value.gender = matchedGender?.value || '';
       }
     },
   );
@@ -156,6 +158,12 @@ export function useRegisterLogic({ loginPath }) {
     nationalityOptions.value = mapDictToOptions(data?.nationality);
     cardTypeOptions.value = mapDictToOptions(data?.card_type);
     genderOptions.value = mapDictToOptions(data?.sex).filter((item) => item.label === '男' || item.label === '女');
+    if (form.value.idCard && form.value.idCard.length === 18) {
+      const genderCode = parseInt(form.value.idCard.charAt(16), 10);
+      const genderLabel = genderCode % 2 === 0 ? '女' : '男';
+      const matchedGender = genderOptions.value.find((item) => item.label === genderLabel);
+      form.value.gender = matchedGender?.value || '';
+    }
 
     const defaultCardType = cardTypeOptions.value.find((item) => item.label === '居民身份证');
     if (defaultCardType) {
