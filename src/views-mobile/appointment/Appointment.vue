@@ -776,10 +776,7 @@ onBeforeUnmount(() => {
 }
 
 .doctor-panel {
-  padding: clamp(14px, 4vw, 18px);
-  background: @bg-white;
-  border-radius: clamp(16px, 4vw, 20px);
-  box-shadow: @shadow-card;
+  padding: clamp(10px, 3vw, 18px);
 }
 
 .panel-header {

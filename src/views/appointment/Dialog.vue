@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, computed, watch, onMounted } from 'vue';
+import { ref, reactive, computed, watch, onMounted, nextTick } from 'vue';
 import dayjs from 'dayjs';
 import { getScheduleDetailApi } from '@/api/schedule';
 const emit = defineEmits(['open']);
@@ -144,9 +144,22 @@ const noticeList = [
   },
 ];
 
+const noticeReachedBottom = ref(false);
+const noticeRef = ref(null);
+
+function checkNoticeScroll() {
+  const el = noticeRef.value;
+  if (!el) return;
+  if (el.scrollHeight - el.scrollTop - el.clientHeight < 5) {
+    noticeReachedBottom.value = true;
+  }
+}
+
 function openNotice() {
   dialogType.value = 'notice';
   dialogVisible.value = true;
+  noticeReachedBottom.value = false;
+  nextTick(checkNoticeScroll);
 }
 defineExpose({
   book,
@@ -289,7 +302,11 @@ defineExpose({
           </div>
         </div>
         <div v-show="dialogType === 'notice'">
-          <div class="notice">
+          <div
+            ref="noticeRef"
+            class="notice"
+            @scroll="checkNoticeScroll"
+          >
             尊敬的患者及家属：
             <div
               v-for="(item, i) in noticeList"
@@ -299,11 +316,13 @@ defineExpose({
             ></div>
           </div>
           <div class="btn-container">
+            <p class="notice-tip">请滚动至底部，阅读完须知后方可点击</p>
             <t-button
               class="btn-confirm"
               shape="round"
               theme="primary"
               block
+              :disabled="!noticeReachedBottom"
               @click="onClickClose"
             >
               我已知晓
@@ -349,9 +368,14 @@ defineExpose({
 }
 
 .btn-container {
-  margin: 30px auto 0;
+  margin: 10px auto 0;
   width: 280px;
   text-align: center;
+  .notice-tip {
+    margin: 0 0 8px;
+    font-size: 12px;
+    color: @text-secondary;
+  }
   .btn-confirm {
     height: 48px;
     margin: 10px 0;

@@ -343,6 +343,10 @@ const {
     border-radius: 10px;
   }
 
+  :deep(.t-input__inner) {
+    font-size: 16px;
+  }
+
   .get-verification-code-btn {
     border-color: @primary-color;
     color: @primary-color;

@@ -172,7 +172,10 @@ function onClickLogout() {
   border-top: 1px solid @border-color;
   display: flex;
   justify-content: space-around;
-  height: 60px;
+  height: calc(60px + constant(safe-area-inset-bottom)); /* iOS 低版本兼容 */
+  height: calc(60px + env(safe-area-inset-bottom));
+  padding-bottom: constant(safe-area-inset-bottom);
+  padding-bottom: env(safe-area-inset-bottom);
   z-index: 100;
 
   .nav-item {

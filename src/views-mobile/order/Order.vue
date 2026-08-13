@@ -219,13 +219,6 @@ async function onClickCancel(order) {
   }
 }
 
-.list-panel {
-  padding: 12px;
-  background: @bg-white;
-  border-radius: clamp(16px, 4vw, 20px);
-  box-shadow: @shadow-card;
-}
-
 .state-block {
   display: flex;
   flex-direction: column;

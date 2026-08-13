@@ -1,8 +1,9 @@
 /* src/styles/theme.css */
 :root {
-  --td-brand-color: #20857e; /* 紫色主题 */
+  --td-brand-color: #20857e; /* 绿色主题 */
   --td-brand-color-hover: rgba(32, 133, 126, 0.85);
   --td-brand-color-active: #156762;
+  --td-brand-color-disabled: #b8d5d2;
 }
 /* color palette from <https://github.com/vuejs/theme> */
 :root {
