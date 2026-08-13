@@ -106,7 +106,7 @@ import FooterMobile from '@/components/Footer/FooterMobile.vue';
   min-height: 0;
   display: flex;
   flex-direction: column;
-  margin-top: -4px;
+  margin-top: -12px;
 }
 
 .mobile-auth-card {

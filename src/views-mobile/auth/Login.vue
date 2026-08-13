@@ -135,7 +135,7 @@ function handleForgetPassword() {
   margin: 0;
 
   padding: clamp(16px, 4.5vw, 22px);
-  padding-top: 10vh;
+  padding-top: 5vh;
   box-shadow: none;
 }
 

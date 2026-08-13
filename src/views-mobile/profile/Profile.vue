@@ -331,6 +331,9 @@ const {
   :deep(.t-input) {
     border-radius: 10px;
   }
+  :deep(.t-input__inner) {
+    font-size: 16px;
+  }
 }
 
 .btn-submit {

@@ -34,12 +34,13 @@ function onClickLink(path) {
 .mobile-footer {
   padding: clamp(16px, 5vw, 24px) clamp(12px, 4vw, 20px);
   padding-bottom: calc(clamp(16px, 5vw, 24px) + env(safe-area-inset-bottom));
-  padding-top: 0;
+  padding-top: 10px;
   color: #666;
   font-size: 12px;
   line-height: 1.8;
   text-align: center;
   display: flex;
+  justify-content: center;
   .img-box {
     img {
       width: 50px;
