@@ -2,6 +2,9 @@
 import { MessagePlugin } from 'tdesign-vue-next';
 import { post, get } from '@/utils/request';
 const hospitalId = import.meta.env.VITE_HOSPITAL_ID;
+import { useUserStore } from '@/store/modules/user';
+const userStore = useUserStore();
+import router from '@/router';
 
 export async function registerApi(params) {
   const {
@@ -105,6 +108,12 @@ export async function updateProfileApi({ idCard, realName, phonenumber, address 
     phonenumber,
     address,
   });
+  if (code === 401) {
+    MessagePlugin.error('登录过期，请重新登录');
+    userStore.logout();
+    router.push('/login');
+    throw new Error(msg + '登录过期，请重新登录');
+  }
   if (code !== 200) {
     MessagePlugin.error(msg || '更新个人信息失败');
     throw new Error(msg || '更新个人信息失败');
