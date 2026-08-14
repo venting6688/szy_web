@@ -71,7 +71,9 @@ function onClickBookTime(item) {
   appointmentInfo.value.scheduleItemCode = item.ScheduleItemCode;
 }
 function bookDisabled(item) {
-  return Number(item.AvailableLeftNum) === 0;
+  if (Number(item.AvailableLeftNum) === 0) return true;
+  // 预约结束时间已过则不可再预约
+  return dayjs(`${item.ServiceDate} ${item.EndTime}`).isBefore(dayjs());
 }
 // #region 确认预约
 import { createAppointmentApi } from '@/api/appointment';
