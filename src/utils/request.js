@@ -45,7 +45,7 @@ instance.interceptors.request.use(
       }
     }
     const hospitalId =
-      hospitalStore.current === hospitalStore.list.find((item) => item.appointment === false).value
+      hospitalStore.current === hospitalStore.list.find((item) => item.appointment === false)?.value
         ? import.meta.env.VITE_HOSPITAL_ID
         : hospitalStore.current;
 

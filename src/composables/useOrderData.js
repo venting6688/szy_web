@@ -27,7 +27,7 @@ export function useOrderData() {
     hospitalOptions,
     (newVal) => {
       if (newVal.length === 0) return;
-      const isCBD = hospitalStore.current === hospitalStore.list.find((item) => item.appointment === false).value;
+      const isCBD = hospitalStore.current === hospitalStore.list.find((item) => item.appointment === false)?.value;
       hospitalId.value = (isCBD ? import.meta.env.VITE_HOSPITAL_ID : hospitalStore.current) || newVal[0].value;
       onChangeHospital();
     },
