@@ -15,7 +15,8 @@ export function useOrderData() {
   const orderList = ref([]);
   const hospitalId = ref('');
   // 院区列表
-  const hospitalOptions = computed(() => hospitalStore.list.filter((item) => item.appointment === true));
+  // 必须使用computed，否则接口返回时间要是慢于组件挂载时间，会导致组件挂载时院区列表为空
+  const hospitalOptions = computed(() => hospitalStore.list);
   // 切换院区
   function onChangeHospital() {
     loading.value = true;
@@ -40,7 +41,10 @@ export function useOrderData() {
       startDate: dayjs().format('YYYY-MM-DD'),
       endDate: dayjs().add(7, 'day').format('YYYY-MM-DD'),
     });
-    orderList.value = res || [];
+
+    if (hospitalId.value === hospitalStore.list.find((item) => item.appointment === false)?.value)
+      orderList.value = (res || []).filter((item) => item.CBDFlag === 'Y');
+    else orderList.value = (res || []).filter((item) => item.CBDFlag !== 'Y');
     loading.value = false;
   }
 
