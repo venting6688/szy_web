@@ -58,6 +58,7 @@
 
 <script setup>
 import { computed } from 'vue';
+import dayjs from 'dayjs';
 
 const props = defineProps({
   order: {
@@ -77,7 +78,15 @@ const statusMap = {
 
 // 是否可取消
 const canCancel = computed(() => {
-  return props.order.AllowRefundFlag === 'Y' && props.order.OrderStatus === 'normal';
+  if (props.order.AllowRefundFlag !== 'Y' || props.order.OrderStatus !== 'normal') {
+    return false;
+  }
+  // 当前时间晚于预约时段末尾时间，则不可取消
+  const admitEnd = props.order.AdmitRange?.split('-')[1];
+  if (admitEnd && dayjs(`${props.order.OrderApptDate} ${admitEnd}`).isBefore(dayjs())) {
+    return false;
+  }
+  return true;
 });
 
 // 取消事件

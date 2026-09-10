@@ -1,11 +1,21 @@
 ﻿<script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useOrderData } from '@/composables/useOrderData';
+import dayjs from 'dayjs';
 
 const { orderList, loading, cancelEmit, getOrderList, hospitalOptions, hospitalId, onChangeHospital } = useOrderData();
 
+// 是否可取消
 function canCancel(order) {
-  return order.AllowRefundFlag === 'Y' && order.OrderStatus === 'normal';
+  if (order.AllowRefundFlag !== 'Y' || order.OrderStatus !== 'normal') {
+    return false;
+  }
+  // 当前时间晚于预约时段末尾时间，则不可取消
+  const admitEnd = order.AdmitRange?.split('-')[1];
+  if (admitEnd && dayjs(`${order.OrderApptDate} ${admitEnd}`).isBefore(dayjs())) {
+    return false;
+  }
+  return true;
 }
 
 async function onClickCancel(order) {
