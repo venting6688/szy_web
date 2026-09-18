@@ -11,6 +11,10 @@ const {
   currentDept,
   dates,
   currentDate,
+  pendingDate,
+  pendingViewDate,
+  isPendingView,
+  countdownText,
   onlyAvailable,
   loading,
   format,
@@ -128,7 +132,7 @@ const {
             v-for="d in dates"
             :key="d"
             class="date-item"
-            :class="{ active: currentDate === d }"
+            :class="{ active: currentDate === d || pendingViewDate === d }"
             @click="onClickDate(d)"
           >
             <div class="week-day">{{ dayjs(d).isSame(dayjs(), 'day') ? '今天' : weekDayMap[dayjs(d).day()] }}</div>
@@ -136,10 +140,11 @@ const {
             <!-- 可用号源 -->
             <div
               class="sub"
-              :class="{ unavailable: !weekLoading && !isAvailable(d) }"
+              :class="{ unavailable: !weekLoading && !isAvailable(d), pending: d === pendingDate }"
               v-if="type !== 'schedule'"
             >
-              <template v-if="weekLoading">加载中</template>
+              <template v-if="d === pendingDate">待放号</template>
+              <template v-else-if="weekLoading">加载中</template>
               <template v-else>{{ isAvailable(d) ? '有号' : '无号' }}</template>
             </div>
           </div>
@@ -147,7 +152,8 @@ const {
 
         <!-- 标题 -->
         <div class="title flex justify-between">
-          <span>{{ format(currentDate) }} 坐诊医生</span>
+          <span v-if="isPendingView">{{ format(pendingViewDate) }} 待放号</span>
+          <span v-else>{{ format(currentDate) }} 坐诊医生</span>
           <div v-if="type !== 'schedule'">
             <span style="color: #666">只看有号 </span>
 
@@ -158,8 +164,21 @@ const {
           </div>
         </div>
 
+        <!-- 待放号倒计时 -->
+        <div
+          v-if="isPendingView"
+          class="pending-countdown"
+        >
+          <div class="pending-title">{{ formatToFull(pendingViewDate) }}号源将于20:00开放</div>
+          <div class="pending-time">{{ countdownText }}</div>
+          <div class="pending-tip">倒计时结束后自动加载医生排班</div>
+        </div>
+
         <!-- 医生列表 -->
-        <div class="doctor-list">
+        <div
+          v-else
+          class="doctor-list"
+        >
           <!-- loading -->
           <div
             v-if="loading"
@@ -360,6 +379,9 @@ const {
       &.unavailable {
         color: @text-secondary;
       }
+      &.pending {
+        color: @warning-color;
+      }
     }
     .week-day {
       font-size: @font-base;
@@ -390,6 +412,30 @@ const {
     width: 100%;
     text-align: center;
     margin-top: 100px;
+  }
+}
+
+.pending-countdown {
+  width: 100%;
+  padding: 80px 0;
+  text-align: center;
+
+  .pending-title {
+    font-size: @font-medium;
+    color: @text-regular;
+  }
+
+  .pending-time {
+    margin: @space-md 0;
+    font-size: 40px;
+    font-weight: 700;
+    color: @warning-color;
+    letter-spacing: 2px;
+  }
+
+  .pending-tip {
+    font-size: @font-small;
+    color: @text-secondary;
   }
 }
 </style>

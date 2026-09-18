@@ -15,6 +15,10 @@ const {
   currentDept,
   dates,
   currentDate,
+  pendingDate,
+  pendingViewDate,
+  isPendingView,
+  countdownText,
   onlyAvailable,
   loading,
   format,
@@ -323,7 +327,7 @@ onBeforeUnmount(() => {
           v-for="d in dates"
           :key="d"
           class="date-chip"
-          :class="{ active: currentDate === d }"
+          :class="{ active: currentDate === d || pendingViewDate === d }"
           type="button"
           @click="onClickDate(d)"
         >
@@ -331,10 +335,11 @@ onBeforeUnmount(() => {
           <span class="day">{{ format(d) }}</span>
           <span
             class="status"
-            :class="{ unavailable: !weekLoading && !isAvailable(d) }"
+            :class="{ unavailable: !weekLoading && !isAvailable(d), pending: d === pendingDate }"
             v-if="type !== 'schedule'"
           >
-            <template v-if="weekLoading">加载中</template>
+            <template v-if="d === pendingDate">待放号</template>
+            <template v-else-if="weekLoading">加载中</template>
             <template v-else>{{ isAvailable(d) ? '有号' : '无号' }}</template>
           </span>
         </button>
@@ -344,7 +349,10 @@ onBeforeUnmount(() => {
     <section class="doctor-panel">
       <div class="panel-header">
         <div>
-          <div class="panel-title">{{ format(currentDate) }} 坐诊医生</div>
+          <div class="panel-title">
+            <template v-if="isPendingView">{{ format(pendingViewDate) }} 待放号</template>
+            <template v-else>{{ format(currentDate) }} 坐诊医生</template>
+          </div>
           <div class="panel-subtitle">
             {{ currentDeptLabel }}
           </div>
@@ -362,7 +370,16 @@ onBeforeUnmount(() => {
       </div>
 
       <div
-        v-if="!currentSecondDept"
+        v-if="isPendingView"
+        class="pending-countdown"
+      >
+        <div class="pending-title">{{ formatToFull(pendingViewDate) }} 号源将于20:00开放</div>
+        <div class="pending-time">{{ countdownText }}</div>
+        <div class="pending-tip">倒计时结束后自动加载医生排班</div>
+      </div>
+
+      <div
+        v-else-if="!currentSecondDept"
         class="state-block"
       >
         <t-empty
@@ -773,6 +790,10 @@ onBeforeUnmount(() => {
   &.unavailable {
     color: @text-secondary;
   }
+
+  &.pending {
+    color: @warning-color;
+  }
 }
 
 .doctor-panel {
@@ -816,6 +837,33 @@ onBeforeUnmount(() => {
   justify-content: center;
   min-height: 240px;
   color: @text-secondary;
+}
+
+.pending-countdown {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  min-height: 240px;
+  text-align: center;
+
+  .pending-title {
+    font-size: 14px;
+    color: @text-regular;
+  }
+
+  .pending-time {
+    font-size: clamp(30px, 9vw, 40px);
+    font-weight: 700;
+    color: @warning-color;
+    letter-spacing: 2px;
+  }
+
+  .pending-tip {
+    font-size: 12px;
+    color: @text-secondary;
+  }
 }
 
 .doctor-list {

@@ -28,15 +28,59 @@ export function useAppointmentData() {
 
   const currentDept = ref(-1);
 
-  const dates = Array.from({ length: 7 }, (_, i) => dayjs().add(i, 'day').format('YYYY-MM-DD'));
+  // 放号时间配置：每天 19:50 起展示第 8 天（待放号），20:00 正式放号
+  const PENDING_START_MINUTES = 11 * 60 + 50;
+  const RELEASE_END_MINUTES = 20 * 60;
 
-  const currentDate = ref(dates[0]);
+  // 当前时间戳，由定时器驱动，用于日期区间与放号状态自动切换（页面不刷新也会更新）
+  const now = ref(Date.now());
+
+  // 是否处于待放号窗口（19:50 - 20:00）
+  const isPendingPeriod = computed(() => {
+    const t = dayjs(now.value);
+    const minutes = t.hour() * 60 + t.minute();
+    return minutes >= PENDING_START_MINUTES && minutes < RELEASE_END_MINUTES;
+  });
+
+  // 19:50 起展示第 8 天，20:00 后第 8 天转为正式放号
+  const showEighthDay = computed(() => {
+    const t = dayjs(now.value);
+    return t.hour() * 60 + t.minute() >= PENDING_START_MINUTES;
+  });
+
+  // 日期列表：19:50 前 7 天，19:50 起 8 天；排班页保持 7 天（跨月、跨年由 dayjs 计算）
+  const dates = computed(() => {
+    const base = dayjs(now.value);
+    const length = showEighthDay.value && type !== 'schedule' ? 8 : 7;
+    return Array.from({ length }, (_, i) => base.add(i, 'day').format('YYYY-MM-DD'));
+  });
+
+  // 待放号的第 8 天日期
+  const pendingDate = computed(() => (isPendingPeriod.value && type !== 'schedule' ? dates.value[7] : null));
+
+  // 点击待放号日期后的查看状态
+  const pendingViewDate = ref(null);
+  const isPendingView = computed(() => !!pendingDate.value && pendingViewDate.value === pendingDate.value);
+
+  // 距离 20:00 放号的倒计时
+  const countdownText = computed(() => {
+    const target = dayjs(now.value).hour(20).minute(0).second(0).millisecond(0);
+    const total = Math.max(0, target.diff(dayjs(now.value), 'second'));
+    const h = String(Math.floor(total / 3600)).padStart(2, '0');
+    const m = String(Math.floor((total % 3600) / 60)).padStart(2, '0');
+    const s = String(total % 60).padStart(2, '0');
+    return `${h}:${m}:${s}`;
+  });
+
+  const currentDate = ref(dayjs().format('YYYY-MM-DD'));
 
   const onlyAvailable = ref(false);
 
   const doctors = ref([]);
   const loading = ref(false);
   const format = (d) => dayjs(d).format('M月D日');
+  // 年月日
+  const formatToFull = (d) => dayjs(d).format('YYYY-MM-DD');
 
   const displayDoctors = computed(() => {
     if (!onlyAvailable.value) return doctors.value;
@@ -226,14 +270,14 @@ export function useAppointmentData() {
       const schedules = await getSchedulesApi({
         deptCode: currentSecondDept.value,
         doctorCode: null,
-        startDate: dates[0],
-        endDate: dates[dates.length - 1],
+        startDate: dates.value[0],
+        endDate: dates.value[dates.value.length - 1],
       });
 
       // ⭐ 如果不是最新请求，直接丢弃，用于解决连续点击多个科室导致的并发请求问题
       if (currentId !== requestId) return;
 
-      availableDateList.value = buildDateAvailability(schedules, dates[0], dates[dates.length - 1]);
+      availableDateList.value = buildDateAvailability(schedules, dates.value[0], dates.value[dates.value.length - 1]);
     } finally {
       if (currentId === requestId) {
         weekLoading.value = false;
@@ -287,6 +331,12 @@ export function useAppointmentData() {
 
   // 选择日期
   function onClickDate(date) {
+    // 待放号日期：只展示倒计时，不请求排班接口
+    if (date === pendingDate.value) {
+      pendingViewDate.value = date;
+      return;
+    }
+    pendingViewDate.value = null;
     if (!currentSecondDept.value) {
       MessagePlugin.warning('请先选择二级科室');
       return;
@@ -324,6 +374,84 @@ export function useAppointmentData() {
     7: '周日',
   };
 
+  // #region 放号时间段定时器
+  let boundaryTimer = null;
+  let tickTimer = null;
+
+  // 待放号窗口内每秒刷新，用于倒计时与 20:00 自动放号
+  function startTick() {
+    if (tickTimer) return;
+    tickTimer = setInterval(() => {
+      now.value = Date.now();
+    }, 1000);
+  }
+
+  function stopTick() {
+    if (!tickTimer) return;
+    clearInterval(tickTimer);
+    tickTimer = null;
+  }
+
+  // 在 19:50 / 20:00 / 次日 00:00 三个边界刷新时间，实现状态自动切换（无需刷新页面）
+  function refreshTimers() {
+    now.value = Date.now();
+    clearTimeout(boundaryTimer);
+
+    const t = dayjs(now.value);
+    const boundaries = [
+      t.hour(19).minute(50).second(0).millisecond(0),
+      t.hour(20).minute(0).second(0).millisecond(0),
+      t.add(1, 'day').startOf('day'),
+    ];
+    const next = boundaries.find((item) => item.valueOf() > Date.now());
+    const delay = next ? next.diff(dayjs(now.value)) : 60 * 1000;
+    boundaryTimer = setTimeout(refreshTimers, Math.max(delay, 0) + 200);
+
+    if (isPendingPeriod.value) {
+      startTick();
+    } else {
+      stopTick();
+    }
+  }
+
+  // 20:00 放号：刷新整周号源状态；若正在查看倒计时，则自动切换到第 8 天
+  watch(pendingDate, (val) => {
+    if (val) return;
+    const releasedDate = pendingViewDate.value;
+    if (releasedDate) {
+      pendingViewDate.value = null;
+      if (dates.value.includes(releasedDate)) {
+        currentDate.value = releasedDate;
+        if (currentSecondDept.value) loadDoctors();
+      }
+    }
+    if (currentSecondDept.value) loadWeekDoctors();
+  });
+
+  // 跨天保护：页面长时间停留跨过 00:00 时，重置已不在日期区间内的选中日期
+  watch(
+    () => dates.value[0],
+    () => {
+      if (dates.value.includes(currentDate.value)) return;
+      currentDate.value = dates.value[0];
+      if (currentSecondDept.value) {
+        loadDoctors();
+        loadWeekDoctors();
+      }
+    },
+  );
+
+  onMounted(() => {
+    refreshTimers();
+  });
+
+  onBeforeUnmount(() => {
+    clearTimeout(boundaryTimer);
+    boundaryTimer = null;
+    stopTick();
+  });
+  // #endregion
+
   onMounted(() => {
     if (type === 'schedule') return;
     openNoticeDialogOnce();
@@ -334,6 +462,10 @@ export function useAppointmentData() {
     currentDept,
     dates,
     currentDate,
+    pendingDate,
+    pendingViewDate,
+    isPendingView,
+    countdownText,
     onlyAvailable,
     doctors,
     loading,
