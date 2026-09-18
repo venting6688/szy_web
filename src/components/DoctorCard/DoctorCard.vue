@@ -88,7 +88,7 @@ const emit = defineEmits(['book']);
 
         <div class="schedule-action">
           <t-button
-            v-if="item.left > 0"
+            v-if="item.left > 0 && item.ScheduleStatusDesc !== '停诊'"
             size="small"
             class="btn-book"
             @click="emit('book', doctor, item.period)"
@@ -100,7 +100,7 @@ const emit = defineEmits(['book']);
             size="small"
             class="btn-wait"
           >
-            已约满
+            {{ item.ScheduleStatusDesc === '停诊' ? '停诊' : '已约满' }}
           </t-button>
         </div>
       </div>

@@ -184,6 +184,7 @@ export function useAppointmentData() {
         total: Number(item.AvailableTotalNum),
         left: Number(item.AvailableLeftNum),
         scheduleItemCode: item.ScheduleItemCode,
+        ScheduleStatusDesc: item.ScheduleStatusDesc,
       });
     });
     return Array.from(map.values());
