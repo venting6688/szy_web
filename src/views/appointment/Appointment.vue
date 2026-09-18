@@ -18,6 +18,7 @@ const {
   onlyAvailable,
   loading,
   format,
+  formatToFull,
   displayDoctors,
   firstDeptList,
   secondDeptMap,
@@ -137,11 +138,11 @@ const {
           >
             <div class="week-day">{{ dayjs(d).isSame(dayjs(), 'day') ? '今天' : weekDayMap[dayjs(d).day()] }}</div>
             <div>{{ format(d) }}</div>
-            <!-- 可用号源 -->
+            <!-- 可用号源（排班页仅展示待放号） -->
             <div
               class="sub"
               :class="{ unavailable: !weekLoading && !isAvailable(d), pending: d === pendingDate }"
-              v-if="type !== 'schedule'"
+              v-if="type !== 'schedule' || d === pendingDate"
             >
               <template v-if="d === pendingDate">待放号</template>
               <template v-else-if="weekLoading">加载中</template>

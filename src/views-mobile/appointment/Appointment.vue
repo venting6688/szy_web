@@ -22,6 +22,7 @@ const {
   onlyAvailable,
   loading,
   format,
+  formatToFull,
   displayDoctors,
   firstDeptList,
   secondDeptMap,
@@ -336,7 +337,7 @@ onBeforeUnmount(() => {
           <span
             class="status"
             :class="{ unavailable: !weekLoading && !isAvailable(d), pending: d === pendingDate }"
-            v-if="type !== 'schedule'"
+            v-if="type !== 'schedule' || d === pendingDate"
           >
             <template v-if="d === pendingDate">待放号</template>
             <template v-else-if="weekLoading">加载中</template>
