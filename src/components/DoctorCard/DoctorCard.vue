@@ -75,7 +75,7 @@ const emit = defineEmits(['book']);
         <div class="left">
           <span class="date">{{ doctor.date }}</span>
           <span class="period">{{ item.period }}</span>
-          <div>
+          <div :class="{ 'remain-invisible': item.left <= 0 || item.ScheduleStatusDesc === '停诊' }">
             <span>剩余</span>
             <span
               class="remain"
@@ -195,6 +195,10 @@ const emit = defineEmits(['book']);
     width: 60%;
     justify-content: space-between;
   }
+}
+
+.remain-invisible {
+  visibility: hidden;
 }
 
 .remain {

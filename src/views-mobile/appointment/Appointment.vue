@@ -458,7 +458,10 @@ onBeforeUnmount(() => {
               </div>
               <div
                 class="remain"
-                :class="item.left > 0 ? 'primary-color' : 'gray'"
+                :class="[
+                  item.left > 0 ? 'primary-color' : 'gray',
+                  { 'remain-invisible': item.left <= 0 || item.ScheduleStatusDesc === '停诊' },
+                ]"
               >
                 剩余 {{ item.left }}
               </div>
@@ -1006,6 +1009,10 @@ onBeforeUnmount(() => {
   flex-direction: column;
   gap: 8px;
   align-items: flex-end;
+}
+
+.remain-invisible {
+  visibility: hidden;
 }
 
 .remain {
