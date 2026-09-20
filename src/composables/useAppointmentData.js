@@ -100,7 +100,7 @@ export function useAppointmentData() {
 
   const displayDoctors = computed(() => {
     if (!onlyAvailable.value) return doctors.value;
-    return doctors.value.filter((d) => d.schedule.some((s) => s.left > 0));
+    return doctors.value.filter((d) => d.schedule.some((s) => s.left > 0 && s.ScheduleStatusDesc !== '停诊'));
   });
 
   //#region 科室
