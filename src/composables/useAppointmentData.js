@@ -7,7 +7,7 @@ import { useHospitalStore } from '@/store/modules/hospital';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { useNoticeStore } from '@/store/modules/notice';
 // HIS-COMPAT 临时兼容（2026-09-17 ~ 2026-09-24），过期整体删除
-import { getHisCompatDateState } from '@/his-compat/appointmentReleaseCompat';
+import { getHisCompatDateState, isHisCompatScheduleBlocked } from '@/his-compat/appointmentReleaseCompat';
 import downIcon from '@/assets/image/down.png';
 import rightIcon from '@/assets/image/right.png';
 // 缓存一级科室和二级科室，因为使用了composables，所以不需要使用Pinia了，直接使用Map缓存在本模块中即可
@@ -42,6 +42,8 @@ export function useAppointmentData() {
   const hisCompat = computed(() => getHisCompatDateState(now.value, type));
   // 是否处于特殊期（供日期条样式使用，预约挂号与医生排班页均生效）
   const hisCompatActive = computed(() => !!hisCompat.value);
+  // 特殊期当日挂号页不请求排班数据（HIS 此时无号源）
+  const hisCompatScheduleBlocked = computed(() => isHisCompatScheduleBlocked(now.value, type));
   // #endregion
 
   // 是否处于待放号窗口（19:50 - 20:00）
@@ -220,6 +222,12 @@ export function useAppointmentData() {
 
   // 加载医生排班
   async function loadDoctors() {
+    // HIS-COMPAT：特殊期当日挂号页不请求排班数据，保持空列表；过期删除本分支
+    if (hisCompatScheduleBlocked.value) {
+      doctors.value = [];
+      loading.value = false;
+      return;
+    }
     // 待放号日期不请求排班接口，转为展示倒计时
     // （HIS-COMPAT：9/17 当天日期条内只有待放号日期，默认选中即会走到这里）
     if (pendingDate.value && currentDate.value === pendingDate.value) {
@@ -286,6 +294,12 @@ export function useAppointmentData() {
   let requestId = 0;
 
   async function loadWeekDoctors() {
+    // HIS-COMPAT：特殊期当日挂号页不请求排班数据，保持空列表；过期删除本分支
+    if (hisCompatScheduleBlocked.value) {
+      availableDateList.value = [];
+      weekLoading.value = false;
+      return;
+    }
     const currentId = ++requestId;
     weekLoading.value = true;
 

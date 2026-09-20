@@ -16,13 +16,18 @@
  *   - 19:50 / 20:00 / 次日 00:00 的状态切换复用 useAppointmentData 中已有的边界定时器，
  *     页面不刷新也会自动完成；倒计时目标（当天 20:00）同样复用原有实现
  *
- * 生效页面：预约挂号（/appointment、/h5/appointment）与医生排班（/schedule、/h5/schedule），
- *          两者共用同一日期条；当日挂号页（appointment-today）无日期条，不受影响
+ * 生效页面与影响：
+ *   - 日期条规则（9/25 锚定 + 每日释放）：预约挂号（/appointment、/h5/appointment）
+ *     与医生排班（/schedule、/h5/schedule），两者共用同一日期条；
+ *   - 当日挂号（/appointment-today、/h5/appointment-today）无日期条，特殊期内不请求排班数据
+ *     （HIS 此时无号源）：仅拦截排班接口 getSchedulesApi，科室接口（/newFirstDepts、/newDepts）
+ *     照常请求，页面结构与空状态保持原样
  *
  * ⚠️ 删除步骤（临时需求结束后整体移除）：
  *   1. 删除本文件（src/his-compat 目录）及 import；
  *   2. 删除 src/composables/useAppointmentData.js 中所有带 `HIS-COMPAT` 标记的代码
- *      （import / hisCompat / hisCompatActive / dates 与 pendingDate 的分支 / return 字段）；
+ *      （import / hisCompat / hisCompatActive / hisCompatScheduleBlocked /
+ *      dates 与 pendingDate 的分支 / loadDoctors、loadWeekDoctors 的排班拦截 / return 字段）；
  *   3. 删除 src/views/appointment/Appointment.vue 中 `hisCompatActive` 解构、
  *      `date-bar--his-compat` 类名及其样式；
  *   4. 其余改动（currentDate 取日期条首日、跨天 watcher 监听整个日期条、
@@ -36,7 +41,8 @@ const COMPAT_END = '2026-09-25 00:00:00'; // 左闭右开：9/25 00:00 起恢复
 const FIRST_SHOW_DATE = '2026-09-25'; // 特殊期展示的首个日期
 const PENDING_FROM = { hour: 19, minute: 50 }; // 待放号出现时刻
 const RELEASE_AT = { hour: 20, minute: 0 }; // 正式放号时刻
-const COMPAT_TYPES = ['appointment', 'schedule']; // 生效页面类型（有日期条的页面）
+const COMPAT_DATE_BAR_TYPES = ['appointment', 'schedule']; // 日期条改为 9/25 锚定的页面
+const COMPAT_BLOCK_SCHEDULE_TYPES = ['appointment-today']; // 特殊期不请求排班数据的页面
 
 const DATE_FORMAT = 'YYYY-MM-DD';
 
@@ -46,15 +52,33 @@ function atTime(day, time) {
 }
 
 /**
- * 当前是否处于特殊期（含页面类型判断）
+ * 是否处于特殊期时间窗内（与页面无关）
+ * @param {number|Date|string} now 当前时间
+ * @returns {boolean}
+ */
+export function isHisCompatInWindow(now) {
+  const t = dayjs(now);
+  return !t.isBefore(dayjs(COMPAT_START)) && t.isBefore(dayjs(COMPAT_END));
+}
+
+/**
+ * 该页面在特殊期是否使用 9/25 锚定的日期条规则
  * @param {number|Date|string} now 当前时间
  * @param {string} type 页面类型：appointment / appointment-today / schedule
  * @returns {boolean}
  */
 export function isHisCompatActive(now, type) {
-  if (!COMPAT_TYPES.includes(type)) return false;
-  const t = dayjs(now);
-  return !t.isBefore(dayjs(COMPAT_START)) && t.isBefore(dayjs(COMPAT_END));
+  return COMPAT_DATE_BAR_TYPES.includes(type) && isHisCompatInWindow(now);
+}
+
+/**
+ * 该页面在特殊期是否禁止请求排班数据（当日挂号页：特殊期 HIS 无号源）
+ * @param {number|Date|string} now 当前时间
+ * @param {string} type 页面类型
+ * @returns {boolean}
+ */
+export function isHisCompatScheduleBlocked(now, type) {
+  return COMPAT_BLOCK_SCHEDULE_TYPES.includes(type) && isHisCompatInWindow(now);
 }
 
 /**

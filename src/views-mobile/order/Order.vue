@@ -12,7 +12,7 @@ function canCancel(order) {
   }
   // 当前时间晚于预约时段末尾时间，则不可取消
   const admitEnd = order.AdmitRange?.split('-')[1];
-  if (admitEnd && dayjs(`${order.OrderApptDate} ${admitEnd}`).isBefore(dayjs())) {
+  if (admitEnd && dayjs(`${order.AdmitDate} ${admitEnd}`).isBefore(dayjs())) {
     return false;
   }
   return true;
@@ -117,7 +117,7 @@ async function onClickCancel(order) {
             </div>
             <div class="row">
               <span class="label">预约时间</span>
-              <span class="value">{{ item.OrderApptDate }} {{ item.SessionName }}（{{ item.AdmitRange }}）</span>
+              <span class="value">{{ item.AdmitDate }} {{ item.SessionName }}（{{ item.AdmitRange }}）</span>
             </div>
           </div>
 

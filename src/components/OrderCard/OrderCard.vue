@@ -29,7 +29,7 @@
 
       <div class="row">
         <span class="label">预约时间：</span>
-        <span> {{ order.OrderApptDate }} {{ order.SessionName }} （{{ order.AdmitRange }}） </span>
+        <span> {{ order.AdmitDate }} {{ order.SessionName }} （{{ order.AdmitRange }}） </span>
       </div>
 
       <!-- <div class="row">
@@ -83,7 +83,7 @@ const canCancel = computed(() => {
   }
   // 当前时间晚于预约时段末尾时间，则不可取消
   const admitEnd = props.order.AdmitRange?.split('-')[1];
-  if (admitEnd && dayjs(`${props.order.OrderApptDate} ${admitEnd}`).isBefore(dayjs())) {
+  if (admitEnd && dayjs(`${props.order.AdmitDate} ${admitEnd}`).isBefore(dayjs())) {
     return false;
   }
   return true;
