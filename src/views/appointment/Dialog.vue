@@ -27,11 +27,13 @@ const appointmentInfo = ref();
 const doctorCardInfo = ref();
 async function book(doctor, period) {
   doctorCardInfo.value = { ...doctor, period };
+  // 不同时段（上午/下午/晚上）挂号费可能不同，取所点击时段的价格
+  const periodItem = doctorCardInfo.value.schedule?.find((item) => item.period === period);
   appointmentInfo.value = {
     doctor: doctorCardInfo.value.name,
     department: doctorCardInfo.value.deptName,
     location: '暂无信息',
-    price: doctorCardInfo.value.price,
+    price: periodItem?.price ?? doctorCardInfo.value.price,
     date: dayjs(doctorCardInfo.value.date).format('YYYY-MM-DD'),
     patient: userStore.userInfo?.realName,
   };
@@ -45,6 +47,12 @@ const activeTab = ref('');
 
 const scheduleDetailList = ref([]);
 async function getScheduleDetail() {
+  // 切换时段后同步刷新价格，避免诊查费/ PayFee 仍沿用上一个时段的价格
+  const periodItem = doctorCardInfo.value?.schedule?.find((item) => item.period === activeTab.value);
+  if (periodItem && appointmentInfo.value) {
+    appointmentInfo.value.price = periodItem.price ?? doctorCardInfo.value.price;
+  }
+
   const data = await getScheduleDetailApi({
     scheduleItemCode: doctorCardInfo.value.schedule.find((item) => item.period === activeTab.value)?.scheduleItemCode,
     deptCode: doctorCardInfo.value.deptCode,
@@ -254,7 +262,7 @@ defineExpose({
             >
               <t-input
                 disabled
-                :value="appointmentInfo.price + '元'"
+                :value="appointmentInfo.price !== null && appointmentInfo.price !== undefined ? appointmentInfo.price + '元' : '暂无信息'"
               />
             </t-form-item>
             <t-form-item

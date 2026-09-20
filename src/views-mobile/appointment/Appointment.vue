@@ -436,12 +436,6 @@ onBeforeUnmount(() => {
                   </div>
                   <div class="dept-row">{{ doc.deptName }}</div>
                 </div>
-                <div
-                  v-if="type === 'schedule'"
-                  class="price"
-                >
-                  ￥{{ doc.price }}
-                </div>
               </div>
 
               <div class="doctor-desc">{{ doc.desc || '暂无医生介绍' }}</div>
@@ -461,7 +455,12 @@ onBeforeUnmount(() => {
                 <div class="schedule-period">{{ item.period }}</div>
                 <div class="schedule-date">{{ doc.date }}</div>
               </div>
-              <div class="price-inline">￥{{ doc.price }}</div>
+              <div
+                v-if="item.price !== null"
+                class="price-inline"
+              >
+                ￥{{ item.price }}
+              </div>
               <div class="schedule-action">
                 <t-button
                   v-if="item.left > 0 && item.ScheduleStatusDesc !== '停诊'"
@@ -491,6 +490,12 @@ onBeforeUnmount(() => {
                 :key="`${doc.code}-${item.period}`"
               >
                 <span>{{ item.period }}</span>
+                <!-- 不同时段挂号费可能不同，价格分别跟在各自时段后面 -->
+                <span
+                  v-if="item.price !== null"
+                  class="price-inline"
+                  >（￥{{ item.price }}）</span
+                >
                 <span v-show="index < doc.schedule.length - 1">、</span>
               </span>
             </span>
@@ -941,14 +946,7 @@ onBeforeUnmount(() => {
   color: @text-secondary;
 }
 
-.price {
-  flex-shrink: 0;
-  font-size: clamp(18px, 4.6vw, 22px);
-  font-weight: 700;
-  color: @warning-color;
-}
-
-/* 价格（号源行内，替代原来的“剩余xx”） */
+/* 价格（号源行内，替代原来的“剩余xx”；排班视图跟在时段后面） */
 .price-inline {
   flex-shrink: 0;
   font-size: 15px;

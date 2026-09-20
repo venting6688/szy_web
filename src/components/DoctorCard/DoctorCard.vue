@@ -58,14 +58,6 @@ const emit = defineEmits(['book']);
           >{{ doctor.desc }}</t-typography-paragraph
         >
       </div>
-
-      <!-- 排班视图没有号源行，价格仍保留在右上角 -->
-      <div
-        v-if="type === 'schedule'"
-        class="price"
-      >
-        ￥{{ doctor.price }}
-      </div>
     </div>
 
     <!-- 下半部分 -->
@@ -81,7 +73,11 @@ const emit = defineEmits(['book']);
         <div class="left">
           <span class="date">{{ doctor.date }}</span>
           <span class="period">{{ item.period }}</span>
-          <span class="price-inline">￥{{ doctor.price }}</span>
+          <span
+            v-if="item.price !== null"
+            class="price-inline"
+            >￥{{ item.price }}</span
+          >
         </div>
 
         <div class="schedule-action">
@@ -114,6 +110,13 @@ const emit = defineEmits(['book']);
           :key="`${doctor.code}-${item.period}`"
         >
           <span>{{ item.period }}</span>
+          <!-- 不同时段挂号费可能不同，价格分别跟在各自时段后面 -->
+
+          (<span
+            v-if="item.price !== null"
+            class="price-inline"
+            >￥{{ item.price }}</span
+          >)
           <span v-show="index < doctor.schedule.length - 1">、</span>
         </span>
       </span>
@@ -167,16 +170,7 @@ const emit = defineEmits(['book']);
   white-space: nowrap;
 }
 
-/* 价格（排班视图右上角） */
-.price {
-  position: absolute;
-  right: 0;
-  top: 0;
-  font-size: @font-large;
-  color: @warning-color;
-}
-
-/* 价格（号源行内，替代原来的“剩余xx”） */
+/* 价格（号源行内，替代原来的“剩余xx”；排班视图跟在时段后面） */
 .price-inline {
   font-size: @font-base;
   font-weight: 600;

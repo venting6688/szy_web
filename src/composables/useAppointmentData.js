@@ -176,6 +176,13 @@ export function useAppointmentData() {
     // loadingInstance.hide();
   }
 
+  // 挂号费可能为 null / undefined / 空串，统一转为数字或 null
+  function toPrice(value) {
+    if (value === null || value === undefined || value === '') return null;
+    const num = Number(value);
+    return Number.isNaN(num) ? null : num;
+  }
+
   function transformSchedule(list, deptCode) {
     const map = new Map();
 
@@ -188,7 +195,9 @@ export function useAppointmentData() {
           deptCode,
           date: currentDate.value,
           name: item.DoctorName,
-          price: item.RegFee,
+          // 医生级别的价格仅为兜底（时段价格缺失时使用），
+          // 实际展示以每个时段的 price 为准，见下方汇总逻辑
+          price: null,
           desc: item.DocIntruduction,
           deptName: item.DepartmentName,
           doctorType: item.DoctorSessType,
@@ -199,13 +208,21 @@ export function useAppointmentData() {
       const doctor = map.get(code);
       doctor.schedule.push({
         period: item.SessionName,
+        // 不同时段（上午/下午/晚上）的挂号费可能不同，价格必须挂在时段上
+        price: toPrice(item.RegFee),
         total: Number(item.AvailableTotalNum),
         left: Number(item.AvailableLeftNum),
         scheduleItemCode: item.ScheduleItemCode,
         ScheduleStatusDesc: item.ScheduleStatusDesc,
       });
     });
-    return Array.from(map.values());
+
+    // 汇总医生级别价格：取各时段中的最低价作为兜底价（时段自身价格优先）
+    return Array.from(map.values()).map((doctor) => {
+      const prices = doctor.schedule.map((item) => item.price).filter((price) => price !== null);
+      if (!prices.length) return doctor;
+      return { ...doctor, price: Math.min(...prices) };
+    });
   }
 
   const currentSecondDept = ref(null);
