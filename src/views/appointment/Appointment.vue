@@ -15,6 +15,8 @@ const {
   pendingViewDate,
   isPendingView,
   countdownText,
+  // HIS-COMPAT：特殊期日期条样式标记，过期整体删除
+  hisCompatActive,
   onlyAvailable,
   loading,
   format,
@@ -128,6 +130,7 @@ const {
         <div
           v-if="type === 'appointment' || type === 'schedule'"
           class="date-bar"
+          :class="{ 'date-bar--his-compat': hisCompatActive }"
         >
           <div
             v-for="d in dates"
@@ -342,6 +345,12 @@ const {
   gap: @space-md;
   margin-bottom: @space-lg;
   justify-content: space-between;
+
+  /* HIS-COMPAT 临时兼容（2026-09-17 ~ 2026-09-24）：特殊期日期条只有 1~8 个日期，
+     space-between 会把 1~2 个日期拉到两端，改为左对齐；预约挂号与医生排班页均生效，过期整体删除 */
+  &--his-compat {
+    justify-content: flex-start;
+  }
 
   .date-item {
     width: 13%;

@@ -1,4 +1,4 @@
-﻿<script setup>
+<script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import dayjs from 'dayjs';
@@ -464,7 +464,7 @@ onBeforeUnmount(() => {
               </div>
               <div class="schedule-action">
                 <t-button
-                  v-if="item.left > 0"
+                  v-if="item.left > 0 && item.ScheduleStatusDesc !== '停诊'"
                   class="btn-book"
                   size="small"
                   @click="bookEmit(doc, item.period)"
@@ -475,7 +475,7 @@ onBeforeUnmount(() => {
                   v-else
                   class="btn-disabled"
                 >
-                  已约满
+                  {{ item.ScheduleStatusDesc === '停诊' ? '停诊' : '已约满' }}
                 </div>
               </div>
             </div>
