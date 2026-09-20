@@ -436,7 +436,12 @@ onBeforeUnmount(() => {
                   </div>
                   <div class="dept-row">{{ doc.deptName }}</div>
                 </div>
-                <div class="price">￥{{ doc.price }}</div>
+                <div
+                  v-if="type === 'schedule'"
+                  class="price"
+                >
+                  ￥{{ doc.price }}
+                </div>
               </div>
 
               <div class="doctor-desc">{{ doc.desc || '暂无医生介绍' }}</div>
@@ -456,15 +461,7 @@ onBeforeUnmount(() => {
                 <div class="schedule-period">{{ item.period }}</div>
                 <div class="schedule-date">{{ doc.date }}</div>
               </div>
-              <div
-                class="remain"
-                :class="[
-                  item.left > 0 ? 'primary-color' : 'gray',
-                  { 'remain-invisible': item.left <= 0 || item.ScheduleStatusDesc === '停诊' },
-                ]"
-              >
-                剩余 {{ item.left }}
-              </div>
+              <div class="price-inline">￥{{ doc.price }}</div>
               <div class="schedule-action">
                 <t-button
                   v-if="item.left > 0 && item.ScheduleStatusDesc !== '停诊'"
@@ -472,7 +469,7 @@ onBeforeUnmount(() => {
                   size="small"
                   @click="bookEmit(doc, item.period)"
                 >
-                  预约
+                  剩余{{ item.left }}
                 </t-button>
                 <div
                   v-else
@@ -951,6 +948,14 @@ onBeforeUnmount(() => {
   color: @warning-color;
 }
 
+/* 价格（号源行内，替代原来的“剩余xx”） */
+.price-inline {
+  flex-shrink: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: @warning-color;
+}
+
 .doctor-desc {
   display: -webkit-box;
   margin-top: 10px;
@@ -1011,26 +1016,10 @@ onBeforeUnmount(() => {
   align-items: flex-end;
 }
 
-.remain-invisible {
-  visibility: hidden;
-}
-
-.remain {
-  font-size: 12px;
-  font-weight: 600;
-
-  &.green {
-    color: @success-color;
-  }
-
-  &.gray {
-    color: @text-secondary;
-  }
-}
-
 .btn-book {
   min-width: 76px;
   height: 32px;
+  padding: 0 12px;
   color: #fff;
   background: @primary-color;
   border: 0;

@@ -59,7 +59,13 @@ const emit = defineEmits(['book']);
         >
       </div>
 
-      <div class="price">￥{{ doctor.price }}</div>
+      <!-- 排班视图没有号源行，价格仍保留在右上角 -->
+      <div
+        v-if="type === 'schedule'"
+        class="price"
+      >
+        ￥{{ doctor.price }}
+      </div>
     </div>
 
     <!-- 下半部分 -->
@@ -75,15 +81,7 @@ const emit = defineEmits(['book']);
         <div class="left">
           <span class="date">{{ doctor.date }}</span>
           <span class="period">{{ item.period }}</span>
-          <div :class="{ 'remain-invisible': item.left <= 0 || item.ScheduleStatusDesc === '停诊' }">
-            <span>剩余</span>
-            <span
-              class="remain"
-              :class="item.left > 0 ? 'primary-color' : 'gray'"
-            >
-              {{ item.left }}
-            </span>
-          </div>
+          <span class="price-inline">￥{{ doctor.price }}</span>
         </div>
 
         <div class="schedule-action">
@@ -93,7 +91,7 @@ const emit = defineEmits(['book']);
             class="btn-book"
             @click="emit('book', doctor, item.period)"
           >
-            预约
+            剩余{{ item.left }}
           </t-button>
           <t-button
             v-else
@@ -169,12 +167,19 @@ const emit = defineEmits(['book']);
   white-space: nowrap;
 }
 
-/* 价格 */
+/* 价格（排班视图右上角） */
 .price {
   position: absolute;
   right: 0;
   top: 0;
   font-size: @font-large;
+  color: @warning-color;
+}
+
+/* 价格（号源行内，替代原来的“剩余xx”） */
+.price-inline {
+  font-size: @font-base;
+  font-weight: 600;
   color: @warning-color;
 }
 
@@ -197,25 +202,11 @@ const emit = defineEmits(['book']);
   }
 }
 
-.remain-invisible {
-  visibility: hidden;
-}
-
-.remain {
-  &.gray {
-    color: @text-secondary;
-  }
-
-  &.green {
-    color: @success-color;
-    font-weight: 500;
-  }
-}
-
 /* 按钮 */
 .btn-wait {
-  width: 72px;
+  min-width: 72px;
   height: 28px;
+  padding: 0 10px;
   background: @warning-color-fade;
   color: @warning-color;
   border-radius: 29px;
@@ -224,8 +215,9 @@ const emit = defineEmits(['book']);
 }
 
 .btn-book {
-  width: 72px;
+  min-width: 72px;
   height: 28px;
+  padding: 0 10px;
   background: @primary-color;
   color: #fff;
   border-radius: 29px;
