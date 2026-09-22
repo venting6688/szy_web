@@ -328,7 +328,7 @@ onBeforeUnmount(() => {
           v-for="d in dates"
           :key="d"
           class="date-chip"
-          :class="{ active: currentDate === d || pendingViewDate === d }"
+          :class="{ active: isPendingView ? pendingViewDate === d : currentDate === d }"
           type="button"
           @click="onClickDate(d)"
         >

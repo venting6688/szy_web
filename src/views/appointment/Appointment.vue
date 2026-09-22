@@ -136,7 +136,7 @@ const {
             v-for="d in dates"
             :key="d"
             class="date-item"
-            :class="{ active: currentDate === d || pendingViewDate === d }"
+            :class="{ active: isPendingView ? pendingViewDate === d : currentDate === d }"
             @click="onClickDate(d)"
           >
             <div class="week-day">{{ dayjs(d).isSame(dayjs(), 'day') ? '今天' : weekDayMap[dayjs(d).day()] }}</div>
