@@ -104,16 +104,30 @@ async function onClickCancel(order) {
         >
           <div class="card-grid">
             <div class="row">
-              <span class="label">就诊人姓名</span>
-              <span class="value">{{ item.OrderApptUser || '-' }}</span>
+              <span class="label">就诊科室</span>
+              <span class="value">{{ item.AdmitArea || '-' }}</span>
             </div>
             <div class="row">
-              <span class="label">预约科室</span>
-              <span class="value">{{ item.Department || '-' }}</span>
+              <span class="label">科室地点</span>
+              <span class="value">{{ item.AdmitRooms || '-' }}</span>
             </div>
             <div class="row">
-              <span class="label">预约医生</span>
-              <span class="value">{{ item.Doctor || '-' }}</span>
+              <span class="label">就诊院区</span>
+              <span class="value">{{ item.HospitalName || '-' }}</span>
+            </div>
+            <div class="row">
+              <span class="label">诊查费</span>
+              <span
+                class="value"
+                style="color: #df9a5a"
+              >
+                {{ '￥' + Number(item.RegFee).toFixed(2) + '元' || '-' }}
+                <span style="color: red">(就诊时支付)</span>
+              </span>
+            </div>
+            <div class="row">
+              <span class="label">就诊医生</span>
+              <span class="value">{{ item.Doctor || '-' }}({{ item.DoctorTitle || '-' }})</span>
             </div>
             <div class="row">
               <span class="label">预约时间</span>

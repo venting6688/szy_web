@@ -14,17 +14,27 @@
     <!-- 主体 -->
     <div class="content">
       <div class="row">
-        <span class="label">预约就诊人姓名：</span>
-        <span>{{ order.OrderApptUser }}</span>
+        <span class="label">就诊科室：</span>
+        <span>{{ order.AdmitArea || '-' }}</span>
       </div>
       <div class="row">
-        <span class="label">预约科室：</span>
-        <span>{{ order.Department }}</span>
+        <span class="label">科室地点：</span>
+        <span>{{ order.AdmitRooms || '-' }}</span>
       </div>
-
       <div class="row">
-        <span class="label">预约医生：</span>
-        <span>{{ order.Doctor }}</span>
+        <span class="label">就诊院区：</span>
+        <span>{{ order.HospitalName || '-' }}</span>
+      </div>
+      <div class="row">
+        <span class="label">诊查费：</span>
+        <span style="color: #df9a5a">
+          {{ '￥' + Number(order.RegFee).toFixed(2) + '元' || '-' }}
+          <span style="color: red">(就诊时支付)</span>
+        </span>
+      </div>
+      <div class="row">
+        <span class="label">就诊医生：</span>
+        <span>{{ order.Doctor || '-' }}({{ order.DoctorTitle || '-' }})</span>
       </div>
 
       <div class="row">
@@ -102,7 +112,6 @@ const handleCancel = () => {
   padding: 16px;
   margin-bottom: 12px;
   width: 1200px;
-  height: 150px;
   background: #ffffff;
   border-radius: 14px;
   box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.05);

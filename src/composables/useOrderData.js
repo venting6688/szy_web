@@ -43,7 +43,12 @@ export function useOrderData() {
     });
 
     if (hospitalId.value === hospitalStore.list.find((item) => item.appointment === false)?.value)
-      orderList.value = (res || []).filter((item) => item.CBDFlag === 'Y');
+      orderList.value = (res || [])
+        .filter((item) => item.CBDFlag === 'Y')
+        .map((item) => ({
+          ...item,
+          HospitalName: item.HospitalTitle,
+        }));
     else orderList.value = (res || []).filter((item) => item.CBDFlag !== 'Y');
     loading.value = false;
   }
