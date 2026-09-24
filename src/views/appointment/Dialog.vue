@@ -25,10 +25,10 @@ const formatTime = (time) => time.slice(0, 5);
 const dialogVisible = ref(false);
 const appointmentInfo = ref();
 const doctorCardInfo = ref();
-async function book(doctor, period) {
-  doctorCardInfo.value = { ...doctor, period };
+async function book(doctor, scheduleItemCode) {
+  doctorCardInfo.value = { ...doctor };
   // 不同时段（上午/下午/晚上）挂号费可能不同，取所点击时段的价格
-  const periodItem = doctorCardInfo.value.schedule?.find((item) => item.period === period);
+  const periodItem = doctorCardInfo.value.schedule?.find((item) => item.scheduleItemCode === scheduleItemCode);
   appointmentInfo.value = {
     doctor: doctorCardInfo.value.name,
     department: doctorCardInfo.value.deptName,
@@ -39,7 +39,7 @@ async function book(doctor, period) {
   };
   dialogType.value = 'schedule';
   dialogVisible.value = true;
-  activeTab.value = period;
+  activeTab.value = scheduleItemCode;
   await getScheduleDetail();
 }
 // 可能的值：上午、下午、晚上、全天
@@ -48,13 +48,13 @@ const activeTab = ref('');
 const scheduleDetailList = ref([]);
 async function getScheduleDetail() {
   // 切换时段后同步刷新价格，避免诊查费/ PayFee 仍沿用上一个时段的价格
-  const periodItem = doctorCardInfo.value?.schedule?.find((item) => item.period === activeTab.value);
+  const periodItem = doctorCardInfo.value?.schedule?.find((item) => item.scheduleItemCode === activeTab.value);
   if (periodItem && appointmentInfo.value) {
     appointmentInfo.value.price = periodItem.price ?? doctorCardInfo.value.price;
   }
 
   const data = await getScheduleDetailApi({
-    scheduleItemCode: doctorCardInfo.value.schedule.find((item) => item.period === activeTab.value)?.scheduleItemCode,
+    scheduleItemCode: activeTab.value,
     deptCode: doctorCardInfo.value.deptCode,
   });
 
@@ -205,9 +205,9 @@ defineExpose({
             @change="getScheduleDetail"
           >
             <t-tab-panel
-              v-for="item in doctorCardInfo.schedule"
-              :key="item.ScheduleItemCode"
-              :value="item.period"
+              v-for="(item, index) in doctorCardInfo.schedule"
+              :key="item.scheduleItemCode + index"
+              :value="item.scheduleItemCode"
               :label="item.period"
             >
             </t-tab-panel>

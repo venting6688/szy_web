@@ -85,7 +85,7 @@ const emit = defineEmits(['book']);
             v-if="item.left > 0 && item.ScheduleStatusDesc !== '停诊'"
             size="small"
             class="btn-book"
-            @click="emit('book', doctor, item.period)"
+            @click="emit('book', doctor, item.scheduleItemCode)"
           >
             剩余{{ item.left }}
           </t-button>

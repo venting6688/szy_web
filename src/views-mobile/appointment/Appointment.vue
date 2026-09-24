@@ -466,7 +466,7 @@ onBeforeUnmount(() => {
                   v-if="item.left > 0 && item.ScheduleStatusDesc !== '停诊'"
                   class="btn-book"
                   size="small"
-                  @click="bookEmit(doc, item.period)"
+                  @click="bookEmit(doc, item.scheduleItemCode)"
                 >
                   剩余{{ item.left }}
                 </t-button>

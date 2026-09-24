@@ -414,8 +414,8 @@ export function useAppointmentData() {
 
   // 弹窗
   const dialogRef = ref(null);
-  function bookEmit(doctor, period) {
-    dialogRef.value.book(doctor, period);
+  function bookEmit(doctor, scheduleItemCode) {
+    dialogRef.value.book(doctor, scheduleItemCode);
   }
   // 通知弹窗
   const noticeDialogRef = ref(null);
