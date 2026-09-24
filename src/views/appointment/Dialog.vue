@@ -209,6 +209,7 @@ defineExpose({
               :key="item.scheduleItemCode + index"
               :value="item.scheduleItemCode"
               :label="item.period"
+              :disabled="item.ScheduleStatusDesc === '停诊' || item.left <= 0"
             >
             </t-tab-panel>
           </t-tabs>
