@@ -7,7 +7,7 @@ const userStore = useUserStore();
 const hospitalStore = useHospitalStore();
 
 // 预约挂号
-export async function createAppointmentApi({ ScheduleItemCode, PayFee, StartTime, EndTime }) {
+export async function createAppointmentApi({ ScheduleItemCode, PayFee, StartTime, EndTime, RegisterDate }) {
   const { code, msg, data } = await post(
     '/mobile/api/dh/appoint/register',
     {
@@ -32,6 +32,7 @@ export async function createAppointmentApi({ ScheduleItemCode, PayFee, StartTime
       TradeCode: 1000,
       ExtUserID: 'app001',
       ExtOrgCode: 'WECHAT',
+      registerDate: RegisterDate,
     },
     {
       hospitalId: hospitalStore.current,

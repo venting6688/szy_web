@@ -96,6 +96,7 @@ async function confirmBook() {
       PayFee: appointmentInfo.value.price,
       StartTime: appointmentInfo.value.startTime,
       EndTime: appointmentInfo.value.endTime,
+      RegisterDate: appointmentInfo.value.date,
     });
 
     MessagePlugin.success('预约挂号成功');
@@ -262,7 +263,11 @@ defineExpose({
             >
               <t-input
                 disabled
-                :value="appointmentInfo.price !== null && appointmentInfo.price !== undefined ? appointmentInfo.price + '元' : '暂无信息'"
+                :value="
+                  appointmentInfo.price !== null && appointmentInfo.price !== undefined
+                    ? appointmentInfo.price + '元'
+                    : '暂无信息'
+                "
               />
             </t-form-item>
             <t-form-item
