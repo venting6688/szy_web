@@ -4,7 +4,6 @@ import { useRoute, useRouter } from 'vue-router';
 import { getFirstDeptsApi, getSecondDeptsApi } from '@/api/department';
 import { getSchedulesApi } from '@/api/schedule';
 import { useHospitalStore } from '@/store/modules/hospital';
-import { MessagePlugin } from 'tdesign-vue-next';
 import { useNoticeStore } from '@/store/modules/notice';
 // HIS-COMPAT 临时兼容（2026-09-17 ~ 2026-09-24），过期整体删除
 import { getHisCompatDateState, isHisCompatScheduleBlocked } from '@/his-compat/appointmentReleaseCompat';
@@ -110,8 +109,10 @@ export function useAppointmentData() {
   const secondDeptMap = ref({}); // 存子科室
   const openDept = ref(null); // 当前展开的一级科室
 
-  async function getFirstDepts() {
-    const cacheKey = hospitalStore.current;
+  // preferDeptId / preferSecondDeptId：日期刷新时用于保留原选中科室，在新日期不存在时回落为第一个
+  async function getFirstDepts(preferDeptId, preferSecondDeptId) {
+    // 缓存按“院区 + 日期”隔离，不同日期的科室可能不同
+    const cacheKey = `${hospitalStore.current}:${currentDate.value}`;
     let arr = firstDeptCache.get(cacheKey);
     if (!firstDeptCache.has(cacheKey)) {
       arr = await getFirstDeptsApi({
@@ -122,15 +123,18 @@ export function useAppointmentData() {
     }
     firstDeptList.value = arr;
 
-    // 默认选中第一个一级科室并展开
+    // 默认选中第一个一级科室并展开（原一级科室仍存在时保留）
     if (arr && arr.length > 0) {
-      await onClickDept(arr[0]);
-      // 默认选中第一个二级科室
-      const firstDeptId = arr[0].CliSerGroupID;
+      const targetDept = arr.find((item) => item.CliSerGroupID === preferDeptId) || arr[0];
+      await onClickDept(targetDept);
+      // 默认选中第一个二级科室（原二级科室仍存在时保留）
+      const targetDeptId = targetDept.CliSerGroupID;
       nextTick(async () => {
-        const secondDepts = secondDeptMap.value[firstDeptId];
+        const secondDepts = secondDeptMap.value[targetDeptId];
         if (secondDepts && secondDepts.length > 0) {
-          await onClickSecondDept(secondDepts[0]);
+          const targetSecondDept =
+            secondDepts.find((child) => child.CLGRPRowId === preferSecondDeptId) || secondDepts[0];
+          await onClickSecondDept(targetSecondDept);
         }
       });
     }
@@ -139,7 +143,8 @@ export function useAppointmentData() {
   // 点击一级科室
   async function onClickDept(item) {
     const id = item.CliSerGroupID;
-    const cacheKey = `${hospitalStore.current}:${id}`;
+    // 缓存按“院区 + 一级科室 + 日期”隔离，不同日期的二级科室可能不同
+    const cacheKey = `${hospitalStore.current}:${id}:${currentDate.value}`;
 
     // const loadingInstance = await LoadingPlugin({
     //   text: '加载中...',
@@ -384,20 +389,27 @@ export function useAppointmentData() {
   );
   // #endregion
 
+  // 日期变化后整体刷新：左侧两级科室按新日期重新拉取（尽量保留原选中科室），
+  // 右侧医生排班由重新选中的二级科室自动加载
+  function refreshByDate(date) {
+    const keepDeptId = currentDept.value;
+    const keepSecondDeptId = currentSecondDept.value;
+    currentDate.value = date;
+    initData();
+    getFirstDepts(keepDeptId, keepSecondDeptId);
+  }
+
   // 选择日期
   function onClickDate(date) {
     // 待放号日期：只展示倒计时，不请求排班接口
     if (date === pendingDate.value) {
       pendingViewDate.value = date;
+      // 左侧科室同样按待放号日期刷新
+      refreshByDate(date);
       return;
     }
     pendingViewDate.value = null;
-    if (!currentSecondDept.value) {
-      MessagePlugin.warning('请先选择二级科室');
-      return;
-    }
-    currentDate.value = date;
-    loadDoctors();
+    refreshByDate(date);
   }
 
   // 弹窗
@@ -478,8 +490,9 @@ export function useAppointmentData() {
     if (releasedDate) {
       pendingViewDate.value = null;
       if (dates.value.includes(releasedDate)) {
-        currentDate.value = releasedDate;
-        if (currentSecondDept.value) loadDoctors();
+        // 放号后左侧科室按放号日期刷新，右侧排班由重新选中的二级科室自动加载
+        refreshByDate(releasedDate);
+        return;
       }
     }
     if (currentSecondDept.value) loadWeekDoctors();
