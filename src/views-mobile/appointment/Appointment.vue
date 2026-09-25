@@ -491,11 +491,11 @@ onBeforeUnmount(() => {
               >
                 <span>{{ item.period }}</span>
                 <!-- 不同时段挂号费可能不同，价格分别跟在各自时段后面 -->
-                <span
+                (<span
                   v-if="item.price !== null"
                   class="price-inline"
-                  >（￥{{ item.price }}）</span
-                >
+                  >￥{{ item.price }}</span
+                >)
                 <span v-show="index < doc.schedule.length - 1">、</span>
               </span>
             </span>
