@@ -5,8 +5,6 @@ import { getFirstDeptsApi, getSecondDeptsApi } from '@/api/department';
 import { getSchedulesApi } from '@/api/schedule';
 import { useHospitalStore } from '@/store/modules/hospital';
 import { useNoticeStore } from '@/store/modules/notice';
-// HIS-COMPAT 临时兼容（2026-09-17 ~ 2026-09-24），过期整体删除
-import { getHisCompatDateState, isHisCompatScheduleBlocked } from '@/his-compat/appointmentReleaseCompat';
 import downIcon from '@/assets/image/down.png';
 import rightIcon from '@/assets/image/right.png';
 // 缓存一级科室和二级科室，因为使用了composables，所以不需要使用Pinia了，直接使用Map缓存在本模块中即可
@@ -36,15 +34,6 @@ export function useAppointmentData() {
   // 当前时间戳，由定时器驱动，用于日期区间与放号状态自动切换（页面不刷新也会更新）
   const now = ref(Date.now());
 
-  // #region HIS-COMPAT 临时兼容（2026-09-17 ~ 2026-09-24），过期整体删除
-  // 特殊期日期规则全部由该模块产出；返回 null 表示不在特殊期，走下面原有的正常逻辑
-  const hisCompat = computed(() => getHisCompatDateState(now.value, type));
-  // 是否处于特殊期（供日期条样式使用，预约挂号与医生排班页均生效）
-  const hisCompatActive = computed(() => !!hisCompat.value);
-  // 特殊期当日挂号页不请求排班数据（HIS 此时无号源）
-  const hisCompatScheduleBlocked = computed(() => isHisCompatScheduleBlocked(now.value, type));
-  // #endregion
-
   // 是否处于待放号窗口（19:50 - 20:00）
   const isPendingPeriod = computed(() => {
     const t = dayjs(now.value);
@@ -60,8 +49,6 @@ export function useAppointmentData() {
 
   // 日期列表：19:50 前 7 天，19:50 起 8 天（预约挂号与医生排班页均生效；跨月、跨年由 dayjs 计算）
   const dates = computed(() => {
-    // HIS-COMPAT：特殊期日期条（9/25 锚定 + 每日释放），过期删除本行
-    if (hisCompat.value) return hisCompat.value.dates;
     const base = dayjs(now.value);
     const length = showEighthDay.value ? 8 : 7;
     return Array.from({ length }, (_, i) => base.add(i, 'day').format('YYYY-MM-DD'));
@@ -69,8 +56,6 @@ export function useAppointmentData() {
 
   // 待放号的第 8 天日期
   const pendingDate = computed(() => {
-    // HIS-COMPAT：特殊期待放号日期由兼容模块给出，过期删除本行
-    if (hisCompat.value) return hisCompat.value.pendingDate;
     return isPendingPeriod.value ? dates.value[7] : null;
   });
 
@@ -88,7 +73,7 @@ export function useAppointmentData() {
     return `${h}:${m}:${s}`;
   });
 
-  // 默认选中日期条的起始日期（正常时段即今天；HIS-COMPAT 特殊期为 9/25）
+  // 默认选中日期条的起始日期（正常时段即今天）
   const currentDate = ref(dates.value[0]);
 
   const onlyAvailable = ref(false);
@@ -244,14 +229,7 @@ export function useAppointmentData() {
 
   // 加载医生排班
   async function loadDoctors() {
-    // HIS-COMPAT：特殊期当日挂号页不请求排班数据，保持空列表；过期删除本分支
-    if (hisCompatScheduleBlocked.value) {
-      doctors.value = [];
-      loading.value = false;
-      return;
-    }
     // 待放号日期不请求排班接口，转为展示倒计时
-    // （HIS-COMPAT：9/17 当天日期条内只有待放号日期，默认选中即会走到这里）
     if (pendingDate.value && currentDate.value === pendingDate.value) {
       pendingViewDate.value = currentDate.value;
       loading.value = false;
@@ -316,12 +294,6 @@ export function useAppointmentData() {
   let requestId = 0;
 
   async function loadWeekDoctors() {
-    // HIS-COMPAT：特殊期当日挂号页不请求排班数据，保持空列表；过期删除本分支
-    if (hisCompatScheduleBlocked.value) {
-      availableDateList.value = [];
-      weekLoading.value = false;
-      return;
-    }
     const currentId = ++requestId;
     weekLoading.value = true;
 
@@ -475,7 +447,7 @@ export function useAppointmentData() {
     boundaryTimer = setTimeout(refreshTimers, Math.max(delay, 0) + 200);
 
     // 有待放号日期展示时就要每秒刷新倒计时
-    // （正常时段待放号只在 19:50-20:00 出现，条件等价；HIS-COMPAT：9/17 全天展示待放号）
+    // （正常时段待放号只在 19:50-20:00 出现，条件等价）
     if (isPendingPeriod.value || pendingDate.value) {
       startTick();
     } else {
@@ -498,7 +470,7 @@ export function useAppointmentData() {
     if (currentSecondDept.value) loadWeekDoctors();
   });
 
-  // 跨天保护：页面长时间停留时，日期条整体发生变化（跨过 00:00，或 HIS-COMPAT 特殊期开始/结束）
+  // 跨天保护：页面长时间停留时，日期条整体发生变化（跨过 00:00）
   // 后重置已不在日期区间内的选中日期
   watch(
     () => dates.value.join(),
@@ -537,8 +509,6 @@ export function useAppointmentData() {
     pendingViewDate,
     isPendingView,
     countdownText,
-    // HIS-COMPAT：特殊期标记，供日期条样式使用，过期整体删除
-    hisCompatActive,
     onlyAvailable,
     doctors,
     loading,
