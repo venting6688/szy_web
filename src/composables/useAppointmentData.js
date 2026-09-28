@@ -227,6 +227,23 @@ export function useAppointmentData() {
     loadWeekDoctors();
   }
 
+  // 已过时段过滤：仅当天生效（12:00 起不再展示上午号源，18:00 起不再展示上午、下午号源），全天号源始终保留
+  // 剩余时段全部被过滤的医生整体隐藏
+  function filterPassedPeriods(list) {
+    if (!dayjs(currentDate.value).isSame(dayjs(), 'day')) return list;
+
+    const minutes = dayjs().hour() * 60 + dayjs().minute();
+    const passedPeriods = minutes < 12 * 60 ? [] : minutes < 18 * 60 ? ['上午'] : ['上午', '下午'];
+    if (!passedPeriods.length) return list;
+
+    return list
+      .map((doctor) => ({
+        ...doctor,
+        schedule: doctor.schedule.filter((item) => item.period === '全天' || !passedPeriods.includes(item.period)),
+      }))
+      .filter((doctor) => doctor.schedule.length > 0);
+  }
+
   // 加载医生排班
   async function loadDoctors() {
     // 待放号日期不请求排班接口，转为展示倒计时
@@ -241,7 +258,7 @@ export function useAppointmentData() {
       startDate: currentDate.value,
       endDate: currentDate.value,
     });
-    doctors.value = transformSchedule(schedules, currentSecondDept.value);
+    doctors.value = filterPassedPeriods(transformSchedule(schedules, currentSecondDept.value));
     // 如果是当天
     // if (dayjs(currentDate.value).isSame(dayjs(), 'day')) {
     //   availableDateList.value[0] = buildDateAvailability(schedules, currentDate.value, currentDate.value)[0];
