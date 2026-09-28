@@ -175,7 +175,7 @@ function handleForgetPassword() {
   gap: 10px;
   align-items: center;
   justify-content: space-between;
-  margin: 8px 0 14px;
+  margin: 18px 0 14px;
   font-size: 13px;
   color: @text-secondary;
 }
