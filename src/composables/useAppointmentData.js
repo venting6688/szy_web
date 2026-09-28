@@ -396,10 +396,10 @@ export function useAppointmentData() {
     const noticeStore = useNoticeStore();
     if (noticeStore.isNotified) return;
     noticeStore.setIsNotified(true);
-    noticeDialogRef.value.openNotice();
+    noticeDialogRef.value.openNotice('notice');
   }
-  function openNoticeDialog() {
-    noticeDialogRef.value.openNotice();
+  function openNoticeDialog(type = 'notice') {
+    noticeDialogRef.value.openNotice(type);
   }
 
   const weekDayMap = {

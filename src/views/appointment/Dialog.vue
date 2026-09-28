@@ -15,6 +15,7 @@ const headerTitle = computed(() => {
   if (dialogType.value === 'schedule') return '选择号源';
   if (dialogType.value === 'appointment') return '预约信息';
   if (dialogType.value === 'notice') return '预约须知';
+  if (dialogType.value === 'notice2') return '温馨提示';
   return '';
 });
 // 时间格式化
@@ -108,11 +109,11 @@ async function confirmBook() {
   }
 }
 // 跳转预约须知
-function goNotice() {
+function goNotice(type = 'notice') {
   // dialogType.value = 'notice';
   // noticeDialogRef.value.openNotice();
 
-  emit('open');
+  emit('open', type);
 }
 function onClickClose() {
   // if (dialogType.value === 'notice') {
@@ -122,7 +123,7 @@ function onClickClose() {
 }
 // #endregion
 
-const noticeList = [
+const noticeList1 = [
   {
     text: '1、我院实行实名制预约、就诊制度，就诊人应使用本人姓名、身份信息进行预约、就诊，务必做到人证相符。',
   },
@@ -169,6 +170,20 @@ const noticeList = [
     text: '15、我院官网开设互联网医院，线上咨询，为不便来院患者提供便利。线上就诊流程：选择医生→填写问诊信息→线上支付→等待医生接诊→问诊结束→查看诊断报告。',
   },
 ];
+const noticeList2 = [
+  {
+    text: '请在预约时间之前携带身份证完成就诊卡/医保卡实名认证后取号。',
+  },
+  {
+    text: '跨省异地医保患者首次就诊，请提前从国家医保平台app进行联网备案，再到自助取号机取号候诊',
+  },
+  {
+    text: '七天内如需取消预约，请在就诊日前一日0点之前操作；当日预约：上午号源操作需在11点之前进行，下午号源操作需在16点30分之前进行；当日取消：请在就诊时间点之前操作。',
+  },
+  {
+    text: '医院东院区车位相对充足，西院区就诊高峰期间车位比较紧张。请广大患者根据需求合理选择出行方式，感谢您的理解和配合。',
+  },
+];
 
 const noticeReachedBottom = ref(false);
 const noticeRef = ref(null);
@@ -181,12 +196,17 @@ function checkNoticeScroll() {
   }
 }
 
-function openNotice() {
-  dialogType.value = 'notice';
+function openNotice(type = 'notice') {
+  console.log(type);
+  dialogType.value = type;
   dialogVisible.value = true;
   noticeReachedBottom.value = false;
   nextTick(checkNoticeScroll);
 }
+
+const getNoticeList = computed(() => {
+  return dialogType.value === 'notice' ? noticeList1 : noticeList2;
+});
 defineExpose({
   book,
   openNotice,
@@ -197,8 +217,8 @@ defineExpose({
 <template>
   <div>
     <t-dialog
-      :dialog-class-name="dialogType === 'notice' ? 'notice-dialog' : 'schedule-dialog'"
-      :closeBtn="dialogType === 'notice' ? false : true"
+      :dialog-class-name="dialogType === 'notice' || dialogType === 'notice2' ? 'notice-dialog' : 'schedule-dialog'"
+      :closeBtn="dialogType === 'notice' || dialogType === 'notice2' ? false : true"
       :footer="false"
       placement="center"
       v-model:visible="dialogVisible"
@@ -325,14 +345,19 @@ defineExpose({
             </t-button>
             <div>
               点击查看<a
-                @click="goNotice"
+                @click="goNotice('notice')"
                 style="cursor: pointer"
                 >《预约须知》</a
+              >
+              <a
+                @click="goNotice('notice2')"
+                style="cursor: pointer"
+                >《温馨提示》</a
               >
             </div>
           </div>
         </div>
-        <div v-show="dialogType === 'notice'">
+        <div v-show="dialogType === 'notice' || dialogType === 'notice2'">
           <div
             ref="noticeRef"
             class="notice"
@@ -340,7 +365,7 @@ defineExpose({
           >
             尊敬的患者及家属：
             <div
-              v-for="(item, i) in noticeList"
+              v-for="(item, i) in getNoticeList"
               :key="i"
               class="line"
               v-html="item.text"
