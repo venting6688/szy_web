@@ -27,7 +27,7 @@ export function useAppointmentData() {
 
   const currentDept = ref(-1);
 
-  // 放号时间配置：每天 19:50 起展示第 8 天（待放号），20:00 正式放号
+  // 放号时间配置：每天 19:50 起展示第 9 天（待放号），20:00 正式放号
   const PENDING_START_MINUTES = 19 * 60 + 50;
   const RELEASE_END_MINUTES = 20 * 60;
 
@@ -41,22 +41,22 @@ export function useAppointmentData() {
     return minutes >= PENDING_START_MINUTES && minutes < RELEASE_END_MINUTES;
   });
 
-  // 19:50 起展示第 8 天，20:00 后第 8 天转为正式放号
-  const showEighthDay = computed(() => {
+  // 19:50 起展示第 9 天，20:00 后第 9 天转为正式放号
+  const showNinthDay = computed(() => {
     const t = dayjs(now.value);
     return t.hour() * 60 + t.minute() >= PENDING_START_MINUTES;
   });
 
-  // 日期列表：19:50 前 7 天，19:50 起 8 天（预约挂号与医生排班页均生效；跨月、跨年由 dayjs 计算）
+  // 日期列表：19:50 前 8 天，19:50 起 9 天（预约挂号与医生排班页均生效；跨月、跨年由 dayjs 计算）
   const dates = computed(() => {
     const base = dayjs(now.value);
-    const length = showEighthDay.value ? 8 : 7;
+    const length = showNinthDay.value ? 9 : 8;
     return Array.from({ length }, (_, i) => base.add(i, 'day').format('YYYY-MM-DD'));
   });
 
-  // 待放号的第 8 天日期
+  // 待放号的第 9 天日期
   const pendingDate = computed(() => {
-    return isPendingPeriod.value ? dates.value[7] : null;
+    return isPendingPeriod.value ? dates.value[8] : null;
   });
 
   // 点击待放号日期后的查看状态
@@ -455,7 +455,7 @@ export function useAppointmentData() {
     }
   }
 
-  // 20:00 放号：刷新整周号源状态；若正在查看倒计时，则自动切换到第 8 天
+  // 20:00 放号：刷新整周号源状态；若正在查看倒计时，则自动切换到第 9 天
   watch(pendingDate, (val) => {
     if (val) return;
     const releasedDate = pendingViewDate.value;
