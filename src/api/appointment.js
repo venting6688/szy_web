@@ -25,8 +25,8 @@ export async function createAppointmentApi({
       EndTime,
       MobileNo: userStore.userInfo.phonenumber,
       IDCardNo: userStore.userInfo.idCard,
-      CardNo: userStore.userInfo.idCard,
-      CardType: '04' || userStore.userInfo.idType, // 暂时写死04，否则有未知错误
+      CardNo: userStore.userInfo.his_patient_card,
+      CardType: userStore.userInfo.his_patient_card_type,
       TelePhoneNo: userStore.userInfo.phonenumber,
       PatientName: userStore.userInfo.realName,
       Gender: userStore.userInfo.gender,
