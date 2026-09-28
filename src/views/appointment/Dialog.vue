@@ -98,9 +98,11 @@ async function confirmBook() {
       StartTime: appointmentInfo.value.startTime,
       EndTime: appointmentInfo.value.endTime,
       RegisterDate: appointmentInfo.value.date,
+      doctorName: appointmentInfo.value.doctor,
+      departmentName: appointmentInfo.value.department,
     });
 
-    MessagePlugin.success('预约挂号成功');
+    // MessagePlugin.success('预约挂号成功');
     dialogVisible.value = false;
   } catch (error) {
     console.error('预约挂号失败', error);

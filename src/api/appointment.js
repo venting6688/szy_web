@@ -7,7 +7,15 @@ const userStore = useUserStore();
 const hospitalStore = useHospitalStore();
 
 // 预约挂号
-export async function createAppointmentApi({ ScheduleItemCode, PayFee, StartTime, EndTime, RegisterDate }) {
+export async function createAppointmentApi({
+  ScheduleItemCode,
+  PayFee,
+  StartTime,
+  EndTime,
+  RegisterDate,
+  doctorName,
+  departmentName,
+}) {
   const { code, msg, data } = await post(
     '/mobile/api/dh/appoint/register',
     {
@@ -42,6 +50,16 @@ export async function createAppointmentApi({ ScheduleItemCode, PayFee, StartTime
     MessagePlugin.error(msg || '预约挂号失败');
     throw new Error(msg || '预约挂号失败');
   } else {
+    NotifyPlugin.success({
+      title: '预约挂号成功',
+      content: departmentName + '-' + doctorName,
+      duration: 5000,
+    });
+    NotifyPlugin.info({
+      title: '预约提示',
+      content: '请提前15分钟现场报道取号，就诊顺序以报道号码为准。',
+      duration: 5000,
+    });
     return data;
   }
 }
