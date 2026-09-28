@@ -4,6 +4,7 @@ import { MessagePlugin } from 'tdesign-vue-next';
 import { getAppointmentsApi, cancelAppointmentApi } from '@/api/order';
 import dayjs from 'dayjs';
 import { useHospitalStore } from '@/store/modules/hospital';
+import { canCancelOrder } from '@/utils/appointment';
 const hospitalStore = useHospitalStore();
 
 export function useOrderData() {
@@ -54,6 +55,12 @@ export function useOrderData() {
   }
 
   async function cancelEmit(order) {
+    // 点击时二次校验：不能读组件里可能已陈旧的 computed，必须按点击时刻实时计算
+    if (!canCancelOrder(order)) {
+      MessagePlugin.warning('已超过可取消时间（需早于就诊开始时间30分钟），无法取消预约');
+      getOrderList();
+      return;
+    }
     // 确认取消预约
     const confirmInstance = await DialogPlugin.confirm({
       header: '确认取消预约',
