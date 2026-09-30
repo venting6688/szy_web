@@ -7,7 +7,7 @@ const hospitalStore = useHospitalStore();
 // 医生排班
 export async function getSchedulesApi(params) {
   const { doctorCode, deptCode, startDate, endDate } = params;
-  const { code, msg, data } = await get('/mobile/api/dh/schedules', {
+  const { code, msg, data } = await get('/mobile/api/dh/newSchedules', {
     doctorCode: doctorCode || '',
     deptCode,
     startDate,
