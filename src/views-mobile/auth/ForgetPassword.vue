@@ -167,7 +167,6 @@ async function refreshPageData() {
   padding-top: clamp(18px, 5vw, 28px);
   padding-bottom: calc(clamp(20px, 6vw, 28px) + env(safe-area-inset-bottom));
   overflow-y: auto;
-  overscroll-behavior-y: contain;
   touch-action: manipulation;
   background:
     radial-gradient(circle at 20% 0%, rgb(32 133 126 / 14%) 0, transparent 45%),

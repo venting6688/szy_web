@@ -274,7 +274,6 @@ const {
   /**
   padding-bottom: calc(clamp(20px, 6vw, 28px) + env(safe-area-inset-bottom));**/
   overflow-y: auto;
-  overscroll-behavior-y: contain;
   touch-action: manipulation;
 }
 
