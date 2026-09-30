@@ -15,14 +15,12 @@ const {
   currentDept,
   dates,
   currentDate,
-  pendingDate,
-  pendingViewDate,
-  isPendingView,
-  countdownText,
+  ninthDate,
+  isNinthDayPending,
+  ninthBookDisabled,
   onlyAvailable,
   loading,
   format,
-  formatToFull,
   displayDoctors,
   firstDeptList,
   secondDeptMap,
@@ -328,7 +326,7 @@ onBeforeUnmount(() => {
           v-for="d in dates"
           :key="d"
           class="date-chip"
-          :class="{ active: isPendingView ? pendingViewDate === d : currentDate === d }"
+          :class="{ active: currentDate === d }"
           type="button"
           @click="onClickDate(d)"
         >
@@ -336,10 +334,10 @@ onBeforeUnmount(() => {
           <span class="day">{{ format(d) }}</span>
           <span
             class="status"
-            :class="{ unavailable: !weekLoading && !isAvailable(d), pending: d === pendingDate }"
-            v-if="type !== 'schedule' || d === pendingDate"
+            :class="{ unavailable: !weekLoading && !isAvailable(d), pending: isNinthDayPending(d) }"
+            v-if="type !== 'schedule' || d === ninthDate"
           >
-            <template v-if="d === pendingDate">待放号</template>
+            <template v-if="isNinthDayPending(d)">待放号</template>
             <template v-else-if="weekLoading">加载中</template>
             <template v-else>{{ isAvailable(d) ? '有号' : '无号' }}</template>
           </span>
@@ -350,10 +348,7 @@ onBeforeUnmount(() => {
     <section class="doctor-panel">
       <div class="panel-header">
         <div>
-          <div class="panel-title">
-            <template v-if="isPendingView">{{ format(pendingViewDate) }} 待放号</template>
-            <template v-else>{{ format(currentDate) }} 坐诊医生</template>
-          </div>
+          <div class="panel-title">{{ format(currentDate) }} 坐诊医生</div>
           <div class="panel-subtitle">
             {{ currentDeptLabel }}
           </div>
@@ -371,16 +366,7 @@ onBeforeUnmount(() => {
       </div>
 
       <div
-        v-if="isPendingView"
-        class="pending-countdown"
-      >
-        <div class="pending-title">{{ formatToFull(pendingViewDate) }} 号源将于20:00开放</div>
-        <div class="pending-time">{{ countdownText }}</div>
-        <div class="pending-tip">倒计时结束后自动加载医生排班</div>
-      </div>
-
-      <div
-        v-else-if="!currentSecondDept"
+        v-if="!currentSecondDept"
         class="state-block"
       >
         <t-empty
@@ -462,8 +448,17 @@ onBeforeUnmount(() => {
                 ￥{{ item.price }}
               </div>
               <div class="schedule-action">
+                <!-- 第 9 天 20:00 前：停诊行仍显示停诊，其余行（含余号为 0）禁用并展示“20点预约” -->
                 <t-button
-                  v-if="item.left > 0 && item.ScheduleStatusDesc !== '停诊'"
+                  v-if="ninthBookDisabled && item.ScheduleStatusDesc !== '停诊'"
+                  class="btn-book btn-book-disabled"
+                  size="small"
+                  disabled
+                >
+                  20点预约
+                </t-button>
+                <t-button
+                  v-else-if="item.left > 0 && item.ScheduleStatusDesc !== '停诊'"
                   class="btn-book"
                   size="small"
                   @click="bookEmit(doc, item.scheduleItemCode)"
@@ -845,33 +840,6 @@ onBeforeUnmount(() => {
   color: @text-secondary;
 }
 
-.pending-countdown {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  align-items: center;
-  justify-content: center;
-  min-height: 240px;
-  text-align: center;
-
-  .pending-title {
-    font-size: 14px;
-    color: @text-regular;
-  }
-
-  .pending-time {
-    font-size: clamp(30px, 9vw, 40px);
-    font-weight: 700;
-    color: @warning-color;
-    letter-spacing: 2px;
-  }
-
-  .pending-tip {
-    font-size: 12px;
-    color: @text-secondary;
-  }
-}
-
 .doctor-list {
   display: flex;
   flex-direction: column;
@@ -1024,6 +992,20 @@ onBeforeUnmount(() => {
   border-radius: 999px;
   transform: translateZ(0);
   font-size: 14px;
+}
+
+/* 第 9 天 20:00 前的禁用态：样式与“待放号”一致，且不响应点击 */
+.btn-book.btn-book-disabled {
+  min-width: 76px;
+  height: 32px;
+  padding: 0 12px;
+  color: @warning-color;
+  background: @warning-color-fade;
+  border: 0;
+  border-radius: 999px;
+  transform: translateZ(0);
+  font-size: 14px;
+  pointer-events: none;
 }
 
 .btn-disabled {

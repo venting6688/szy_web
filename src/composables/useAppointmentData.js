@@ -27,54 +27,37 @@ export function useAppointmentData() {
 
   const currentDept = ref(-1);
 
-  // 放号时间配置：每天 19:50 起展示第 9 天（待放号），20:00 正式放号
-  const PENDING_START_MINUTES = 19 * 60 + 50;
-  const RELEASE_END_MINUTES = 20 * 60;
+  // 放号时间配置：每天 20:00 放开第 9 天号源
+  const RELEASE_MINUTES = 20 * 60;
 
-  // 当前时间戳，由定时器驱动，用于日期区间与放号状态自动切换（页面不刷新也会更新）
+  // 当前时间戳，由放号边界定时器驱动，用于第 9 天放号状态自动切换（页面不刷新也会更新）
   const now = ref(Date.now());
 
-  // 是否处于待放号窗口（19:50 - 20:00）
-  const isPendingPeriod = computed(() => {
+  // 第 9 天是否未到 20:00 放号时间（00:00 - 20:00 为待放号）
+  const isNinthPending = computed(() => {
     const t = dayjs(now.value);
-    const minutes = t.hour() * 60 + t.minute();
-    return minutes >= PENDING_START_MINUTES && minutes < RELEASE_END_MINUTES;
+    return t.hour() * 60 + t.minute() < RELEASE_MINUTES;
   });
 
-  // 19:50 起展示第 9 天，20:00 后第 9 天转为正式放号
-  const showNinthDay = computed(() => {
-    const t = dayjs(now.value);
-    return t.hour() * 60 + t.minute() >= PENDING_START_MINUTES;
-  });
-
-  // 日期列表：19:50 前 8 天，19:50 起 9 天（预约挂号与医生排班页均生效；跨月、跨年由 dayjs 计算）
+  // 日期列表：固定 9 天（预约挂号与医生排班页均生效；跨月、跨年由 dayjs 计算）
   const dates = computed(() => {
     const base = dayjs(now.value);
-    const length = showNinthDay.value ? 9 : 8;
-    return Array.from({ length }, (_, i) => base.add(i, 'day').format('YYYY-MM-DD'));
+    return Array.from({ length: 9 }, (_, i) => base.add(i, 'day').format('YYYY-MM-DD'));
   });
 
-  // 待放号的第 9 天日期
-  const pendingDate = computed(() => {
-    return isPendingPeriod.value ? dates.value[8] : null;
-  });
+  // 第 9 天日期（一直展示，点击即按真实日期请求排班，不再跳过接口）
+  const ninthDate = computed(() => dates.value[8]);
 
-  // 点击待放号日期后的查看状态
-  const pendingViewDate = ref(null);
-  const isPendingView = computed(() => !!pendingDate.value && pendingViewDate.value === pendingDate.value);
+  // 第 9 天在 20:00 前固定展示“待放号”，不看接口返回
+  function isNinthDayPending(date) {
+    return date === ninthDate.value && isNinthPending.value;
+  }
 
-  // 距离 20:00 放号的倒计时
-  const countdownText = computed(() => {
-    const target = dayjs(now.value).hour(20).minute(0).second(0).millisecond(0);
-    const total = Math.max(0, target.diff(dayjs(now.value), 'second'));
-    const h = String(Math.floor(total / 3600)).padStart(2, '0');
-    const m = String(Math.floor((total % 3600) / 60)).padStart(2, '0');
-    const s = String(total % 60).padStart(2, '0');
-    return `${h}:${m}:${s}`;
-  });
-
-  // 默认选中日期条的起始日期（正常时段即今天）
+  // 默认选中日期条的起始日期（即今天）
   const currentDate = ref(dates.value[0]);
+
+  // 第 9 天 20:00 前预约按钮禁用（展示“20点预约”）
+  const ninthBookDisabled = computed(() => isNinthDayPending(currentDate.value));
 
   const onlyAvailable = ref(false);
 
@@ -246,12 +229,7 @@ export function useAppointmentData() {
 
   // 加载医生排班
   async function loadDoctors() {
-    // 待放号日期不请求排班接口，转为展示倒计时
-    if (pendingDate.value && currentDate.value === pendingDate.value) {
-      pendingViewDate.value = currentDate.value;
-      loading.value = false;
-      return;
-    }
+    // 第 9 天与其他日期一致，按真实日期请求排班（20:00 前接口返回空即展示空状态）
     const schedules = await getSchedulesApi({
       deptCode: currentSecondDept.value,
       doctorCode: null,
@@ -388,16 +366,8 @@ export function useAppointmentData() {
     getFirstDepts(keepDeptId, keepSecondDeptId);
   }
 
-  // 选择日期
+  // 选择日期（第 9 天与其他日期行为一致，仅 20:00 前不可预约）
   function onClickDate(date) {
-    // 待放号日期：只展示倒计时，不请求排班接口
-    if (date === pendingDate.value) {
-      pendingViewDate.value = date;
-      // 左侧科室同样按待放号日期刷新
-      refreshByDate(date);
-      return;
-    }
-    pendingViewDate.value = null;
     refreshByDate(date);
   }
 
@@ -432,60 +402,19 @@ export function useAppointmentData() {
 
   // #region 放号时间段定时器
   let boundaryTimer = null;
-  let tickTimer = null;
 
-  // 待放号窗口内每秒刷新，用于倒计时与 20:00 自动放号
-  function startTick() {
-    if (tickTimer) return;
-    tickTimer = setInterval(() => {
-      now.value = Date.now();
-    }, 1000);
-  }
-
-  function stopTick() {
-    if (!tickTimer) return;
-    clearInterval(tickTimer);
-    tickTimer = null;
-  }
-
-  // 在 19:50 / 20:00 / 次日 00:00 三个边界刷新时间，实现状态自动切换（无需刷新页面）
+  // 在 20:00 / 次日 00:00 两个边界刷新时间，实现第 9 天放号状态自动切换（无需刷新页面）
+  // 20:00 只翻转按钮与标签状态，不重新请求排班接口
   function refreshTimers() {
     now.value = Date.now();
     clearTimeout(boundaryTimer);
 
     const t = dayjs(now.value);
-    const boundaries = [
-      t.hour(19).minute(50).second(0).millisecond(0),
-      t.hour(20).minute(0).second(0).millisecond(0),
-      t.add(1, 'day').startOf('day'),
-    ];
+    const boundaries = [t.hour(20).minute(0).second(0).millisecond(0), t.add(1, 'day').startOf('day')];
     const next = boundaries.find((item) => item.valueOf() > Date.now());
     const delay = next ? next.diff(dayjs(now.value)) : 60 * 1000;
     boundaryTimer = setTimeout(refreshTimers, Math.max(delay, 0) + 200);
-
-    // 有待放号日期展示时就要每秒刷新倒计时
-    // （正常时段待放号只在 19:50-20:00 出现，条件等价）
-    if (isPendingPeriod.value || pendingDate.value) {
-      startTick();
-    } else {
-      stopTick();
-    }
   }
-
-  // 20:00 放号：刷新整周号源状态；若正在查看倒计时，则自动切换到第 9 天
-  watch(pendingDate, (val) => {
-    if (val) return;
-    const releasedDate = pendingViewDate.value;
-    if (releasedDate) {
-      pendingViewDate.value = null;
-      if (dates.value.includes(releasedDate)) {
-        // 放号后左侧科室按放号日期刷新，右侧排班由重新选中的二级科室自动加载
-        refreshByDate(releasedDate);
-        return;
-      }
-    }
-    if (currentSecondDept.value) loadWeekDoctors();
-  });
 
   // 跨天保护：页面长时间停留时，日期条整体发生变化（跨过 00:00）
   // 后重置已不在日期区间内的选中日期
@@ -508,7 +437,6 @@ export function useAppointmentData() {
   onBeforeUnmount(() => {
     clearTimeout(boundaryTimer);
     boundaryTimer = null;
-    stopTick();
   });
   // #endregion
 
@@ -522,10 +450,9 @@ export function useAppointmentData() {
     currentDept,
     dates,
     currentDate,
-    pendingDate,
-    pendingViewDate,
-    isPendingView,
-    countdownText,
+    ninthDate,
+    isNinthDayPending,
+    ninthBookDisabled,
     onlyAvailable,
     doctors,
     loading,

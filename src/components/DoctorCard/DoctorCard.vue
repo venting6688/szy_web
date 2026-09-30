@@ -4,6 +4,8 @@ import { defineProps } from 'vue';
 const props = defineProps({
   doctor: Object,
   type: String,
+  // 第 9 天 20:00 前禁用预约按钮，展示“20点预约”
+  bookDisabled: Boolean,
 });
 
 const ellipsisState = ref({
@@ -81,8 +83,17 @@ const emit = defineEmits(['book']);
         </div>
 
         <div class="schedule-action">
+          <!-- 第 9 天 20:00 前：停诊行仍显示停诊，其余行（含余号为 0）禁用并展示“20点预约” -->
           <t-button
-            v-if="item.left > 0 && item.ScheduleStatusDesc !== '停诊'"
+            v-if="bookDisabled && item.ScheduleStatusDesc !== '停诊'"
+            size="small"
+            class="btn-book btn-book-disabled"
+            disabled
+          >
+            20点预约
+          </t-button>
+          <t-button
+            v-else-if="item.left > 0 && item.ScheduleStatusDesc !== '停诊'"
             size="small"
             class="btn-book"
             @click="emit('book', doctor, item.scheduleItemCode)"
@@ -216,6 +227,18 @@ const emit = defineEmits(['book']);
   color: #fff;
   border-radius: 29px;
   border: 0;
+}
+
+/* 第 9 天 20:00 前的禁用态：样式与“待放号”一致，且不响应点击 */
+.btn-book.btn-book-disabled {
+  min-width: 72px;
+  height: 28px;
+  padding: 0 10px;
+  background: @warning-color-fade;
+  color: @warning-color;
+  border-radius: 29px;
+  border: 0;
+  pointer-events: none;
 }
 
 .schedule-group-schedule {
