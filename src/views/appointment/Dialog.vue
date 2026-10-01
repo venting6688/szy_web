@@ -18,6 +18,12 @@ const headerTitle = computed(() => {
   if (dialogType.value === 'notice2') return '温馨提示';
   return '';
 });
+// 预约信息弹窗内嵌了温馨提示，高度需随内容自适应，故单独使用一个弹窗类名
+const dialogClassName = computed(() => {
+  if (dialogType.value === 'notice' || dialogType.value === 'notice2') return 'notice-dialog';
+  if (dialogType.value === 'appointment') return 'appointment-dialog';
+  return 'schedule-dialog';
+});
 // 时间格式化
 import { useUserStore } from '@/store/modules/user';
 const userStore = useUserStore();
@@ -219,7 +225,7 @@ defineExpose({
 <template>
   <div>
     <t-dialog
-      :dialog-class-name="dialogType === 'notice' || dialogType === 'notice2' ? 'notice-dialog' : 'schedule-dialog'"
+      :dialog-class-name="dialogClassName"
       :closeBtn="dialogType === 'notice' || dialogType === 'notice2' ? false : true"
       :footer="false"
       placement="center"
@@ -333,6 +339,16 @@ defineExpose({
               />
             </t-form-item>
           </t-form>
+          <div class="appointment-notice">
+            <div class="notice-title">温馨提示</div>
+            <div class="notice-greeting">尊敬的患者及家属：</div>
+            <div
+              v-for="(item, i) in noticeList2"
+              :key="i"
+              class="line"
+              v-html="item.text"
+            ></div>
+          </div>
           <div class="btn-container">
             <t-button
               class="btn-confirm"
@@ -350,11 +366,6 @@ defineExpose({
                 @click="goNotice('notice')"
                 style="cursor: pointer"
                 >《预约须知》</a
-              >
-              <a
-                @click="goNotice('notice2')"
-                style="cursor: pointer"
-                >《温馨提示》</a
               >
             </div>
           </div>
@@ -422,6 +433,34 @@ defineExpose({
         cursor: not-allowed;
       }
     }
+  }
+}
+
+// 预约信息弹窗：宽度上限 640px，窄屏自动收敛到视口内；不设固定高度，内容多高就多高，超出屏幕时由遮罩层滚动
+:deep(.appointment-dialog) {
+  width: calc(100vw - 32px);
+  max-width: 640px;
+  padding: 20px;
+}
+
+// 预约信息弹窗内嵌的温馨提示：浅底卡片 + 层次化排版，避免与上方表单糊成一堵灰墙
+.appointment-notice {
+  margin: 16px 0 0;
+  padding: 12px 14px;
+  background: @primary-color-fade;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.7;
+  color: @text-regular;
+  .notice-title {
+    font-weight: 600;
+    color: @text-primary;
+  }
+  .notice-greeting {
+    margin-top: 6px;
+  }
+  .line {
+    margin-top: 6px;
   }
 }
 
