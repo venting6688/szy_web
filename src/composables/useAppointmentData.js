@@ -79,8 +79,8 @@ export function useAppointmentData() {
 
   // preferDeptId / preferSecondDeptId：日期刷新时用于保留原选中科室，在新日期不存在时回落为第一个
   async function getFirstDepts(preferDeptId, preferSecondDeptId) {
-    // 缓存按“院区 + 日期”隔离，不同日期的科室可能不同
-    const cacheKey = `${hospitalStore.current}:${currentDate.value}`;
+    // 缓存按“院区”隔离：科室列表不随日期变化，切换日期不再重复请求科室接口
+    const cacheKey = `${hospitalStore.current}`;
     let arr = firstDeptCache.get(cacheKey);
     if (!firstDeptCache.has(cacheKey)) {
       arr = await getFirstDeptsApi({
@@ -111,8 +111,8 @@ export function useAppointmentData() {
   // 点击一级科室
   async function onClickDept(item) {
     const id = item.CliSerGroupID;
-    // 缓存按“院区 + 一级科室 + 日期”隔离，不同日期的二级科室可能不同
-    const cacheKey = `${hospitalStore.current}:${id}:${currentDate.value}`;
+    // 缓存按“院区 + 一级科室”隔离：二级科室列表不随日期变化，切换日期不再重复请求科室接口
+    const cacheKey = `${hospitalStore.current}:${id}`;
 
     // const loadingInstance = await LoadingPlugin({
     //   text: '加载中...',
