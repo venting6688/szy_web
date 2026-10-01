@@ -128,6 +128,12 @@ const emit = defineEmits(['book']);
             class="price-inline"
             >￥{{ item.price }}</span
           >)
+          <!-- 排班视图：停诊时段标记（已约满不加） -->
+          <span
+            v-if="item.ScheduleStatusDesc === '停诊'"
+            class="period-stopped"
+            >停诊</span
+          >
           <span v-show="index < doctor.schedule.length - 1">、</span>
         </span>
       </span>
@@ -246,5 +252,16 @@ const emit = defineEmits(['book']);
   gap: 150px;
   margin-top: 14px;
   font-size: 14px;
+}
+
+/* 排班视图：停诊时段标记 */
+.period-stopped {
+  margin-left: 4px;
+  padding: 0 6px;
+  font-size: 14px;
+  line-height: 18px;
+  border-radius: 9px;
+  color: @warning-color;
+  background: @warning-color-fade;
 }
 </style>

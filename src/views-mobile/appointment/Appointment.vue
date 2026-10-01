@@ -491,6 +491,12 @@ onBeforeUnmount(() => {
                   class="price-inline"
                   >￥{{ item.price }}</span
                 >)
+                <!-- 排班视图：停诊时段标记（已约满不加） -->
+                <span
+                  v-if="item.ScheduleStatusDesc === '停诊'"
+                  class="period-stopped"
+                  >停诊</span
+                >
                 <span v-show="index < doc.schedule.length - 1">、</span>
               </span>
             </span>
@@ -945,6 +951,17 @@ onBeforeUnmount(() => {
   gap: 30px;
   margin-top: 14px;
   font-size: 14px;
+}
+
+/* 排班视图：停诊时段标记 */
+.period-stopped {
+  margin-left: 4px;
+  padding: 0 6px;
+  font-size: @font-small;
+  line-height: 18px;
+  border-radius: 9px;
+  color: @warning-color;
+  background: @warning-color-fade;
 }
 
 /* 与 PC 差异：横向时间行重排为竖向信息卡，便于触屏点击 */
