@@ -71,6 +71,14 @@ const go = (path) => {
 const isActive = (path) => {
   return route.path === path;
 };
+// 程序化跳转（如预约成功后 push 到预约记录页）也要同步面包屑标题，避免标题与实际页面不一致
+watch(
+  () => route.path,
+  (path) => {
+    const name = navList.find((item) => item.path === path)?.name;
+    if (name) headerTitle.value = name;
+  },
+);
 // 获取当前图标
 const getIcon = (item) => {
   return isActive(item.path) ? item.activeIcon : item.icon;

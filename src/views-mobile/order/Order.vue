@@ -61,6 +61,9 @@ async function onClickCancel(order) {
       </t-select>
     </section>
 
+    <!-- 预约提示横幅：常驻展示，不可关闭 -->
+    <section class="notice-bar">请提前15分钟现场报道取号，就诊顺序以报道号码为准。</section>
+
     <section class="list-panel">
       <div
         v-if="loading"
@@ -354,6 +357,17 @@ async function onClickCancel(order) {
   text-align: center;
   background: #f2f3f5;
   border-radius: 999px;
+}
+
+.notice-bar {
+  margin-bottom: clamp(12px, 4vw, 18px);
+  padding: 10px 12px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: @primary-color;
+  background: @primary-color-fade;
+  border: 1px solid rgb(32 133 126 / 24%);
+  border-radius: clamp(12px, 3.5vw, 14px);
 }
 
 @media (orientation: landscape) {

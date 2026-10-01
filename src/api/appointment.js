@@ -55,11 +55,6 @@ export async function createAppointmentApi({
       content: departmentName + '-' + doctorName,
       duration: 5000,
     });
-    NotifyPlugin.info({
-      title: '预约提示',
-      content: '请提前15分钟现场报道取号，就诊顺序以报道号码为准。',
-      duration: 5000,
-    });
     return data;
   }
 }

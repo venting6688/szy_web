@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { ref, reactive, computed, watch, onMounted, nextTick } from 'vue';
 import dayjs from 'dayjs';
+import { useRouter } from 'vue-router';
 import { getScheduleDetailApi } from '@/api/schedule';
 const emit = defineEmits(['open']);
+const router = useRouter();
 
 //#region 预约
 // 弹窗类型
@@ -110,6 +112,8 @@ async function confirmBook() {
 
     // MessagePlugin.success('预约挂号成功');
     dialogVisible.value = false;
+    // 预约成功后跳转到预约记录页：该页重新挂载取数，用户不再停留在号源未刷新的挂号页
+    router.push('/order');
   } catch (error) {
     console.error('预约挂号失败', error);
   } finally {

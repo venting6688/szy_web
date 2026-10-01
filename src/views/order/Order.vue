@@ -24,6 +24,10 @@ const { orderList, loading, hospitalOptions, cancelEmit, hospitalId, onChangeHos
         />
       </t-select>
     </div>
+
+    <!-- 预约提示横幅：常驻展示，不可关闭 -->
+    <div class="notice-bar">请提前15分钟现场报道取号，就诊顺序以报道号码为准。</div>
+
     <div
       v-if="loading"
       class="loading"
@@ -76,6 +80,16 @@ const { orderList, loading, hospitalOptions, cancelEmit, hospitalId, onChangeHos
       font-weight: 400;
       color: @text-regular;
     }
+  }
+  .notice-bar {
+    margin-bottom: 16px;
+    padding: 10px 14px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: @primary-color;
+    background: @primary-color-fade;
+    border: 1px solid rgb(32 133 126 / 24%);
+    border-radius: 8px;
   }
   .empty {
     margin-top: 120px;

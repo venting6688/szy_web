@@ -40,7 +40,7 @@ export function useOrderData() {
     const res = await getAppointmentsApi({
       // patientNo: '0010060062',
       startDate: dayjs().format('YYYY-MM-DD'),
-      endDate: dayjs().add(7, 'day').format('YYYY-MM-DD'),
+      endDate: dayjs().add(8, 'day').format('YYYY-MM-DD'),
     });
 
     if (hospitalId.value === hospitalStore.list.find((item) => item.appointment === false)?.value)
