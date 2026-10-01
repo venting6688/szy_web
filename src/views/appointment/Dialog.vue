@@ -447,6 +447,24 @@ defineExpose({
   padding: 20px;
 }
 
+// 预约信息弹窗：内容在窗口内滚动（与预约须知同为 65vh 上限），确认按钮 sticky 钉在滚动区底部，恒定可见
+.appointment-dialog-container {
+  max-height: 65vh;
+  overflow-y: auto;
+  .btn-container {
+    position: sticky;
+    bottom: 0;
+    width: 100%;
+    margin-top: 0;
+    padding-top: 20px;
+    background: @bg-white;
+    .btn-confirm {
+      width: 280px;
+      margin: 0 auto 10px;
+    }
+  }
+}
+
 // 预约信息弹窗内嵌的温馨提示：浅底卡片 + 层次化排版，避免与上方表单糊成一堵灰墙
 .appointment-notice {
   margin: 16px 0 0;

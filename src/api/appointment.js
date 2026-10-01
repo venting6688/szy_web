@@ -52,7 +52,6 @@ export async function createAppointmentApi({
   } else {
     MessagePlugin.success({
       content: '预约挂号成功：' + departmentName + '-' + doctorName,
-      placement: 'center',
       duration: 5000,
     });
     return data;

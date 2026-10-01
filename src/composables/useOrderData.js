@@ -76,6 +76,7 @@ export function useOrderData() {
         });
         if (ResultCode == '0') {
           confirmInstance.hide();
+          MessagePlugin.success('取消预约成功');
           setTimeout(() => {
             getOrderList();
             loading.value = false;
