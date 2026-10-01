@@ -24,8 +24,9 @@
   --vt-c-text-dark-2: rgb(235 235 235 / 64%);
 }
 
-/* semantic color variables for this project */
+/* 本项目仅支持浅色主题：显式声明，避免 iOS 深色模式接管原生表单控件配色 */
 :root {
+  color-scheme: light;
   --color-background: var(--vt-c-white);
   --color-background-soft: var(--vt-c-white-soft);
   --color-background-mute: var(--vt-c-white-mute);
@@ -34,18 +35,6 @@
   --color-heading: var(--vt-c-text-light-1);
   --color-text: var(--vt-c-text-light-1);
   --section-gap: 160px;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-background: var(--vt-c-black);
-    --color-background-soft: var(--vt-c-black-soft);
-    --color-background-mute: var(--vt-c-black-mute);
-    --color-border: var(--vt-c-divider-dark-2);
-    --color-border-hover: var(--vt-c-divider-dark-1);
-    --color-heading: var(--vt-c-text-dark-1);
-    --color-text: var(--vt-c-text-dark-2);
-  }
 }
 
 *,
