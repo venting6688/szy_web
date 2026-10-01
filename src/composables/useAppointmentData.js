@@ -227,6 +227,24 @@ export function useAppointmentData() {
       .filter((doctor) => doctor.schedule.length > 0);
   }
 
+  // 医生职称展示顺序：知名专家、主任医师、副主任医师、主治医师、普通门诊；其余职称排在最后
+  const doctorTypeOrder = ['知名专家', '主任医师', '副主任医师', '主治', '普通'];
+  // 接口返回的职称字面量不固定，按「包含关键字」匹配；匹配时先长后短，
+  // 避免「副主任医师」被更短的「主任医师」抢先命中
+  const doctorTypeMatchOrder = [...doctorTypeOrder].sort((a, b) => b.length - a.length);
+
+  // 停诊医生（所有时段均为停诊）永远排在最后，不受职称影响；
+  // 其余医生（含已约满）按职称顺序排列，同职称内保持接口原顺序
+  function sortDoctors(list) {
+    const stoppedRank = (doctor) =>
+      doctor.schedule.length > 0 && doctor.schedule.every((item) => item.ScheduleStatusDesc === '停诊') ? 1 : 0;
+    const typeRank = (doctor) => {
+      const matched = doctorTypeMatchOrder.find((keyword) => doctor.doctorType && doctor.doctorType.includes(keyword));
+      return matched ? doctorTypeOrder.indexOf(matched) : doctorTypeOrder.length;
+    };
+    return [...list].sort((a, b) => stoppedRank(a) - stoppedRank(b) || typeRank(a) - typeRank(b));
+  }
+
   // 加载医生排班
   async function loadDoctors() {
     // 第 9 天与其他日期一致，按真实日期请求排班（20:00 前接口返回空即展示空状态）
@@ -236,7 +254,7 @@ export function useAppointmentData() {
       startDate: currentDate.value,
       endDate: currentDate.value,
     });
-    doctors.value = filterPassedPeriods(transformSchedule(schedules, currentSecondDept.value));
+    doctors.value = sortDoctors(filterPassedPeriods(transformSchedule(schedules, currentSecondDept.value)));
     // 如果是当天
     // if (dayjs(currentDate.value).isSame(dayjs(), 'day')) {
     //   availableDateList.value[0] = buildDateAvailability(schedules, currentDate.value, currentDate.value)[0];
