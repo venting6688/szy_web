@@ -227,16 +227,6 @@ export function useAppointmentData() {
       .filter((doctor) => doctor.schedule.length > 0);
   }
 
-  // 排班页停诊过滤：不再展示停诊时段，剩余时段全部被过滤的医生整体隐藏
-  function filterStoppedPeriods(list) {
-    return list
-      .map((doctor) => ({
-        ...doctor,
-        schedule: doctor.schedule.filter((item) => item.ScheduleStatusDesc !== '停诊'),
-      }))
-      .filter((doctor) => doctor.schedule.length > 0);
-  }
-
   // 加载医生排班
   async function loadDoctors() {
     // 第 9 天与其他日期一致，按真实日期请求排班（20:00 前接口返回空即展示空状态）
@@ -246,9 +236,7 @@ export function useAppointmentData() {
       startDate: currentDate.value,
       endDate: currentDate.value,
     });
-    const list = filterPassedPeriods(transformSchedule(schedules, currentSecondDept.value));
-    // 仅排班页隐藏停诊时段，预约页保留停诊行
-    doctors.value = type === 'schedule' ? filterStoppedPeriods(list) : list;
+    doctors.value = filterPassedPeriods(transformSchedule(schedules, currentSecondDept.value));
     // 如果是当天
     // if (dayjs(currentDate.value).isSame(dayjs(), 'day')) {
     //   availableDateList.value[0] = buildDateAvailability(schedules, currentDate.value, currentDate.value)[0];
@@ -300,7 +288,7 @@ export function useAppointmentData() {
     return result;
   }
 
-  // 加载一周的医生排班
+  // 加载一周号源（日期条「有号/无号」）
   let requestId = 0;
 
   async function loadWeekDoctors() {
