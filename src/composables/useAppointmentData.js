@@ -2,7 +2,7 @@ import { ref, watch, computed, onMounted } from 'vue';
 import dayjs from 'dayjs';
 import { useRoute, useRouter } from 'vue-router';
 import { getFirstDeptsApi, getSecondDeptsApi } from '@/api/department';
-import { getSchedulesApi } from '@/api/schedule';
+import { getSchedulesApi, getSchedulesHasNumberApi } from '@/api/schedule';
 import { useHospitalStore } from '@/store/modules/hospital';
 import { useNoticeStore } from '@/store/modules/notice';
 import downIcon from '@/assets/image/down.png';
@@ -259,20 +259,23 @@ export function useAppointmentData() {
   const availableDateList = ref([]);
   const weekLoading = ref(false);
 
-  // 构建日期可用号源
-  function buildDateAvailability(scheduleList, startDate, endDate) {
+  // 构建日期可用号源（hasNumber 返回按 ServiceDate 的 HasNumber，缺失日期视为无号）
+  function buildDateAvailability(hasNumberList, startDate, endDate) {
     const map = {};
 
-    // 1️⃣ 按日期累加 AvailableLeftNum
-    scheduleList.forEach((item) => {
+    // 1️⃣ 按日期汇总 HasNumber
+    hasNumberList.forEach((item) => {
       const date = item.ServiceDate;
-      const left = Number(item.AvailableLeftNum || 0);
 
       if (!map[date]) {
-        map[date] = 0;
+        map[date] = { hasAvailable: false, total: 0 };
       }
 
-      map[date] += left;
+      if (item.HasNumber === true) {
+        map[date].hasAvailable = true;
+      }
+
+      map[date].total += Number(item.AvailableLeftNum || 0);
     });
 
     // 2️⃣ 生成完整日期区间
@@ -283,12 +286,12 @@ export function useAppointmentData() {
     while (current.isBefore(end) || current.isSame(end)) {
       const dateStr = current.format('YYYY-MM-DD');
 
-      const total = map[dateStr] || 0;
+      const day = map[dateStr];
 
       result.push({
         date: dateStr,
-        hasAvailable: total > 0,
-        total, // 可选：总余号
+        hasAvailable: day ? day.hasAvailable : false,
+        total: day ? day.total : 0, // 可选：总余号
       });
 
       current = current.add(1, 'day');
@@ -306,9 +309,8 @@ export function useAppointmentData() {
 
     availableDateList.value = [];
     try {
-      const schedules = await getSchedulesApi({
+      const hasNumberList = await getSchedulesHasNumberApi({
         deptCode: currentSecondDept.value,
-        doctorCode: null,
         startDate: dates.value[0],
         endDate: dates.value[dates.value.length - 1],
       });
@@ -316,7 +318,11 @@ export function useAppointmentData() {
       // ⭐ 如果不是最新请求，直接丢弃，用于解决连续点击多个科室导致的并发请求问题
       if (currentId !== requestId) return;
 
-      availableDateList.value = buildDateAvailability(schedules, dates.value[0], dates.value[dates.value.length - 1]);
+      availableDateList.value = buildDateAvailability(
+        hasNumberList,
+        dates.value[0],
+        dates.value[dates.value.length - 1],
+      );
     } finally {
       if (currentId === requestId) {
         weekLoading.value = false;
