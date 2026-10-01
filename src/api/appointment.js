@@ -50,9 +50,9 @@ export async function createAppointmentApi({
     MessagePlugin.error(msg || '预约挂号失败');
     throw new Error(msg || '预约挂号失败');
   } else {
-    NotifyPlugin.success({
-      title: '预约挂号成功',
-      content: departmentName + '-' + doctorName,
+    MessagePlugin.success({
+      content: '预约挂号成功：' + departmentName + '-' + doctorName,
+      placement: 'center',
       duration: 5000,
     });
     return data;
