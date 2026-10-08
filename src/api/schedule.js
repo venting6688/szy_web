@@ -1,8 +1,11 @@
 import { get } from '@/utils/request';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { useHospitalStore } from '@/store/modules/hospital';
+import { useUserStore } from '@/store/modules/user';
+import router from '@/router';
 
 const hospitalStore = useHospitalStore();
+const userStore = useUserStore();
 
 // 医生排班
 export async function getSchedulesApi(params) {
@@ -47,6 +50,12 @@ export async function getScheduleDetailApi({ scheduleItemCode, deptCode }) {
     scheduleItemCode,
     deptCode,
   });
+  if (code === 401) {
+    MessagePlugin.error('登录过期，请重新登录');
+    userStore.logout();
+    router.push('/login');
+    throw new Error(msg + '登录过期，请重新登录');
+  }
   if (code !== 200) {
     MessagePlugin.error(msg || '获取号源失败');
     throw new Error(msg || '获取号源失败');

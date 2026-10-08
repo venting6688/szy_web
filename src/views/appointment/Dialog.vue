@@ -62,12 +62,17 @@ async function getScheduleDetail() {
     appointmentInfo.value.price = periodItem.price ?? doctorCardInfo.value.price;
   }
 
-  const data = await getScheduleDetailApi({
-    scheduleItemCode: activeTab.value,
-    deptCode: doctorCardInfo.value.deptCode,
-  });
+  try {
+    const data = await getScheduleDetailApi({
+      scheduleItemCode: activeTab.value,
+      deptCode: doctorCardInfo.value.deptCode,
+    });
 
-  scheduleDetailList.value = data;
+    scheduleDetailList.value = data;
+  } catch (error) {
+    dialogVisible.value = false;
+    console.error('获取号源失败', error);
+  }
 }
 const weekDayMap = {
   1: '周一',

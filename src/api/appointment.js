@@ -3,6 +3,7 @@ import { post } from '@/utils/request';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { useUserStore } from '@/store/modules/user';
 import { useHospitalStore } from '@/store/modules/hospital';
+import router from '@/router';
 const userStore = useUserStore();
 const hospitalStore = useHospitalStore();
 
@@ -46,6 +47,12 @@ export async function createAppointmentApi({
       hospitalId: hospitalStore.current,
     },
   );
+  if (code === 401) {
+    MessagePlugin.error('登录过期，请重新登录');
+    userStore.logout();
+    router.push('/login');
+    throw new Error(msg + '登录过期，请重新登录');
+  }
   if (code !== 200) {
     MessagePlugin.error(msg || '预约挂号失败');
     throw new Error(msg || '预约挂号失败');
