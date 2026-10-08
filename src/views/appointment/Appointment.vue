@@ -331,7 +331,7 @@ const {
   .date-item {
     width: 13%;
     border: 1px solid @border-color;
-    padding: @space-sm @space-md;
+    padding: @space-sm 10px;
     cursor: pointer;
     border-radius: 7px;
     text-align: center;
