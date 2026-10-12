@@ -26,7 +26,7 @@ const { orderList, loading, hospitalOptions, cancelEmit, hospitalId, onChangeHos
     </div>
 
     <!-- 预约提示横幅：常驻展示，不可关闭 -->
-    <div class="notice-bar">请提前15分钟现场报道取号，就诊顺序以报道号码为准。</div>
+    <div class="notice-bar">请提前15分钟现场报到取号，就诊顺序以报到号码为准。</div>
 
     <div
       v-if="loading"

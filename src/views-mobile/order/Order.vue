@@ -62,7 +62,7 @@ async function onClickCancel(order) {
     </section>
 
     <!-- 预约提示横幅：常驻展示，不可关闭 -->
-    <section class="notice-bar">请提前15分钟现场报道取号，就诊顺序以报道号码为准。</section>
+    <section class="notice-bar">请提前15分钟现场报到取号，就诊顺序以报到号码为准。</section>
 
     <section class="list-panel">
       <div
