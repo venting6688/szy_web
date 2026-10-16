@@ -184,7 +184,9 @@ export function useAppointmentData() {
         // 不同时段（上午/下午/晚上）的挂号费可能不同，价格必须挂在时段上
         price: toPrice(item.RegFee),
         total: Number(item.AvailableTotalNum),
-        left: Number(item.AvailableLeftNum),
+        left: Number(item.AvailableLeftNum || 0) + Number(item.AvailableOldNum || 0),
+        AvailableLeftNum: Number(item.AvailableLeftNum || 0),
+        AvailableOldNum: Number(item.AvailableOldNum || 0),
         scheduleItemCode: item.ScheduleItemCode,
         ScheduleStatusDesc: item.ScheduleStatusDesc,
       });

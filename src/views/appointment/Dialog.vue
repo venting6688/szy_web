@@ -86,6 +86,100 @@ const weekDayMap = {
 const formatWeekDay = (weekDay) => weekDayMap[weekDay] || '未知';
 const formatDate = (date) => dayjs(date).format('YYYY年MM月DD日');
 
+// 获取当前医生排班的目标号源数量：统一使用 AvailableLeftNum + AvailableOldNum
+const targetDoctorNum = computed(() => {
+  const periodItem = doctorCardInfo.value?.schedule?.find((item) => item.scheduleItemCode === activeTab.value);
+  if (!periodItem) return 0;
+  if (periodItem.AvailableLeftNum !== undefined || periodItem.AvailableOldNum !== undefined) {
+    return Number(periodItem.AvailableLeftNum || 0) + Number(periodItem.AvailableOldNum || 0);
+  }
+  return Number(periodItem.left || 0);
+});
+
+// 分时段号源数量判断及展示计算
+const processedScheduleDetailList = computed(() => {
+  const list = scheduleDetailList.value || [];
+  if (!list.length) return [];
+
+  const target = targetDoctorNum.value;
+
+  // 目标号源数量 <= 0 时，所有时段均不参与判断，展示“余:0”
+  if (target <= 0) {
+    return list.map((item) => ({
+      ...item,
+      availableNum: 0,
+      isParticipating: false,
+    }));
+  }
+
+  // 1. 按分时段的时间顺序遍历号源数据
+  // 为避免改变现有原数组顺序，按时间排序索引进行判断，再映射回原顺序
+  const sortedIndices = list
+    .map((item, index) => ({ item, index }))
+    .sort((a, b) => {
+      const timeA = `${a.item.ServiceDate || ''} ${a.item.StartTime || ''}`;
+      const timeB = `${b.item.ServiceDate || ''} ${b.item.StartTime || ''}`;
+      return timeA.localeCompare(timeB);
+    });
+
+  const results = new Array(list.length);
+  let accumulated = 0;
+  let started = false;
+  let stopped = false;
+
+  for (const { item, index } of sortedIndices) {
+    // 达到或超过目标数量后停止判断，后续时段不再参与本次判断，展示“余:0”
+    if (stopped) {
+      results[index] = {
+        ...item,
+        availableNum: 0,
+        isParticipating: false,
+      };
+      continue;
+    }
+
+    // 分时段号源数量直接使用 AvailableLeftNum
+    const slotTotal = Number(item.AvailableLeftNum || 0);
+
+    // 从第一个号源数量大于 0 的时段开始累计，之前的时段不参与累计
+    if (!started) {
+      if (slotTotal <= 0) {
+        results[index] = {
+          ...item,
+          availableNum: 0,
+          isParticipating: false,
+        };
+        continue;
+      }
+      started = true;
+    }
+
+    // 每个时段的号源数量按顺序累计，包含当前时段
+    const newAccumulated = accumulated + slotTotal;
+
+    if (newAccumulated >= target) {
+      // 当累计号源数量达到或超过医生排班的目标号源数量时，立即停止判断，包含当前时段；后续时段不再参与本次判断
+      const allocated = target - accumulated;
+      results[index] = {
+        ...item,
+        availableNum: allocated,
+        isParticipating: true,
+      };
+      accumulated = target;
+      stopped = true;
+    } else {
+      results[index] = {
+        ...item,
+        availableNum: slotTotal,
+        isParticipating: true,
+      };
+      accumulated = newAccumulated;
+    }
+  }
+
+  return results;
+});
+
 function onClickBookTime(item) {
   dialogType.value = 'appointment';
   appointmentInfo.value.startTime = item.StartTime;
@@ -93,7 +187,7 @@ function onClickBookTime(item) {
   appointmentInfo.value.scheduleItemCode = item.ScheduleItemCode;
 }
 function bookDisabled(item) {
-  if (Number(item.AvailableLeftNum) === 0) return true;
+  if ((item.availableNum ?? Number(item.AvailableLeftNum || 0)) <= 0) return true;
   // 预约结束时间已过则不可再预约
   return dayjs(`${item.ServiceDate} ${item.EndTime}`).isBefore(dayjs());
 }
@@ -267,14 +361,17 @@ defineExpose({
           </t-tabs>
           <div class="schedule-list">
             <t-button
-              v-for="item in scheduleDetailList"
-              :key="item.ScheduleItemCode"
+              v-for="(item, index) in processedScheduleDetailList"
+              :key="item.ScheduleItemCode ? `${item.ScheduleItemCode}_${index}` : index"
               :class="{ 'btn-book': true, disabled: bookDisabled(item) }"
               variant="outline"
               shape="round"
               @click="!bookDisabled(item) && onClickBookTime(item)"
             >
-              {{ formatTime(item.StartTime) }} - {{ formatTime(item.EndTime) }}
+              <div class="time-slot-btn">
+                <div class="time-range">{{ formatTime(item.StartTime) }} - {{ formatTime(item.EndTime) }}</div>
+                <div class="remain-count">余:{{ item.availableNum }}</div>
+              </div>
             </t-button>
           </div>
         </div>
@@ -430,16 +527,34 @@ defineExpose({
     overflow: auto;
     .btn-book {
       width: 104px;
-      height: 32px;
+      height: 46px;
+      padding: 0;
       background: @primary-color-fade;
       color: @primary-color;
-      border-radius: 16px;
+      border-radius: 23px;
       border: 0;
       &.disabled {
         background-color: #f5f5f5;
         color: #999;
         border-color: #999;
         cursor: not-allowed;
+      }
+
+      .time-slot-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        line-height: 1.25;
+
+        .time-range {
+          font-size: 12px;
+        }
+
+        .remain-count {
+          margin-top: 2px;
+          font-size: 11px;
+        }
       }
     }
   }
