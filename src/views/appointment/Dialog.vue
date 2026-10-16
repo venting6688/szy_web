@@ -145,8 +145,8 @@ const processedScheduleDetailList = computed(() => {
   let stopped = false;
 
   for (const { item, index } of sortedIndices) {
-    // 达到或超过目标数量后停止判断，后续时段不再参与本次判断，展示“余:0”
-    if (stopped) {
+    // 已过期时段不占用额度；达到目标后，后续时段也统一展示“余:0”
+    if (stopped || isScheduleExpired(item)) {
       results[index] = {
         ...item,
         availableNum: 0,
@@ -205,6 +205,9 @@ function onClickBookTime(item) {
 }
 function bookDisabled(item) {
   if ((item.availableNum ?? Number(item.AvailableLeftNum || 0)) <= 0) return true;
+  return isScheduleExpired(item);
+}
+function isScheduleExpired(item) {
   // 预约结束时间已过则不可再预约
   return dayjs(`${item.ServiceDate} ${item.EndTime}`).isBefore(dayjs());
 }
