@@ -55,7 +55,20 @@ async function book(doctor, scheduleItemCode) {
 const activeTab = ref('');
 
 const scheduleDetailList = ref([]);
+const scheduleDetailLoading = ref(false);
+let scheduleDetailRequestId = 0;
 async function getScheduleDetail() {
+  const requestId = ++scheduleDetailRequestId;
+  scheduleDetailLoading.value = true;
+  const scheduleItemCode = activeTab.value;
+  const deptCode = doctorCardInfo.value.deptCode;
+  // 请求期间不展示上个时段的号源，避免使用新时段额度计算旧数据
+  scheduleDetailList.value = [];
+  const isCurrentRequest = () =>
+    requestId === scheduleDetailRequestId &&
+    scheduleItemCode === activeTab.value &&
+    deptCode === doctorCardInfo.value.deptCode;
+
   // 切换时段后同步刷新价格，避免诊查费/ PayFee 仍沿用上一个时段的价格
   const periodItem = doctorCardInfo.value?.schedule?.find((item) => item.scheduleItemCode === activeTab.value);
   if (periodItem && appointmentInfo.value) {
@@ -64,14 +77,18 @@ async function getScheduleDetail() {
 
   try {
     const data = await getScheduleDetailApi({
-      scheduleItemCode: activeTab.value,
-      deptCode: doctorCardInfo.value.deptCode,
+      scheduleItemCode,
+      deptCode,
     });
 
+    if (!isCurrentRequest()) return;
     scheduleDetailList.value = data;
   } catch (error) {
+    if (!isCurrentRequest()) return;
     dialogVisible.value = false;
     console.error('获取号源失败', error);
+  } finally {
+    if (isCurrentRequest()) scheduleDetailLoading.value = false;
   }
 }
 const weekDayMap = {
@@ -359,7 +376,20 @@ defineExpose({
             >
             </t-tab-panel>
           </t-tabs>
-          <div class="schedule-list">
+          <div
+            v-if="scheduleDetailLoading"
+            class="schedule-loading"
+          >
+            <t-loading
+              :delay="50"
+              size="small"
+            ></t-loading>
+            加载中...
+          </div>
+          <div
+            v-else
+            class="schedule-list"
+          >
             <t-button
               v-for="(item, index) in processedScheduleDetailList"
               :key="item.ScheduleItemCode ? `${item.ScheduleItemCode}_${index}` : index"
@@ -518,6 +548,13 @@ defineExpose({
     margin: 10px 0 0;
   }
   margin: 0 20px;
+  .schedule-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 120px;
+  }
   .schedule-list {
     display: flex;
     gap: 12px;
