@@ -113,6 +113,12 @@ const targetDoctorNum = computed(() => {
   return Number(periodItem.left || 0);
 });
 
+// 仅当前排班只剩敬老号时启用特殊展示
+const onlySeniorNumbers = computed(() => {
+  const periodItem = doctorCardInfo.value?.schedule?.find((item) => item.scheduleItemCode === activeTab.value);
+  return Number(periodItem?.AvailableOldNum || 0) > 0 && Number(periodItem?.AvailableLeftNum || 0) === 0;
+});
+
 // 分时段号源数量判断及展示计算
 const processedScheduleDetailList = computed(() => {
   const list = scheduleDetailList.value || [];
@@ -195,6 +201,11 @@ const processedScheduleDetailList = computed(() => {
   }
 
   return results;
+});
+
+const visibleScheduleDetailList = computed(() => {
+  const list = processedScheduleDetailList.value;
+  return onlySeniorNumbers.value ? list.filter((item) => item.availableNum > 0) : list;
 });
 
 function onClickBookTime(item) {
@@ -380,6 +391,12 @@ defineExpose({
             </t-tab-panel>
           </t-tabs>
           <div
+            v-if="onlySeniorNumbers"
+            class="senior-notice"
+          >
+            温馨提示：(敬老)时段为关爱老人预留，70周岁(含)以上老人预约
+          </div>
+          <div
             v-if="scheduleDetailLoading"
             class="schedule-loading"
           >
@@ -394,7 +411,7 @@ defineExpose({
             class="schedule-list"
           >
             <t-button
-              v-for="(item, index) in processedScheduleDetailList"
+              v-for="(item, index) in visibleScheduleDetailList"
               :key="item.ScheduleItemCode ? `${item.ScheduleItemCode}_${index}` : index"
               :class="{ 'btn-book': true, disabled: bookDisabled(item) }"
               variant="outline"
@@ -403,7 +420,7 @@ defineExpose({
             >
               <div class="time-slot-btn">
                 <div class="time-range">{{ formatTime(item.StartTime) }} - {{ formatTime(item.EndTime) }}</div>
-                <div class="remain-count">余:{{ item.availableNum }}</div>
+                <div class="remain-count">余:{{ item.availableNum }}{{ onlySeniorNumbers ? '(敬老)' : '' }}</div>
               </div>
             </t-button>
           </div>
@@ -551,6 +568,12 @@ defineExpose({
     margin: 10px 0 0;
   }
   margin: 0 20px;
+  .senior-notice {
+    margin-top: 12px;
+    color: @warning-color;
+    font-size: 12px;
+    line-height: 1.5;
+  }
   .schedule-loading {
     display: flex;
     align-items: center;
