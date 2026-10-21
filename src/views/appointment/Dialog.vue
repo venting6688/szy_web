@@ -45,6 +45,7 @@ async function book(doctor, scheduleItemCode) {
     price: periodItem?.price ?? doctorCardInfo.value.price,
     date: dayjs(doctorCardInfo.value.date).format('YYYY-MM-DD'),
     patient: userStore.userInfo?.realName,
+    departmentCode: doctorCardInfo.value.deptCode,
   };
   dialogType.value = 'schedule';
   dialogVisible.value = true;
@@ -238,6 +239,7 @@ async function confirmBook() {
       RegisterDate: appointmentInfo.value.date,
       doctorName: appointmentInfo.value.doctor,
       departmentName: appointmentInfo.value.department,
+      departmentCode: appointmentInfo.value.departmentCode,
     });
 
     // MessagePlugin.success('预约挂号成功');

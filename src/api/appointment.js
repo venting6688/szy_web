@@ -16,6 +16,7 @@ export async function createAppointmentApi({
   RegisterDate,
   doctorName,
   departmentName,
+  departmentCode,
 }) {
   const { code, msg, data } = await post(
     '/mobile/api/dh/appoint/register',
@@ -42,6 +43,7 @@ export async function createAppointmentApi({
       ExtUserID: 'app001',
       ExtOrgCode: 'WECHAT',
       registerDate: RegisterDate,
+      departmentCode,
     },
     {
       hospitalId: hospitalStore.current,

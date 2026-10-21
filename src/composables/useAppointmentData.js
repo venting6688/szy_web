@@ -256,6 +256,7 @@ export function useAppointmentData() {
       startDate: currentDate.value,
       endDate: currentDate.value,
     });
+    // 按顺序处理排班数据：先将接口原始数据转为统一格式，再过滤掉当天已过的时段，最后按职称和停诊状态排序
     doctors.value = sortDoctors(filterPassedPeriods(transformSchedule(schedules, currentSecondDept.value)));
     // 如果是当天
     // if (dayjs(currentDate.value).isSame(dayjs(), 'day')) {
