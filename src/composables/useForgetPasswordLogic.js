@@ -37,7 +37,9 @@ export function useForgetPasswordLogic({ loginPath }) {
   const countdown = ref(0);
   let timer = null;
 
-  const btnDisabled = computed(() => !form.value.phone || countdown.value > 0);
+  const btnDisabled = computed(
+    () => !form.value.phone || !/^1[3-9]\d{9}$/.test(form.value.phone) || countdown.value > 0,
+  );
 
   async function onClickGetVerificationCode() {
     if (countdown.value > 0) return;

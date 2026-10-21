@@ -176,7 +176,9 @@ export function useRegisterLogic({ loginPath }) {
     }
   });
 
-  const btnDisabled = computed(() => !form.value.phoneNumber || countdown.value > 0);
+  const btnDisabled = computed(
+    () => !form.value.phoneNumber || !/^1[3-9]\d{9}$/.test(form.value.phoneNumber) || countdown.value > 0,
+  );
 
   async function goRegister() {
     if (loading.value) return;
