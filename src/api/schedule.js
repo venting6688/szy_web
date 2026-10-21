@@ -8,9 +8,11 @@ const hospitalStore = useHospitalStore();
 const userStore = useUserStore();
 
 // 医生排班
-export async function getSchedulesApi(params) {
+export async function getSchedulesApi(params, isRealtime) {
   const { doctorCode, deptCode, startDate, endDate } = params;
-  const { code, msg, data } = await get('/mobile/api/dh/newSchedules', {
+  // isRealtime 为 true 时走实时排班接口，其余情况保持原有排班接口
+  const url = isRealtime ? '/mobile/api/dh/realtimeSchedules' : '/mobile/api/dh/newSchedules';
+  const { code, msg, data } = await get(url, {
     doctorCode: doctorCode || '',
     deptCode,
     startDate,

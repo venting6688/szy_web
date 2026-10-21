@@ -250,12 +250,15 @@ export function useAppointmentData() {
   // 加载医生排班
   async function loadDoctors() {
     // 第 9 天与其他日期一致，按真实日期请求排班（20:00 前接口返回空即展示空状态）
-    const schedules = await getSchedulesApi({
-      deptCode: currentSecondDept.value,
-      doctorCode: null,
-      startDate: currentDate.value,
-      endDate: currentDate.value,
-    });
+    const schedules = await getSchedulesApi(
+      {
+        deptCode: currentSecondDept.value,
+        doctorCode: null,
+        startDate: currentDate.value,
+        endDate: currentDate.value,
+      },
+      false,
+    );
     // 按顺序处理排班数据：先将接口原始数据转为统一格式，再过滤掉当天已过的时段，最后按职称和停诊状态排序
     doctors.value = sortDoctors(filterPassedPeriods(transformSchedule(schedules, currentSecondDept.value)));
     // 如果是当天
@@ -263,6 +266,39 @@ export function useAppointmentData() {
     //   availableDateList.value[0] = buildDateAvailability(schedules, currentDate.value, currentDate.value)[0];
     // }
     loading.value = false;
+    const realtimeSchedules = await getSchedulesApi(
+      {
+        deptCode: currentSecondDept.value,
+        doctorCode: null,
+        startDate: currentDate.value,
+        endDate: currentDate.value,
+      },
+      true,
+    );
+    const realtimeDoctors = sortDoctors(
+      filterPassedPeriods(transformSchedule(realtimeSchedules, currentSecondDept.value)),
+    );
+    // 用实时号源替换余号数字：按「医生 code + 时段唯一标识」匹配，未匹配到的时段保留原值
+    const realtimeMap = new Map();
+    realtimeDoctors.forEach((doctor) => {
+      doctor.schedule.forEach((item) => {
+        realtimeMap.set(`${doctor.code}::${item.scheduleItemCode}`, item);
+      });
+    });
+    doctors.value = doctors.value.map((doctor) => ({
+      ...doctor,
+      schedule: doctor.schedule.map((item) => {
+        const realtimeItem = realtimeMap.get(`${doctor.code}::${item.scheduleItemCode}`);
+        if (!realtimeItem) return item;
+        return {
+          ...item,
+          AvailableLeftNum: realtimeItem.AvailableLeftNum,
+          AvailableOldNum: realtimeItem.AvailableOldNum,
+          total: realtimeItem.total,
+          left: realtimeItem.left,
+        };
+      }),
+    }));
   }
 
   const availableDateList = ref([]);
