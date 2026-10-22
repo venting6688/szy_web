@@ -78,6 +78,8 @@ watch(
     const name = navList.find((item) => item.path === path)?.name;
     if (name) headerTitle.value = name;
   },
+  // 布局首次挂载时（如从 /schedule 预约成功跳转、或在 /order 直接刷新）立即同步标题
+  { immediate: true },
 );
 // 获取当前图标
 const getIcon = (item) => {
