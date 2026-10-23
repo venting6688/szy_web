@@ -222,7 +222,7 @@ export function useAppointmentData() {
   const doctorTypeMatchOrder = [...doctorTypeOrder].sort((a, b) => b.length - a.length);
 
   // 停诊医生（所有时段均为停诊）永远排在最后，不受职称影响；
-  // 其余医生（含已约满）按职称顺序排列，同职称内保持接口原顺序
+  // 其余医生（含已约满）按职称顺序排列，同职称内按医生姓名拼音 A-Z 升序
   function sortDoctors(list) {
     const stoppedRank = (doctor) =>
       doctor.schedule.length > 0 && doctor.schedule.every((item) => item.ScheduleStatusDesc === '停诊') ? 1 : 0;
@@ -230,7 +230,12 @@ export function useAppointmentData() {
       const matched = doctorTypeMatchOrder.find((keyword) => doctor.doctorType && doctor.doctorType.includes(keyword));
       return matched ? doctorTypeOrder.indexOf(matched) : doctorTypeOrder.length;
     };
-    return [...list].sort((a, b) => stoppedRank(a) - stoppedRank(b) || typeRank(a) - typeRank(b));
+    return [...list].sort(
+      (a, b) =>
+        stoppedRank(a) - stoppedRank(b) ||
+        typeRank(a) - typeRank(b) ||
+        (a.name || '').localeCompare(b.name || '', 'zh-Hans-CN'),
+    );
   }
 
   // 加载医生排班
