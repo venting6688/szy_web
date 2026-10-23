@@ -457,6 +457,13 @@ onBeforeUnmount(() => {
                 >
                   20点预约
                 </t-button>
+                <!-- 结束时间已过：非停诊时段展示“已结束”，不可预约 -->
+                <div
+                  v-else-if="item.ended && item.ScheduleStatusDesc !== '停诊'"
+                  class="btn-disabled"
+                >
+                  已结束
+                </div>
                 <t-button
                   v-else-if="item.left > 0 && item.ScheduleStatusDesc !== '停诊'"
                   class="btn-book"

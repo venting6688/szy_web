@@ -92,6 +92,14 @@ const emit = defineEmits(['book']);
           >
             20点预约
           </t-button>
+          <!-- 结束时间已过：非停诊时段展示“已结束”，不可预约 -->
+          <t-button
+            v-else-if="item.ended && item.ScheduleStatusDesc !== '停诊'"
+            size="small"
+            class="btn-wait"
+          >
+            已结束
+          </t-button>
           <t-button
             v-else-if="item.left > 0 && item.ScheduleStatusDesc !== '停诊'"
             size="small"

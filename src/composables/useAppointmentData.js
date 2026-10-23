@@ -189,6 +189,9 @@ export function useAppointmentData() {
         AvailableOldNum: Number(item.AvailableOldNum || 0),
         scheduleItemCode: item.ScheduleItemCode,
         ScheduleStatusDesc: item.ScheduleStatusDesc,
+        EndTime: item.EndTime,
+        // 结束时间已过：非停诊时段的按钮展示“已结束”（仅当天可能命中，未来日期比较结果必为未结束）
+        ended: !!item.EndTime && dayjs(`${currentDate.value} ${item.EndTime}`).isBefore(dayjs()),
       });
     });
 
@@ -210,23 +213,6 @@ export function useAppointmentData() {
     availableDateList.value = [];
     loadDoctors();
     loadWeekDoctors();
-  }
-
-  // 已过时段过滤：仅当天生效（12:00 起不再展示上午号源，18:00 起不再展示上午、下午号源），全天号源始终保留
-  // 剩余时段全部被过滤的医生整体隐藏
-  function filterPassedPeriods(list) {
-    if (!dayjs(currentDate.value).isSame(dayjs(), 'day')) return list;
-
-    const minutes = dayjs().hour() * 60 + dayjs().minute();
-    const passedPeriods = minutes < 12 * 60 ? [] : minutes < 18 * 60 ? ['上午'] : ['上午', '下午'];
-    if (!passedPeriods.length) return list;
-
-    return list
-      .map((doctor) => ({
-        ...doctor,
-        schedule: doctor.schedule.filter((item) => item.period === '全天' || !passedPeriods.includes(item.period)),
-      }))
-      .filter((doctor) => doctor.schedule.length > 0);
   }
 
   // 医生职称展示顺序：知名专家、主任医师、副主任医师、主治医师、普通门诊；其余职称排在最后
@@ -259,8 +245,8 @@ export function useAppointmentData() {
       },
       false,
     );
-    // 按顺序处理排班数据：先将接口原始数据转为统一格式，再过滤掉当天已过的时段，最后按职称和停诊状态排序
-    doctors.value = sortDoctors(filterPassedPeriods(transformSchedule(schedules, currentSecondDept.value)));
+    // 按顺序处理排班数据：先将接口原始数据转为统一格式（含“已结束”标记），最后按职称和停诊状态排序
+    doctors.value = sortDoctors(transformSchedule(schedules, currentSecondDept.value));
     // 如果是当天
     // if (dayjs(currentDate.value).isSame(dayjs(), 'day')) {
     //   availableDateList.value[0] = buildDateAvailability(schedules, currentDate.value, currentDate.value)[0];
@@ -275,9 +261,7 @@ export function useAppointmentData() {
       },
       true,
     );
-    const realtimeDoctors = sortDoctors(
-      filterPassedPeriods(transformSchedule(realtimeSchedules, currentSecondDept.value)),
-    );
+    const realtimeDoctors = sortDoctors(transformSchedule(realtimeSchedules, currentSecondDept.value));
     // 用实时号源替换余号数字：按「医生 code + 时段唯一标识」匹配，未匹配到的时段保留原值
     const realtimeMap = new Map();
     realtimeDoctors.forEach((doctor) => {
