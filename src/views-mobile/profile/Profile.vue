@@ -81,7 +81,7 @@ const {
             name="realName"
           >
             <t-input
-              :disabled="!isModify"
+              disabled
               v-model="profileFormData.realName"
               placeholder="请输入姓名"
             />

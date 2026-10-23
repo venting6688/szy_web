@@ -107,7 +107,7 @@ const {
               name="realName"
             >
               <t-input
-                :disabled="!isModify"
+                disabled
                 v-model="profileFormData.realName"
               />
             </t-form-item>
