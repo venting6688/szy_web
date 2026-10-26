@@ -371,6 +371,18 @@ export function useAppointmentData() {
     // }
     return availableDateList.value.find((item) => item.date === date)?.hasAvailable;
   }
+
+  // 刷新当前二级科室的右侧内容（日期条「有号/无号」与医生排班），效果等同再次点击该二级科室；
+  // 未选中二级科室或正在加载时不可用
+  const refreshDisabled = computed(() => !currentSecondDept.value || loading.value || weekLoading.value);
+
+  function refreshCurrent() {
+    if (refreshDisabled.value) return;
+    loading.value = true;
+    availableDateList.value = [];
+    loadDoctors();
+    loadWeekDoctors();
+  }
   // #//#endregion
 
   function initData() {
@@ -520,6 +532,8 @@ export function useAppointmentData() {
     availableDateList,
     weekLoading,
     isAvailable,
+    refreshDisabled,
+    refreshCurrent,
     hospitalOptions,
     hospitalId,
     onChangeHospital,

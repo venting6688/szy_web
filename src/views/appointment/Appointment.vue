@@ -26,6 +26,8 @@ const {
   onClickSecondDept,
   isAvailable,
   weekLoading,
+  refreshDisabled,
+  refreshCurrent,
   hospitalOptions,
   hospitalId,
   onChangeHospital,
@@ -152,13 +154,24 @@ const {
         <!-- 标题 -->
         <div class="title flex justify-between">
           <span>{{ format(currentDate) }} 坐诊医生</span>
-          <div v-if="type !== 'schedule'">
-            <span style="color: #666">只看有号 </span>
+          <div class="title-actions">
+            <t-button
+              size="small"
+              theme="primary"
+              shape="round"
+              :disabled="refreshDisabled"
+              @click="refreshCurrent"
+            >
+              刷新
+            </t-button>
+            <div v-if="type !== 'schedule'">
+              <span style="color: #666">只看有号 </span>
 
-            <t-switch
-              v-model="onlyAvailable"
-              label=""
-            />
+              <t-switch
+                v-model="onlyAvailable"
+                label=""
+              />
+            </div>
           </div>
         </div>
 
@@ -382,6 +395,12 @@ const {
   font-size: @font-medium;
   color: @text-primary;
   font-weight: 500;
+}
+
+.title-actions {
+  display: flex;
+  align-items: center;
+  gap: @space-md;
 }
 
 .doctor-list {

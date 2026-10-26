@@ -30,6 +30,8 @@ const {
   onClickSecondDept,
   isAvailable,
   weekLoading,
+  refreshDisabled,
+  refreshCurrent,
   hospitalOptions,
   hospitalId,
   onChangeHospital,
@@ -353,16 +355,27 @@ onBeforeUnmount(() => {
             {{ currentDeptLabel }}
           </div>
         </div>
-        <label
-          class="switch-box"
-          v-if="type !== 'schedule'"
-        >
-          <span>只看有号</span>
-          <t-switch
-            v-model="onlyAvailable"
+        <div class="panel-actions">
+          <t-button
             size="small"
-          />
-        </label>
+            theme="primary"
+            shape="round"
+            :disabled="refreshDisabled"
+            @click="refreshCurrent"
+          >
+            刷新
+          </t-button>
+          <label
+            class="switch-box"
+            v-if="type !== 'schedule'"
+          >
+            <span>只看有号</span>
+            <t-switch
+              v-model="onlyAvailable"
+              size="small"
+            />
+          </label>
+        </div>
       </div>
 
       <div
@@ -841,6 +854,13 @@ onBeforeUnmount(() => {
   align-items: center;
   font-size: 12px;
   color: @text-regular;
+}
+
+.panel-actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: 8px;
+  align-items: center;
 }
 
 .state-block {
