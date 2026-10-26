@@ -18,7 +18,7 @@ export async function getSchedulesApi(params, isRealtime) {
     startDate,
     endDate,
     isCBDFlag:
-      hospitalStore.current === hospitalStore.list.find((item) => item.appointment === false)?.value ? 'Y' : '',
+      hospitalStore.current === hospitalStore.list.find((item) => item.appointment === false)?.value ? 'Y' : 'N',
   });
   if (code !== 200) {
     MessagePlugin.error(msg || '获取排班失败');

@@ -3,7 +3,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useOrderData } from '@/composables/useOrderData';
 import { canCancelOrder } from '@/utils/appointment';
 
-const { orderList, loading, cancelEmit, getOrderList, hospitalOptions, hospitalId, onChangeHospital } = useOrderData();
+const { orderList, loading, cancelEmit, getOrderList } = useOrderData();
 
 // 是否可取消（规则统一在 @/utils/appointment，显示层与点击校验共用）
 function canCancel(order) {
@@ -39,27 +39,6 @@ async function onClickCancel(order) {
         <span class="stat-pill cancelable">可取消 {{ cancellableCount }} 条</span>
       </div>
     </section> -->
-
-    <section
-      v-if="hospitalOptions.length"
-      class="filter-bar"
-    >
-      <div class="filter-label">当前院区</div>
-      <t-select
-        v-model="hospitalId"
-        size="large"
-        placeholder="请选择院区"
-        @change="onChangeHospital"
-        class="filter-select"
-      >
-        <t-option
-          v-for="item in hospitalOptions"
-          :key="item.value"
-          :value="item.value"
-          :label="item.label"
-        />
-      </t-select>
-    </section>
 
     <!-- 预约提示横幅：常驻展示，不可关闭 -->
     <section class="notice-bar">请提前15分钟现场报到取号，就诊顺序以报到号码为准。</section>
@@ -206,24 +185,6 @@ async function onClickCancel(order) {
   flex-wrap: wrap;
   gap: 8px;
   margin-top: 12px;
-}
-
-.filter-bar {
-  margin-bottom: clamp(12px, 4vw, 18px);
-  padding: 12px;
-  background: @bg-white;
-  border-radius: clamp(14px, 4vw, 18px);
-  box-shadow: @shadow-card;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-
-  .filter-label {
-    font-size: 15px;
-    color: @text-secondary;
-    width: 30%;
-  }
 }
 
 .stat-pill {

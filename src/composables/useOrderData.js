@@ -43,14 +43,13 @@ export function useOrderData() {
       endDate: dayjs().add(8, 'day').format('YYYY-MM-DD'),
     });
 
-    if (hospitalId.value === hospitalStore.list.find((item) => item.appointment === false)?.value)
-      orderList.value = (res || [])
-        .filter((item) => item.CBDFlag === 'Y')
-        .map((item) => ({
-          ...item,
-          HospitalName: item.HospitalTitle,
-        }));
-    else orderList.value = (res || []).filter((item) => item.CBDFlag !== 'Y');
+    // 预约记录接口已不再限制院区，三个院区的记录全部返回，前端不再按 CBD 过滤
+    orderList.value = (res || []).map((item) => ({
+      ...item,
+      // CBD 单子的院区名取 HospitalTitle，其它院区沿用接口返回的 HospitalName
+      HospitalName:
+        item.CBDFlag === 'Y' ? item.HospitalTitle || item.HospitalName : item.HospitalName || item.HospitalTitle,
+    }));
     loading.value = false;
   }
 

@@ -2,27 +2,13 @@
 import OrderCard from '@/components/OrderCard/OrderCard.vue';
 import { useOrderData } from '@/composables/useOrderData';
 
-const { orderList, loading, hospitalOptions, cancelEmit, hospitalId, onChangeHospital } = useOrderData();
+const { orderList, loading, cancelEmit } = useOrderData();
 </script>
 
 <template>
   <div class="order-container">
     <div class="order-header">
       <div class="title">预约记录</div>
-
-      <t-select
-        v-model="hospitalId"
-        @change="onChangeHospital"
-        size="large"
-        style="width: 500px"
-      >
-        <t-option
-          v-for="item in hospitalOptions"
-          :key="item.value"
-          :value="item.value"
-          :label="item.label"
-        />
-      </t-select>
     </div>
 
     <!-- 预约提示横幅：常驻展示，不可关闭 -->
