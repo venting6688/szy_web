@@ -49,6 +49,11 @@ export const useUserStore = defineStore('user', {
       setToken(token);
       localStorage.setItem('userInfo', JSON.stringify(userInfo));
     },
+    setUserInfo(userInfo) {
+      // 就地合并：保持 userInfo 的引用不变，避免已持有该对象的组件（如 PCLayout）拿不到更新
+      Object.assign(this.userInfo, userInfo);
+      localStorage.setItem('userInfo', JSON.stringify(this.userInfo));
+    },
     logout() {
       this.token = '';
       this.userInfo = { ...defaultUserInfo };

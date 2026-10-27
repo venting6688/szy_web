@@ -15,6 +15,9 @@ const {
   onClick,
   isModify,
   onClickModify,
+  countdown,
+  smsBtnDisabled,
+  onClickGetVerificationCode,
 } = useProfileLogic();
 </script>
 
@@ -106,6 +109,30 @@ const {
               :disabled="!isModify"
               placeholder="请输入手机号"
             />
+          </t-form-item>
+          <t-form-item
+            v-if="isModify"
+            label="验证码"
+            prop="verificationCode"
+            name="verificationCode"
+          >
+            <t-input
+              v-model="profileFormData.verificationCode"
+              placeholder="请输入验证码"
+            >
+              <template #suffix>
+                <t-button
+                  class="get-verification-code-btn"
+                  :class="{ disabled: smsBtnDisabled }"
+                  shape="round"
+                  theme="primary"
+                  size="small"
+                  @click="!smsBtnDisabled && onClickGetVerificationCode()"
+                >
+                  {{ countdown > 0 ? `${countdown}s 后重发` : '获取动态码' }}
+                </t-button>
+              </template>
+            </t-input>
           </t-form-item>
           <t-form-item
             label="家庭住址"
@@ -333,6 +360,19 @@ const {
   }
   :deep(.t-input__inner) {
     font-size: 16px;
+  }
+
+  .get-verification-code-btn {
+    border-color: @primary-color;
+    color: @primary-color;
+    background-color: #fff;
+
+    &.disabled {
+      border-color: #999;
+      color: #999;
+      background-color: #f5f5f5;
+      cursor: not-allowed;
+    }
   }
 }
 

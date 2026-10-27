@@ -3,6 +3,7 @@ import { MessagePlugin } from 'tdesign-vue-next';
 import { post, get } from '@/utils/request';
 const hospitalId = import.meta.env.VITE_HOSPITAL_ID;
 import { useUserStore } from '@/store/modules/user';
+// import { useHospitalStore } from '@/store/modules/hospital';
 const userStore = useUserStore();
 import router from '@/router';
 
@@ -107,6 +108,64 @@ export async function updateProfileApi({ idCard, realName, phonenumber, address 
     realName,
     phonenumber,
     address,
+  });
+  if (code === 401) {
+    MessagePlugin.error('登录过期，请重新登录');
+    userStore.logout();
+    router.push('/login');
+    throw new Error(msg + '登录过期，请重新登录');
+  }
+  if (code !== 200) {
+    MessagePlugin.error(msg || '更新个人信息失败');
+    throw new Error(msg || '更新个人信息失败');
+  } else {
+    MessagePlugin.success('更新个人信息成功');
+    return data;
+  }
+}
+
+/**
+ * 获取家庭列表与默认就诊人（个人中心「当前就诊人」的数据来源）
+ * @param {*} userId 登录用户 id
+ * @returns 家庭列表（含默认就诊人）
+ */
+export async function getFamilyListApi(userId) {
+  const { code, msg, data } = await get('/mobile/getFamilyList', { userId });
+  if (code !== 200) {
+    MessagePlugin.error(msg || '获取就诊人信息失败');
+    throw new Error(msg || '获取就诊人信息失败');
+  } else {
+    return data;
+  }
+}
+
+/**
+ * 更新就诊人信息（院方新接口，手机号变更需带短信验证码）
+ * @param {*} phonenumber 手机号
+ * @param {*} verificationCode 短信验证码
+ * @param {*} address 家庭住址（完整地址，省市区由接口返回）
+ * @returns 更新结果
+ * @description 入参以院方示例请求为准，在此由表单值 + 登录用户信息映射而来
+ */
+export async function updatePatientInfoApi({ phonenumber, verificationCode, address }) {
+  const { userInfo } = userStore;
+  // 家庭列表返回的 address 已是完整地址（省 市 区 详细地址），直接按表单值提交，避免重复拼接省市区
+  const addressText = address || userInfo.address || '';
+  const { code, msg, data } = await post('/mobile/api/dh/patient/userInfo/update', {
+    PatName: userInfo.realName || '',
+    PatBirth: userInfo.birthday || '',
+    PatientID: userInfo.patientId || '',
+    PatSex: userInfo.gender || '',
+    IDType: userInfo.idType || '',
+    IDNo: userInfo.idCard || '',
+    profileId: userInfo.profileId,
+    contactName: '',
+    contactIDNo: '',
+    contactIDType: '',
+    contactTelNo: '',
+    Address: addressText,
+    TelephoneNo: phonenumber,
+    verifyCode: verificationCode,
   });
   if (code === 401) {
     MessagePlugin.error('登录过期，请重新登录');
