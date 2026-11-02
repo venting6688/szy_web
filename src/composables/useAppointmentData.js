@@ -214,9 +214,24 @@ export function useAppointmentData() {
 
   const currentSecondDept = ref(null);
 
+  // 二级科室简介弹窗实例（PC / H5 页面各自挂载一个）
+  const deptIntroRef = ref(null);
+  // 上一次处理过的二级科室 id：仅用于判断“选中的科室是否变化”。
+  // 刻意不放进 initData，因为切日期/切院区会先清空 currentSecondDept 再自动选回原科室，
+  // 用它判断才能做到“自动恢复同一科室不弹、重复点同一科室不弹”
+  let lastIntroDeptId = null;
+
   // 点击子科室
   async function onClickSecondDept(child) {
     loading.value = true;
+    // 仅当选中的二级科室发生变化、且接口返回了简介（CLGRPIntraduction）时弹出科室简介
+    if (lastIntroDeptId !== child.CLGRPRowId) {
+      lastIntroDeptId = child.CLGRPRowId;
+      const deptIntro = child.CLGRPIntraduction || '';
+      if (deptIntro.trim()) {
+        deptIntroRef.value?.open({ title: child.CLGRPDesc, content: deptIntro });
+      }
+    }
     currentSecondDept.value = child.CLGRPRowId;
 
     availableDateList.value = [];
@@ -539,6 +554,7 @@ export function useAppointmentData() {
     onClickDate,
     dialogRef,
     bookEmit,
+    deptIntroRef,
     weekDayMap,
     loadDoctors,
     loadWeekDoctors,

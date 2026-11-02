@@ -4,6 +4,7 @@ import DoctorCard from '@/components/DoctorCard/DoctorCard.vue';
 import downIcon from '@/assets/image/down.png';
 import rightIcon from '@/assets/image/right.png';
 import Dialog from '@/views/appointment/Dialog.vue';
+import DeptIntroDialog from '@/components/DeptIntroDialog/DeptIntroDialog.vue';
 import { useAppointmentData } from '@/composables/useAppointmentData';
 
 const {
@@ -35,6 +36,7 @@ const {
   dialogRef,
   noticeDialogRef,
   bookEmit,
+  deptIntroRef,
   weekDayMap,
   openNoticeDialog,
 } = useAppointmentData();
@@ -225,6 +227,8 @@ const {
       @open="openNoticeDialog"
     />
     <Dialog ref="noticeDialogRef" />
+    <!-- 二级科室简介（MDT门诊 / 专病门诊） -->
+    <DeptIntroDialog ref="deptIntroRef" />
   </div>
 </template>
 <style scoped lang="less">

@@ -5,6 +5,7 @@ import dayjs from 'dayjs';
 import downIcon from '@/assets/image/down.png';
 import rightIcon from '@/assets/image/right.png';
 import Dialog from '@/views/appointment/Dialog.vue';
+import DeptIntroDialog from '@/components/DeptIntroDialog/DeptIntroDialog.vue';
 import { useAppointmentData } from '@/composables/useAppointmentData';
 import defaultAvatar from '@/assets/image/default_avatar.png';
 import { LoadingPlugin } from 'tdesign-vue-next';
@@ -38,6 +39,7 @@ const {
   onClickDate,
   dialogRef,
   bookEmit,
+  deptIntroRef,
   weekDayMap,
   loadDoctors,
   loadWeekDoctors,
@@ -635,6 +637,8 @@ onBeforeUnmount(() => {
       @open="openNoticeDialog"
     />
     <Dialog ref="noticeDialogRef" />
+    <!-- 二级科室简介（MDT门诊 / 专病门诊） -->
+    <DeptIntroDialog ref="deptIntroRef" />
   </div>
 </template>
 
