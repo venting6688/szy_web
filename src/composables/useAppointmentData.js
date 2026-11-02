@@ -156,6 +156,13 @@ export function useAppointmentData() {
     return Number.isNaN(num) ? null : num;
   }
 
+  // 医生序号可能为数字或字符串（如 "01"），统一转数字比较；缺失或非数值返回 null
+  function toDocSeqNo(value) {
+    if (value === null || value === undefined || value === '') return null;
+    const num = Number(value);
+    return Number.isNaN(num) ? null : num;
+  }
+
   function transformSchedule(list, deptCode) {
     const map = new Map();
 
@@ -174,6 +181,8 @@ export function useAppointmentData() {
           desc: item.DocIntruduction,
           deptName: item.DepartmentName,
           doctorType: item.DoctorSessType,
+          // 医生展示序号（接口返回，同一医生各时段取值相同），医生列表按此升序排列
+          docSeqNo: item.DocSeqNo,
           scheduleItemCode: [],
           schedule: [],
         });
@@ -215,27 +224,17 @@ export function useAppointmentData() {
     loadWeekDoctors();
   }
 
-  // 医生职称展示顺序：知名专家、主任医师、副主任医师、主治医师、普通门诊；其余职称排在最后
-  const doctorTypeOrder = ['知名专家', '主任医师', '副主任医师', '主治', '普通'];
-  // 接口返回的职称字面量不固定，按「包含关键字」匹配；匹配时先长后短，
-  // 避免「副主任医师」被更短的「主任医师」抢先命中
-  const doctorTypeMatchOrder = [...doctorTypeOrder].sort((a, b) => b.length - a.length);
-
-  // 停诊医生（所有时段均为停诊）永远排在最后，不受职称影响；
-  // 其余医生（含已约满）按职称顺序排列，同职称内按医生姓名拼音 A-Z 升序
+  // 医生列表按接口返回的 DocSeqNo 升序排列（不再按职称、停诊状态、姓名拼音排序）；
+  // 序号缺失或非数值的医生排在最后，序号相同或都无法比较时保持接口返回顺序
   function sortDoctors(list) {
-    const stoppedRank = (doctor) =>
-      doctor.schedule.length > 0 && doctor.schedule.every((item) => item.ScheduleStatusDesc === '停诊') ? 1 : 0;
-    const typeRank = (doctor) => {
-      const matched = doctorTypeMatchOrder.find((keyword) => doctor.doctorType && doctor.doctorType.includes(keyword));
-      return matched ? doctorTypeOrder.indexOf(matched) : doctorTypeOrder.length;
-    };
-    return [...list].sort(
-      (a, b) =>
-        stoppedRank(a) - stoppedRank(b) ||
-        typeRank(a) - typeRank(b) ||
-        (a.name || '').localeCompare(b.name || '', 'zh-Hans-CN'),
-    );
+    return [...list].sort((a, b) => {
+      const aSeq = toDocSeqNo(a.docSeqNo);
+      const bSeq = toDocSeqNo(b.docSeqNo);
+      if (aSeq === null && bSeq === null) return 0;
+      if (aSeq === null) return 1;
+      if (bSeq === null) return -1;
+      return aSeq - bSeq;
+    });
   }
 
   // 加载医生排班
@@ -250,7 +249,7 @@ export function useAppointmentData() {
       },
       false,
     );
-    // 按顺序处理排班数据：先将接口原始数据转为统一格式（含“已结束”标记），最后按职称和停诊状态排序
+    // 按顺序处理排班数据：先将接口原始数据转为统一格式（含“已结束”标记），最后按 DocSeqNo 升序排序
     doctors.value = sortDoctors(transformSchedule(schedules, currentSecondDept.value));
     // 如果是当天
     // if (dayjs(currentDate.value).isSame(dayjs(), 'day')) {
