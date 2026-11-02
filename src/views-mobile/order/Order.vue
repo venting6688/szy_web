@@ -3,7 +3,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useOrderData } from '@/composables/useOrderData';
 import { canCancelOrder } from '@/utils/appointment';
 
-const { orderList, loading, cancelEmit, getOrderList } = useOrderData();
+const { orderList, loading, cancelEmit, getOrderList, orderTab, onChangeOrderTab } = useOrderData();
 
 // 是否可取消（规则统一在 @/utils/appointment，显示层与点击校验共用）
 function canCancel(order) {
@@ -40,6 +40,24 @@ async function onClickCancel(order) {
       </div>
     </section> -->
 
+    <!-- 我的预约 / 爽约记录 切换 -->
+    <section class="order-tabs">
+      <div
+        class="tab-item"
+        :class="{ active: orderTab === 'normal' }"
+        @click="onChangeOrderTab('normal')"
+      >
+        我的预约
+      </div>
+      <div
+        class="tab-item"
+        :class="{ active: orderTab === 'lose' }"
+        @click="onChangeOrderTab('lose')"
+      >
+        爽约记录
+      </div>
+    </section>
+
     <!-- 预约提示横幅：常驻展示，不可关闭 -->
     <section class="notice-bar">请提前15分钟现场报到取号，就诊顺序以报到号码为准。</section>
 
@@ -60,7 +78,7 @@ async function onClickCancel(order) {
         class="state-block"
       >
         <t-empty
-          description="未查询到预约信息"
+          :description="orderTab === 'lose' ? '暂无爽约记录' : '未查询到预约信息'"
           title="暂无数据"
         >
         </t-empty>
@@ -109,7 +127,10 @@ async function onClickCancel(order) {
             </div>
           </div>
 
-          <div class="card-actions">
+          <div
+            v-if="orderTab === 'normal'"
+            class="card-actions"
+          >
             <button
               v-if="canCancel(item)"
               type="button"
@@ -318,6 +339,31 @@ async function onClickCancel(order) {
   text-align: center;
   background: #f2f3f5;
   border-radius: 999px;
+}
+
+.order-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: clamp(12px, 4vw, 18px);
+
+  .tab-item {
+    flex: 1;
+    padding: 9px 0;
+    font-size: 14px;
+    line-height: 20px;
+    color: @text-regular;
+    text-align: center;
+    background: #fff;
+    border: 1.5px solid @border-light;
+    border-radius: 999px;
+
+    &.active {
+      font-weight: 600;
+      color: #fff;
+      background: @primary-color;
+      border-color: @primary-color;
+    }
+  }
 }
 
 .notice-bar {

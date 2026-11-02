@@ -14,6 +14,8 @@ export function useOrderData() {
   const loading = ref(false);
 
   const orderList = ref([]);
+  // 记录类型：normal=预约记录，lose=爽约记录
+  const orderTab = ref('normal');
   const hospitalId = ref('');
   // 院区列表
   // 必须使用computed，否则接口返回时间要是慢于组件挂载时间，会导致组件挂载时院区列表为空
@@ -37,8 +39,10 @@ export function useOrderData() {
   );
   // 获取订单列表
   async function getOrderList() {
+    // 爽约记录与预约记录的日期范围一致：均为今天 ~ 今天+8 天
     const res = await getAppointmentsApi({
       // patientNo: '0010060062',
+      orderStatus: orderTab.value === 'lose' ? 'lose' : 'normal',
       startDate: dayjs().format('YYYY-MM-DD'),
       endDate: dayjs().add(8, 'day').format('YYYY-MM-DD'),
     });
@@ -51,6 +55,15 @@ export function useOrderData() {
         item.CBDFlag === 'Y' ? item.HospitalTitle || item.HospitalName : item.HospitalName || item.HospitalTitle,
     }));
     loading.value = false;
+  }
+
+  // 切换「预约记录 / 爽约记录」，切换后重新请求
+  function onChangeOrderTab(tab) {
+    // 显式赋值，避免依赖 change 与 update:modelValue 的触发顺序
+    if (tab) orderTab.value = tab;
+    orderList.value = [];
+    loading.value = true;
+    getOrderList();
   }
 
   async function cancelEmit(order) {
@@ -88,10 +101,14 @@ export function useOrderData() {
   return {
     orderList,
     loading,
+    // 记录类型：normal=预约记录，lose=爽约记录
+    orderTab,
     hospitalId,
     hospitalOptions,
     // 切换院区
     onChangeHospital,
+    // 切换预约记录 / 爽约记录
+    onChangeOrderTab,
     // 取消预约
     cancelEmit,
     getOrderList,

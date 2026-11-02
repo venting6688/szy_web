@@ -2,13 +2,31 @@
 import OrderCard from '@/components/OrderCard/OrderCard.vue';
 import { useOrderData } from '@/composables/useOrderData';
 
-const { orderList, loading, cancelEmit } = useOrderData();
+const { orderList, loading, cancelEmit, orderTab, onChangeOrderTab } = useOrderData();
 </script>
 
 <template>
   <div class="order-container">
     <div class="order-header">
-      <div class="title">预约记录</div>
+      <div class="title">我的预约</div>
+    </div>
+
+    <!-- 我的预约 / 爽约记录 切换 -->
+    <div class="order-tabs">
+      <div
+        class="tab-item"
+        :class="{ active: orderTab === 'normal' }"
+        @click="onChangeOrderTab('normal')"
+      >
+        我的预约
+      </div>
+      <div
+        class="tab-item"
+        :class="{ active: orderTab === 'lose' }"
+        @click="onChangeOrderTab('lose')"
+      >
+        爽约记录
+      </div>
     </div>
 
     <!-- 预约提示横幅：常驻展示，不可关闭 -->
@@ -39,7 +57,7 @@ const { orderList, loading, cancelEmit } = useOrderData();
       class="empty"
     >
       <t-empty
-        description="未查询到预约信息"
+        :description="orderTab === 'lose' ? '暂无爽约记录' : '未查询到预约信息'"
         title="暂无数据"
       >
       </t-empty>
@@ -65,6 +83,35 @@ const { orderList, loading, cancelEmit } = useOrderData();
       font-size: @font-base;
       font-weight: 400;
       color: @text-regular;
+    }
+  }
+  .order-tabs {
+    display: flex;
+    gap: 32px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid @border-color;
+
+    .tab-item {
+      position: relative;
+      padding-bottom: 10px;
+      font-size: 16px;
+      line-height: 22px;
+      color: @text-regular;
+      cursor: pointer;
+      &.active {
+        font-weight: 600;
+        color: @primary-color;
+        &::after {
+          position: absolute;
+          bottom: -1px;
+          left: 0;
+          width: 100%;
+          height: 2px;
+          background: @primary-color;
+          border-radius: 2px;
+          content: '';
+        }
+      }
     }
   }
   .notice-bar {
