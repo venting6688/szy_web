@@ -32,6 +32,7 @@ export async function createAppointmentApi({
       TelePhoneNo: userStore.userInfo.phonenumber,
       PatientName: userStore.userInfo.realName,
       Gender: userStore.userInfo.gender,
+      // !! 地址疑似只需传递userInfo.address就行，待验证
       Address:
         userStore.userInfo.province +
         userStore.userInfo.city +
