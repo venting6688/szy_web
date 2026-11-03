@@ -224,11 +224,18 @@ export function useAppointmentData() {
   // 点击子科室
   async function onClickSecondDept(child) {
     loading.value = true;
-    // 仅当选中的二级科室发生变化、且接口返回了简介（CLGRPIntraduction）时弹出科室简介
+    // 仅当选中的二级科室发生变化、且满足弹窗范围、且接口返回了简介（CLGRPIntraduction）时弹出科室简介。
+    // 弹窗范围（用户确认）：父级一级科室名匹配「多学科综合门诊」「专病门诊」；
+    // 其中「多学科综合门诊」下还要求二级科室名带「MDT门诊」（父级名直接取接口返回的 ParentCliSerGroupName）
     if (lastIntroDeptId !== child.CLGRPRowId) {
       lastIntroDeptId = child.CLGRPRowId;
+      const parentName = child.ParentCliSerGroupName || '';
+      const isMdtParent = parentName.includes('多学科综合门诊');
+      const inIntroScope =
+        (isMdtParent || parentName.includes('专病门诊')) &&
+        (!isMdtParent || (child.CLGRPDesc || '').includes('MDT门诊'));
       const deptIntro = child.CLGRPIntraduction || '';
-      if (deptIntro.trim()) {
+      if (inIntroScope && deptIntro.trim()) {
         deptIntroRef.value?.open({ title: child.CLGRPDesc, content: deptIntro });
       }
     }
