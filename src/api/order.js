@@ -7,11 +7,11 @@ import { useHospitalStore } from '@/store/modules/hospital';
 const userStore = useUserStore();
 const hospitalStore = useHospitalStore();
 
-// 查询预约 / 挂号记录（orderStatus：normal=预约记录，lose=爽约记录，两者日期范围一致）
-export async function getAppointmentsApi({ startDate, endDate, orderStatus = 'normal' }) {
+// 查询预约 / 挂号记录
+export async function getAppointmentsApi({ startDate, endDate }) {
   const { data, msg, code } = await get('/mobile/api/dh/appointments', {
     patientNo: userStore.userInfo.patientId || '',
-    orderStatus,
+    orderStatus: 'normal',
     queryDateFlag: 'AdmDate',
     queryUserType: 'OWN',
     startDate,
