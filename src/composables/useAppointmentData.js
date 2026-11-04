@@ -69,7 +69,10 @@ export function useAppointmentData() {
 
   const displayDoctors = computed(() => {
     if (!onlyAvailable.value) return doctors.value;
-    return doctors.value.filter((d) => d.schedule.some((s) => s.left > 0 && s.ScheduleStatusDesc !== '停诊'));
+    // 「只看有号」：无号、停诊、已结束（EndTime 已过）的时段都不可约，医生剩余时段全部不可约时整卡不展示
+    return doctors.value.filter((d) =>
+      d.schedule.some((s) => s.left > 0 && s.ScheduleStatusDesc !== '停诊' && !s.ended),
+    );
   });
 
   //#region 科室
