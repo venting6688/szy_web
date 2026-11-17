@@ -29,7 +29,8 @@ const {
   onClickDept,
   currentSecondDept,
   onClickSecondDept,
-  isAvailable,
+  dateStatusText,
+  isDateUnavailable,
   weekLoading,
   refreshDisabled,
   refreshCurrent,
@@ -338,12 +339,12 @@ onBeforeUnmount(() => {
           <span class="day">{{ format(d) }}</span>
           <span
             class="status"
-            :class="{ unavailable: !weekLoading && !isAvailable(d), pending: isNinthDayPending(d) }"
+            :class="{ unavailable: !weekLoading && isDateUnavailable(d), pending: isNinthDayPending(d) }"
             v-if="type !== 'schedule' || d === ninthDate"
           >
             <template v-if="isNinthDayPending(d)">待放号</template>
             <template v-else-if="weekLoading">加载中</template>
-            <template v-else>{{ isAvailable(d) ? '有号' : '无号' }}</template>
+            <template v-else>{{ dateStatusText(d) }}</template>
           </span>
         </button>
       </div>

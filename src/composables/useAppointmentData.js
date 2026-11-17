@@ -317,23 +317,25 @@ export function useAppointmentData() {
   const availableDateList = ref([]);
   const weekLoading = ref(false);
 
-  // 构建日期可用号源（hasNumber 返回按 ServiceDate 的 HasNumber，缺失日期视为无号）
+  // 日期条三态文案：available 有号 / full 满号 / none 无号；接口未返回该日期时不出字
+  const DATE_STATUS_TEXT = {
+    available: '有号',
+    full: '满号',
+    none: '无号',
+  };
+
+  // 构建日期可用号源（hasNumber 返回按 ServiceDate 的 AvailableLeftNum：-1 无号 / 0 满号 / >0 有号）
   function buildDateAvailability(hasNumberList, startDate, endDate) {
     const map = {};
 
-    // 1️⃣ 按日期汇总 HasNumber
+    // 1️⃣ 按日期取号源数量（接口每天只返回一行，不再累加；缺失或为空视为无结果）
     hasNumberList.forEach((item) => {
       const date = item.ServiceDate;
 
-      if (!map[date]) {
-        map[date] = { hasAvailable: false, total: 0 };
-      }
+      if (!date) return;
 
-      if (item.HasNumber === true) {
-        map[date].hasAvailable = true;
-      }
-
-      map[date].total += Number(item.AvailableLeftNum || 0);
+      const raw = item.AvailableLeftNum;
+      map[date] = raw === null || raw === undefined || raw === '' ? NaN : Number(raw);
     });
 
     // 2️⃣ 生成完整日期区间
@@ -344,12 +346,22 @@ export function useAppointmentData() {
     while (current.isBefore(end) || current.isSame(end)) {
       const dateStr = current.format('YYYY-MM-DD');
 
-      const day = map[dateStr];
+      const leftNum = map[dateStr];
+      let status = '';
+
+      if (Number.isFinite(leftNum)) {
+        if (leftNum > 0) {
+          status = 'available';
+        } else if (leftNum === 0) {
+          status = 'full';
+        } else {
+          status = 'none';
+        }
+      }
 
       result.push({
         date: dateStr,
-        hasAvailable: day ? day.hasAvailable : false,
-        total: day ? day.total : 0, // 可选：总余号
+        status,
       });
 
       current = current.add(1, 'day');
@@ -388,12 +400,20 @@ export function useAppointmentData() {
     }
   }
 
-  function isAvailable(date) {
-    // 使用dayjs判断是否为当前日期
-    // if (dayjs(date).isSame(dayjs(), 'day')) {
-    //   return false;
-    // }
-    return availableDateList.value.find((item) => item.date === date)?.hasAvailable;
+  // 日期条三态：available 有号 / full 满号 / none 无号 / '' 不显示（接口未返回该日期）
+  function getDateStatus(date) {
+    return availableDateList.value.find((item) => item.date === date)?.status || '';
+  }
+
+  // 日期条文案，无结果时返回空串（保留占位，不改变日期条高度）
+  function dateStatusText(date) {
+    return DATE_STATUS_TEXT[getDateStatus(date)] || '';
+  }
+
+  // 满号与无号都不可约，统一走灰色样式
+  function isDateUnavailable(date) {
+    const status = getDateStatus(date);
+    return status === 'full' || status === 'none';
   }
 
   // 刷新当前二级科室的右侧内容（日期条「有号/无号」与医生排班），效果等同再次点击该二级科室；
@@ -555,7 +575,9 @@ export function useAppointmentData() {
     onClickSecondDept,
     availableDateList,
     weekLoading,
-    isAvailable,
+    getDateStatus,
+    dateStatusText,
+    isDateUnavailable,
     refreshDisabled,
     refreshCurrent,
     hospitalOptions,
